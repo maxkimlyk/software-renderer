@@ -1,17 +1,24 @@
-#include "window.h"
+#include "program.h"
+#include "renderer.h"
 
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "TEST";
 
+void Process()
+{
+
+}
+
+void Draw(Renderer &renderer)
+{
+
+}
+
 int main()
 {
-    Window window;
-    int status = window.Create(WIDTH, HEIGHT, CAPTION);
-    if (status != 0)
-        return status;
-
-    window.MainLoop();
-
-    return 0;
+    Program program;
+    program.ProcessCallback = Process;
+    program.DrawCallback = Draw;
+    return program.Run(WIDTH, HEIGHT, CAPTION);
 }

@@ -37,11 +37,12 @@ union Color
 
 class Canvas
 {
-    size_t width;
-    size_t height;
     uint32_t *ptr;
 
 public:
+    size_t width;
+    size_t height;
+
     Canvas(size_t width, size_t height)
     {
         this->width = width;
@@ -58,6 +59,11 @@ public:
     {
         for (size_t i = 0; i < width * height; ++i)
             ptr[i] = uint32_t(color);
+    }
+
+    void SetPixel(int32_t x, int32_t y, Color color)
+    {
+        ptr[x + y * height] = uint32_t(color);
     }
 
     void Clear()
@@ -93,4 +99,3 @@ public:
 };
 
 #endif
-

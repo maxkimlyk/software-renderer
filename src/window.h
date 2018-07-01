@@ -16,7 +16,7 @@ class Window
     HWND hWnd;
 
 public:
-    bool isRunning;
+    bool closed;
 
     int Create(size_t width, size_t height, const std::string &caption)
     {
@@ -56,46 +56,37 @@ public:
         SetForegroundWindow(hWnd);
         SetFocus(hWnd);
 
+        closed = false;
+
         return 0;
     }
 
-    int MainLoop()
+    int MainLoopRoutine()
     {
-        isRunning = true;
-
-        DWORD secBeginTime = timeGetTime();
-        uint32_t fpsCount = 0;
-
         MSG msg;
-        while (isRunning)
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
-            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+            if (msg.message == WM_QUIT)
             {
-                if (msg.message == WM_QUIT)
-                {
-                    isRunning = false;
-                    break;
-                }
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
+                closed = true;
+                return -1;
             }
-            else
-            {
-                RedrawWindow(hWnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE);
-                fpsCount += 1;
 
-                if (timeGetTime() - secBeginTime >= 1000)
-                {
-                    char fpsString[STR_SIZE];
-                    sprintf(fpsString, "FPS: %d", fpsCount);
-                    SetWindowText(hWnd, fpsString);
-                    fpsCount = 0;
-                    secBeginTime += 1000;
-                }
-            }
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
         }
 
-        return msg.wParam;
+        return 0;
+    }
+
+    void Redraw()
+    {
+        RedrawWindow(hWnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE);
+    }
+
+    void SetCaption(std::string &text)
+    {
+        SetWindowText(hWnd, text.c_str());
     }
 
 private:
