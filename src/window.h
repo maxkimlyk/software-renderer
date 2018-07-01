@@ -6,8 +6,9 @@
 
 #include "canvas.h"
 
-static const char *WINDOW_CLASS_NAME = "rendererwindowclass12";
+static const char *WINDOW_CLASS_NAME = "rendererwindowclass";
 static const DWORD BPP = 32;
+static const size_t STR_SIZE =32;
 
 class Window
 {
@@ -62,6 +63,9 @@ public:
     {
         isRunning = true;
 
+        DWORD secBeginTime = timeGetTime();
+        uint32_t fpsCount = 0;
+
         MSG msg;
         while (isRunning)
         {
@@ -78,6 +82,16 @@ public:
             else
             {
                 RedrawWindow(hWnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE);
+                fpsCount += 1;
+
+                if (timeGetTime() - secBeginTime >= 1000)
+                {
+                    char fpsString[STR_SIZE];
+                    sprintf(fpsString, "FPS: %d", fpsCount);
+                    SetWindowText(hWnd, fpsString);
+                    fpsCount = 0;
+                    secBeginTime += 1000;
+                }
             }
         }
 
