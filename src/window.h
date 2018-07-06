@@ -5,6 +5,7 @@
 #include <string>
 
 #include "canvas.h"
+#include "renderer.h"
 
 static const char *WINDOW_CLASS_NAME = "rendererwindowclass";
 static const DWORD BPP = 32;
@@ -15,8 +16,15 @@ class Window
     HINSTANCE hInstance;
     HWND hWnd;
 
+    Renderer *renderer;
+
 public:
     bool closed;
+
+    Window(Renderer *renderer)
+    {
+        this->renderer = renderer;
+    }
 
     int Create(size_t width, size_t height, const std::string &caption)
     {
@@ -36,7 +44,7 @@ public:
         windowRect.bottom = height;
 
         dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-        dwStyle = WS_OVERLAPPEDWINDOW;
+        dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 
         AdjustWindowRectEx(&windowRect, dwStyle, false, dwExStyle);
 
@@ -45,7 +53,7 @@ public:
                               100, 100,
                               windowRect.right - windowRect.left,
                               windowRect.bottom - windowRect.top,
-                              NULL, NULL, hInstance, NULL);
+                              NULL, NULL, hInstance, (LPVOID)(this));
         if (!hWnd)
         {
             printf("Could not create window\n");
@@ -116,6 +124,7 @@ private:
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         static HDC hCompatibleDC = 0;
+        static Window *thisptr = NULL;
 
         switch (uMsg)
         {
@@ -128,6 +137,10 @@ private:
                 WARNING("hCompatibleDC is null\n");
 
             ReleaseDC(hWnd, hdc);
+
+            CREATESTRUCT *cs = (CREATESTRUCT*)lParam;
+            thisptr = (Window*)(cs->lpCreateParams);
+
             break;
         }
 
@@ -159,8 +172,6 @@ private:
             bmi.bmiHeader.biClrUsed = 0;
             bmi.bmiHeader.biClrImportant = 0;
 
-            static Canvas canvas(max_width, max_height);
-
             uint32_t *bitPointer;
             size_t bufferSize = bmi.bmiHeader.biSizeImage;
 
@@ -172,8 +183,8 @@ private:
                 return -1;
             }
 
-            canvas.Randomize();
-            canvas.CopyTo((uint32_t*)bitPointer, bufferSize);
+            Canvas *canvas = thisptr->renderer->canvas;
+            canvas->CopyTo((uint32_t*)bitPointer, bufferSize);
 
             HGDIOBJ hOldObj = SelectObject(hCompatibleDC, hBitmap);
 
