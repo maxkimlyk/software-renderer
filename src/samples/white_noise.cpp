@@ -1,9 +1,8 @@
-#include "program.h"
-#include "renderer.h"
+#include "../common/program.h"
 
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
-const std::string CAPTION = "TEST";
+const std::string CAPTION = "White Noise";
 
 void Process()
 {
