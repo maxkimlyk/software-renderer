@@ -66,9 +66,9 @@ public:
         ptr[x + y * width] = uint32_t(color);
     }
 
-    void Clear()
+    void Clear(Color color)
     {
-        Fill(Color(0));
+        Fill(color);
     }
 
     void Randomize()

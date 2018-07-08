@@ -12,6 +12,8 @@ class Program
     Canvas *canvas;
     Renderer *renderer;
 
+    std::string windowCaption;
+
     bool isRunning;
 
 public:
@@ -39,6 +41,8 @@ public:
             ERROR("Could not create window\n");
             return status;
         }
+
+        this->windowCaption = windowCaption;
 
         return MainLoop();
     }
@@ -81,14 +85,14 @@ private:
             if (timeGetTime() - secBeginTime >= 1000)
             {
                 std::ostringstream oss;
-                oss << "FPS: " << fpsCount;
+                oss << windowCaption << " (FPS: " << fpsCount << ")";
                 window->SetCaption(oss.str());
                 fpsCount = 0;
                 secBeginTime += 1000;
             }
         }
 
-        return msg.wParam;
+        return 0;
     }
 };
 

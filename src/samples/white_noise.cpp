@@ -6,7 +6,9 @@ const std::string CAPTION = "White Noise";
 
 void Process()
 {
-
+    Vec3f v;
+    v.Fill(0);
+    float d = v * v;
 }
 
 void Draw(Renderer &renderer)

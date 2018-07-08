@@ -49,7 +49,7 @@ public:
         AdjustWindowRectEx(&windowRect, dwStyle, false, dwExStyle);
 
         hWnd = CreateWindowEx(dwExStyle, WINDOW_CLASS_NAME,
-                              "caption", WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle,
+                              caption.c_str(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle,
                               100, 100,
                               windowRect.right - windowRect.left,
                               windowRect.bottom - windowRect.top,
