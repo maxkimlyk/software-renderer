@@ -26,9 +26,9 @@ void Process()
     y = int(HEIGHT / 2 + (HEIGHT / 4) * sin(angle));
 
     color = Color(
-        255 * (0.5 + 0.5 * cos(2*angle + 0.1 * PI)),
-        255 * (0.5 + 0.5 * cos(4*angle + 0.3 * PI)),
-        255 * (0.5 + 0.5 * cos(6*angle + 0.7 * PI))
+        uint8_t( 255 * (0.5 + 0.5 * cos(2*angle + 0.1 * PI)) ),
+        uint8_t( 255 * (0.5 + 0.5 * cos(4*angle + 0.3 * PI)) ),
+        uint8_t( 255 * (0.5 + 0.5 * cos(6*angle + 0.7 * PI)) )
     );
 }
 

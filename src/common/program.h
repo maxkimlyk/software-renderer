@@ -57,7 +57,6 @@ private:
 
         DWORD lastProcessTime = secBeginTime;
 
-        MSG msg;
         while (isRunning)
         {
             window->MainLoopRoutine();
