@@ -22,8 +22,8 @@ void Process()
     if (angle > 2 * PI)
         angle -= 2 * PI;
 
-    x = int(WIDTH / 2 + (WIDTH / 4) * cos(angle));
-    y = int(HEIGHT / 2 + (HEIGHT / 4) * sin(angle));
+    x = int(WIDTH / 2 + (WIDTH / 4) * cos(angle)) - rectWidth / 2;
+    y = int(HEIGHT / 2 + (HEIGHT / 4) * sin(angle)) - rectHeight / 2;
 
     color = Color(
         uint8_t( 255 * (0.5 + 0.5 * cos(2*angle + 0.1 * PI)) ),
