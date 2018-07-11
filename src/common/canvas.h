@@ -63,7 +63,8 @@ public:
 
     void SetPixel(int32_t x, int32_t y, Color color)
     {
-        ptr[x + y * width] = uint32_t(color);
+        if ((uint32_t)(x) < width && (uint32_t)(y) < height)
+            ptr[x + y * width] = uint32_t(color);
     }
 
     void Clear(Color color)
