@@ -116,6 +116,16 @@ Vec<n, T> Normalize(Vec<n, T> vec)
         return vec;
 }
 
+template <class T>
+Vec<3, T> Cross(Vec<3, T> &lhs, Vec<3, T> &rhs)
+{
+    return Vec<3, T> {
+        lhs[1] * rhs[2] - lhs[2] * rhs[1],
+        lhs[2] * rhs[0] - lhs[0] * rhs[2],
+        lhs[0] * rhs[1] - lhs[1] * rhs[0]
+    };
+}
+
 template <size_t n, class T>
 Vec<n+1, T> Embed(Vec<n, T> &vec, T value = 1)
 {

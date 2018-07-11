@@ -15,6 +15,7 @@ TEST_CASE( "Vector", "[Vec]" )
     CHECK(vec1 * 3.0f == Vec3f {0.0f, 3.0f, 6.0f});
     CHECK(3.0f * vec1 == Vec3f {0.0f, 3.0f, 6.0f});
     CHECK(vec1.Norm() == std::sqrt(5.0f));
+    CHECK(Cross(Vec3f {1.0f, 0.0f, 0.0f}, Vec3f {0.0f, 1.0f, 0.0f}) == Vec3f {0.0f, 0.0f, 1.0f} );
 
     CHECK(Vec3i(vec1) == Vec3i {0, 1, 2});
 }
