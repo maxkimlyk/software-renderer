@@ -30,9 +30,18 @@ public:
         return v[index];
     }
 
+    template <class T2>
+    operator Vec<n, T2> ()
+    {
+        Vec<n, T2> other;
+        for (size_t i = 0; i < n; ++i)
+            other[i] = (T2)(v[i]);
+        return other;
+    }
+
     void Fill(T val)
     {
-        for (size_t i = 0; i < n; i++)
+        for (size_t i = 0; i < n; ++i)
             v[i] = val;
     }
 
@@ -187,6 +196,15 @@ public:
             rows[i] = *elem;
     }
 
+    template <class T2>
+    operator Mat<n, T2> ()
+    {
+        Mat<n, T2> other;
+        for (size_t i = 0; i < n; ++i)
+            other[i] = (Vec<n, T2>)(rows[i]);
+        return other;
+    }
+
     Vec<n, T>& operator[] (size_t row)
     {
         return rows[row];
@@ -251,6 +269,8 @@ public:
     }
 };
 
+typedef Mat<3, int> Mat3i;
+typedef Mat<4, int> Mat4i;
 typedef Mat<3, float> Mat3f;
 typedef Mat<4, float> Mat4f;
 typedef Mat<3, double> Mat3d;
