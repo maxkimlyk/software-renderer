@@ -61,6 +61,11 @@ public:
             ptr[i] = uint32_t(color);
     }
 
+    void FillBlack()
+    {
+        memset(ptr, 0, sizeof(uint32_t) * width * height);
+    }
+
     void SetPixel(int32_t x, int32_t y, Color color)
     {
         if ((uint32_t)(x) < width && (uint32_t)(y) < height)

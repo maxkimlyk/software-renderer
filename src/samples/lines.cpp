@@ -47,8 +47,6 @@ void Draw(Renderer &renderer)
 
 int main()
 {
-    printf("%d\n", sizeof(Vec2i));
-
     Program program;
     program.ProcessCallback = Process;
     program.DrawCallback = Draw;

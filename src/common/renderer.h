@@ -8,6 +8,36 @@ class Renderer
 {
     friend class Window;
 
+    struct Rect
+    {
+        int left;
+        int right;
+        int top;
+        int bottom;
+    };
+
+    template<class T>
+    inline void MinMax(T a, T b, T c, T &min, T &max)
+    {
+        if (a > b)
+            std::swap(a, b);
+        if (b > c)
+            std::swap(b, c);
+        if (a > b)
+            std::swap(a, b);
+        min = a;
+        max = c;
+    }
+
+    template <size_t n, class T>
+    Rect BoundingBox(Vec<n, T> p1, Vec<n, T> p2, Vec<n, T> p3)
+    {
+        Rect rect;
+        MinMax((int)p1[0], (int)p2[0], (int)p3[0], rect.left, rect.right);
+        MinMax((int)p1[1], (int)p2[1], (int)p3[1], rect.top, rect.bottom);
+        return rect;
+    }
+
 public:
     Canvas *canvas;
 
@@ -21,7 +51,10 @@ public:
 
     void Clear(Color color = Color(0))
     {
-        canvas->Clear(color);
+        if ((uint32_t)(color) == 0)
+            canvas->FillBlack();
+        else
+            canvas->Clear(color);
     }
 
     void SetPixel(uint32_t x, uint32_t y, Color color)
@@ -90,6 +123,26 @@ public:
                 canvas->SetPixel(x, y, color);
             err += derr;
         }
+    }
+
+    void Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
+    {
+        Vec3f v1 = {(float)(p2[0] - p1[0]), (float)(p3[0] - p1[0]), 1.0f};
+        Vec3f v2 = {(float)(p2[1] - p1[1]), (float)(p3[1] - p1[1]), 1.0f};
+
+        Rect rect = BoundingBox(p1, p2, p3);
+        for (int y = rect.top; y <= rect.bottom; ++y)
+            for (int x = rect.left; x <= rect.right; ++x)
+            {
+                v1[2] = p1[0] - x;
+                v2[2] = p1[1] - y;
+                Vec3f tmp = Cross(v1, v2);
+                tmp = tmp / tmp[2];
+                Vec3f bar = Vec3f {1 - tmp[0] - tmp[1], tmp[0], tmp[1]};
+
+                if (bar[0] >= 0.0f && bar[1] >= 0.0f && bar[2] >= 0.0f)
+                    canvas->SetPixel(x, y, color);
+            }
     }
 };
 
