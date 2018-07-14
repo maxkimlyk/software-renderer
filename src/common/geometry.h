@@ -82,7 +82,7 @@ Vec<n, T> operator/ (Vec<n, T> &lhs, T rhs)
 }
 
 template <size_t n, class T>
-Vec<n, T> operator+ (Vec<n, T> lhs,  Vec<n, T> &rhs)
+Vec<n, T> operator+ (Vec<n, T> lhs, const Vec<n, T> &rhs)
 {
     for (size_t i = 0; i < n; ++i)
         lhs[i] += rhs[i];
@@ -90,7 +90,7 @@ Vec<n, T> operator+ (Vec<n, T> lhs,  Vec<n, T> &rhs)
 }
 
 template <size_t n, class T>
-Vec<n, T> operator- (Vec<n, T> lhs,  Vec<n, T> &rhs)
+Vec<n, T> operator- (Vec<n, T> lhs, const Vec<n, T> &rhs)
 {
     for (size_t i = 0; i < n; ++i)
         lhs[i] -= rhs[i];

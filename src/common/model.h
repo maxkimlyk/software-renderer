@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <regex>
+#include <limits>
 #include "geometry.h"
 #include "utils.h"
 
@@ -22,6 +23,29 @@ struct Face
 struct Model
 {
     std::vector<Face> faces;
+
+    void Normalize()
+    {
+        float maxNorm = 0;
+        for (auto face = faces.begin(); face != faces.end(); ++face)
+        {
+            for (size_t v = 0; v < 3; ++v)
+            {
+                float vertexNorm = face->v[v].coord.Norm();
+                if (vertexNorm > maxNorm)
+                    maxNorm = vertexNorm;
+            }
+        }
+
+        if (maxNorm == 0)
+            return;
+
+        float invMaxNorm = 1.0f / maxNorm;
+
+        for (auto face = faces.begin(); face != faces.end(); ++face)
+            for (size_t i = 0; i < 3; ++i)
+                face->v[i].coord = face->v[i].coord * invMaxNorm;
+    }
 };
 
 class ObjReader
@@ -30,7 +54,7 @@ class ObjReader
     std::vector<Vec3f> norms;
     std::vector<Vec2f> texs;
 
-    static const uint32_t undefined = std::numeric_limits<uint32_t>::max();
+    static const uint32_t undefined = 0;
 
     inline Vec3f BuildNormal(Vec3f v1, Vec3f v2, Vec3f v3)
     {
@@ -72,9 +96,7 @@ class ObjReader
     template <size_t n, class T>
     Vec<n, T> Eject(std::vector<Vec<n, T>> &vector, size_t index)
     {
-        if (index == 0)
-            WARNING("ObjReader::Eject: index == 0\n");
-        if (index == undefined || index == 0)
+        if (index == undefined)
         {
             Vec<n, T> res;
             res.Fill((T)(0));
