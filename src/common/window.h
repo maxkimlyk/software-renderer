@@ -183,7 +183,7 @@ private:
                 return -1;
             }
 
-            Canvas *canvas = thisptr->renderer->canvas;
+            Canvas<uint32_t> *canvas = thisptr->renderer->canvas;
             canvas->CopyTo((uint32_t*)bitPointer, bufferSize);
 
             HGDIOBJ hOldObj = SelectObject(hCompatibleDC, hBitmap);

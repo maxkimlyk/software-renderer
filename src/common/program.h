@@ -9,7 +9,7 @@
 class Program
 {
     Window *window;
-    Canvas *canvas;
+    Canvas<uint32_t> *canvas;
     Renderer *renderer;
 
     std::string windowCaption;
@@ -31,7 +31,7 @@ public:
 
     int Run(size_t windowWidth, size_t windowHeight, const std::string &windowCaption)
     {
-        canvas = new Canvas(windowWidth, windowHeight);
+        canvas = new Canvas<uint32_t>(windowWidth, windowHeight);
         renderer = new Renderer(canvas);
         window = new Window(renderer);
 

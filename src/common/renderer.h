@@ -39,9 +39,9 @@ class Renderer
     }
 
 public:
-    Canvas *canvas;
+    Canvas<uint32_t> *canvas;
 
-    Renderer(Canvas *canvas)
+    Renderer(Canvas<uint32_t> *canvas)
     {
         this->canvas = canvas;
     }
@@ -51,10 +51,7 @@ public:
 
     void Clear(Color color = Color(0))
     {
-        if ((uint32_t)(color) == 0)
-            canvas->FillBlack();
-        else
-            canvas->Clear(color);
+        canvas->Clear(color);
     }
 
     void SetPixel(uint32_t x, uint32_t y, Color color)

@@ -29,15 +29,16 @@ union Color
         this->value = value;
     }
 
-    operator uint32_t()
+    operator uint32_t() const
     {
         return value;
     }
 };
 
+template <class T>
 class Canvas
 {
-    uint32_t *ptr;
+    T *ptr;
 
 public:
     size_t width;
@@ -47,7 +48,7 @@ public:
     {
         this->width = width;
         this->height = height;
-        ptr = new uint32_t [width * height];
+        ptr = new T [width * height];
     }
 
     ~Canvas()
@@ -55,35 +56,43 @@ public:
         delete [] ptr;
     }
 
-    void Fill(Color color)
+    T& At(size_t x, size_t y)
+    {
+        return ptr[x + (height - 1 - y) * width];
+    }
+
+    T& AtSave(size_t x, size_t y)
+    {
+        if ((uint32_t)(x) < width && (uint32_t)(y) < height)
+            return At(x, y);
+
+        static T stub = 0;
+        return stub;
+    }
+
+    void Fill(T value)
     {
         for (size_t i = 0; i < width * height; ++i)
-            ptr[i] = uint32_t(color);
+            ptr[i] = value;
     }
 
     void FillBlack()
     {
-        memset(ptr, 0, sizeof(uint32_t) * width * height);
+        memset(ptr, 0, sizeof(T) * width * height);
     }
 
-    void SetPixel(int32_t x, int32_t y, Color color)
+    void Clear(T value)
+    {
+        if (value == T(0))
+            FillBlack();
+        else
+            Fill(value);
+    }
+
+    void SetPixel(int32_t x, int32_t y, T value)
     {
         if ((uint32_t)(x) < width && (uint32_t)(y) < height)
-            ptr[x + (height - 1 - y) * width] = uint32_t(color);
-    }
-
-    void Clear(Color color)
-    {
-        Fill(color);
-    }
-
-    void Randomize()
-    {
-        for (size_t i = 0; i < width * height; ++i)
-        {
-            Color color(rand(), rand(), rand());
-            ptr[i] = uint32_t(color);
-        }
+            At(x, y) = value;
     }
 
     void CopyTo(uint32_t *dstptr, size_t size)
@@ -100,7 +109,7 @@ public:
             return;
         }
 
-        memcpy(dstptr, ptr, sizeof(uint32_t) * width * height);
+        memcpy(dstptr, ptr, sizeof(T) * width * height);
     }
 };
 
