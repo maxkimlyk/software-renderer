@@ -6,6 +6,7 @@ TEST_CASE( "Vector", "[Vec]" )
 {
     Vec3f vec1 = {0.0f, 1.0f, 2.0f};
     Vec3f vec2 = {2.0f, 1.0f, 0.0f};
+    Vec2f vec3 = {1.0f, 2.0f};
 
     CHECK_FALSE(vec1 == vec2);
     CHECK(vec1 == vec1);
@@ -18,6 +19,10 @@ TEST_CASE( "Vector", "[Vec]" )
     CHECK(Cross(Vec3f {1.0f, 0.0f, 0.0f}, Vec3f {0.0f, 1.0f, 0.0f}) == Vec3f {0.0f, 0.0f, 1.0f} );
 
     CHECK(Vec3i(vec1) == Vec3i {0, 1, 2});
+
+    CHECK(vec3.x == 1.0f);
+    CHECK(vec3.y == vec3[1]);
+    CHECK(vec2.z == 0.0f);
 }
 
 TEST_CASE( "Matrix", "[Mat]" )

@@ -91,27 +91,27 @@ public:
     {
         bool transformed = false;
 
-        if (abs(p2[0] - p1[0]) < abs(p2[1] - p1[1]))
+        if (abs(p2.x - p1.x) < abs(p2.y - p1.y))
         {
-            std::swap(p1[0], p1[1]);
-            std::swap(p2[0], p2[1]);
+            std::swap(p1.x, p1.y);
+            std::swap(p2.x, p2.y);
             transformed = true;
         }
 
-        if (p2[0] < p1[0])
+        if (p2.x < p1.x)
             std::swap(p1, p2);
 
-        int y = p1[1];
-        int dy = (p2[1] > p1[1]) ? 1 : -1;
+        int y = p1.y;
+        int dy = (p2.y > p1.y) ? 1 : -1;
         int err = 0;
-        int derr = 2 * abs(p2[1] - p1[1]);
+        int derr = 2 * abs(p2.y - p1.y);
 
-        for (int x = p1[0]; x <= p2[0]; x++)
+        for (int x = p1.x; x <= p2.x; x++)
         {
-            if (err > (p2[0] - p1[0]))
+            if (err > (p2.x - p1.x))
             {
                 y += dy;
-                err -= 2 * (p2[0] - p1[0]);
+                err -= 2 * (p2.x - p1.x);
             }
 
             if (transformed)
@@ -124,20 +124,20 @@ public:
 
     void Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
     {
-        Vec3f v1 = {(float)(p2[0] - p1[0]), (float)(p3[0] - p1[0]), 1.0f};
-        Vec3f v2 = {(float)(p2[1] - p1[1]), (float)(p3[1] - p1[1]), 1.0f};
+        Vec3f v1 = {(float)(p2.x - p1.x), (float)(p3.x - p1.x), 1.0f};
+        Vec3f v2 = {(float)(p2.y - p1.y), (float)(p3.y - p1.y), 1.0f};
 
         Rect rect = BoundingBox(p1, p2, p3);
         for (int y = rect.top; y <= rect.bottom; ++y)
             for (int x = rect.left; x <= rect.right; ++x)
             {
-                v1[2] = p1[0] - x;
-                v2[2] = p1[1] - y;
+                v1.z = p1.x - x;
+                v2.z = p1.y - y;
                 Vec3f tmp = Cross(v1, v2);
-                tmp = tmp / tmp[2];
-                Vec3f bar = Vec3f {1 - tmp[0] - tmp[1], tmp[0], tmp[1]};
+                tmp = tmp / tmp.z;
+                Vec3f bar = Vec3f {1 - tmp.x - tmp.y, tmp.x, tmp.y};
 
-                if (bar[0] >= 0.0f && bar[1] >= 0.0f && bar[2] >= 0.0f)
+                if (bar.x >= 0.0f && bar.y >= 0.0f && bar.z >= 0.0f)
                     canvas->SetPixel(x, y, color);
             }
     }
