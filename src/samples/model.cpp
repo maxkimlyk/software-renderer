@@ -12,16 +12,29 @@ const char *MODEL_NAME = "palm.obj";
 Model model;
 Color color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
 
+float angle = 0.0f;
+float angleSpeed = 0.01;
+const float maxViewpoint = .5f;
+
 void Process()
 {
-
+    static const float PI = 3.14159265f;
+    angle += angleSpeed;
+    if (angle > 2 * PI)
+        angle -= 2 * PI;
 }
 
 void Draw(Renderer &renderer)
 {
-    static const Vec2i origin = {WIDTH / 2, HEIGHT / 2};
-    static const float xf = WIDTH / 2;
-    static const float yf = HEIGHT / 2;
+    float x = sin(2.0f * angle) * maxViewpoint;
+    float y = cos(2.0f * angle) * maxViewpoint;
+
+    renderer.camera.LookAt(
+        Vec3f {0.0f, 0.0f, 0.0f},
+        Vec3f {x, 0.0f, y},
+        Vec3f {0.0f, 1.0f, 0.0f});
+
+    renderer.UpdateTransformMatrix();
 
     renderer.Clear();
     for (auto face = model.faces.begin(); face != model.faces.end(); ++face)
@@ -29,12 +42,7 @@ void Draw(Renderer &renderer)
         Vec3f v1 = face->v[0].coord;
         Vec3f v2 = face->v[1].coord;
         Vec3f v3 = face->v[2].coord;
-        Vec2i p1 = Vec2i {(int)(v1[0] * xf), (int)(v1[1] * yf)} + origin;
-        Vec2i p2 = Vec2i {(int)(v2[0] * xf), (int)(v2[1] * yf)} + origin;
-        Vec2i p3 = Vec2i {(int)(v3[0] * xf), (int)(v3[1] * yf)} + origin;
-        renderer.Line(p1, p2, color);
-        renderer.Line(p2, p3, color);
-        renderer.Line(p3, p1, color);
+        renderer.TriangleMesh(v1, v2, v3, color);
     }
 }
 

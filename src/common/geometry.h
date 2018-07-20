@@ -1,7 +1,7 @@
 #ifndef _GEOMETRY_H_
 #define _GEOMETRY_H_
 
-#include <cmath>
+#include "definitions.h"
 
 template <size_t n, class T> struct Mat;
 
@@ -308,6 +308,15 @@ struct Mat
                     max = std::abs(rows[i][j]);
         return max;
     }
+
+    static Mat<n, T> Identity()
+    {
+        Mat<n, T> mat;
+        for (size_t i = 0; i < n; ++i)
+            for (size_t j = 0; j < n; ++j)
+                mat[i][j] = i == j ? T(1) : T(0);
+        return mat;
+    }
 };
 
 typedef Mat<3, int> Mat3i;
@@ -359,6 +368,7 @@ Vec<n, T> operator* (const Mat<n, T> &lhs, const Vec<n, T> &rhs)
     Vec<n, T> res;
     for (size_t i = 0; i < n; ++i)
         res[i] = lhs[i] * rhs;
+    return res;
 }
 
 template<size_t n, class T>

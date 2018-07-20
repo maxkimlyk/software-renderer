@@ -113,4 +113,6 @@ public:
     }
 };
 
+typedef Canvas<uint32_t> Image;
+
 #endif

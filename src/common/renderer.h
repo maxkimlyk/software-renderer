@@ -3,21 +3,23 @@
 
 #include "canvas.h"
 #include "geometry.h"
+#include "camera.h"
 
-class Renderer
+class Rasterizer
 {
     friend class Window;
 
+    template <class T>
     struct Rect
     {
-        int left;
-        int right;
-        int top;
-        int bottom;
+        T left;
+        T right;
+        T top;
+        T bottom;
     };
 
     template<class T>
-    inline void MinMax(T a, T b, T c, T &min, T &max)
+    static inline void MinMax(T a, T b, T c, T &min, T &max)
     {
         if (a > b)
             std::swap(a, b);
@@ -30,64 +32,44 @@ class Renderer
     }
 
     template <size_t n, class T>
-    Rect BoundingBox(Vec<n, T> p1, Vec<n, T> p2, Vec<n, T> p3)
+    static Rect<T> BoundingBox(Vec<n, T> p1, Vec<n, T> p2, Vec<n, T> p3)
     {
-        Rect rect;
-        MinMax((int)p1[0], (int)p2[0], (int)p3[0], rect.left, rect.right);
-        MinMax((int)p1[1], (int)p2[1], (int)p3[1], rect.top, rect.bottom);
+        Rect<T> rect;
+        MinMax(p1[0], p2[0], p3[0], rect.left, rect.right);
+        MinMax(p1[1], p2[1], p3[1], rect.top, rect.bottom);
         return rect;
     }
 
 public:
-    Canvas<uint32_t> *canvas;
-
-    Renderer(Canvas<uint32_t> *canvas)
-    {
-        this->canvas = canvas;
-    }
-
-    size_t Width() { return canvas->width; }
-    size_t Height() { return canvas->height; }
-
-    void Clear(Color color = Color(0))
-    {
-        canvas->Clear(color);
-    }
-
-    void SetPixel(uint32_t x, uint32_t y, Color color)
-    {
-        canvas->SetPixel(x, y, color);
-    }
-
-    void DrawRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
+    static void Rectangle(Image &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
     {
         int inc = x2 > x1 ? 1 : -1;
         for (int i = x1; i != x2; i += inc)
         {
-            canvas->SetPixel(i, y1, color);
-            canvas->SetPixel(i, y2, color);
+            canvas.SetPixel(i, y1, color);
+            canvas.SetPixel(i, y2, color);
         }
 
         inc = y2 > y1 ? 1 : -1;
         for (int i = y1; i != y2; i += inc)
         {
-            canvas->SetPixel(x1, i, color);
-            canvas->SetPixel(x2, i, color);
+            canvas.SetPixel(x1, i, color);
+            canvas.SetPixel(x2, i, color);
         }
     }
 
-    void DrawSolidRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
+    static void SolidRect(Image &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
     {
         int xinc = x2 > x1 ? 1 : -1;
         int yinc = y2 > y1 ? 1 : -1;
         for(int y = y1; y != y2; y += yinc)
             for (int x = x1; x != x2; x += xinc)
             {
-                canvas->SetPixel(x, y, color);
+                canvas.SetPixel(x, y, color);
             }
     }
 
-    void Line(Vec2i p1, Vec2i p2, Color color)
+    static void Line(Image &canvas, Vec2i p1, Vec2i p2, Color color)
     {
         bool transformed = false;
 
@@ -115,31 +97,135 @@ public:
             }
 
             if (transformed)
-                canvas->SetPixel(y, x, color);
+                canvas.SetPixel(y, x, color);
             else
-                canvas->SetPixel(x, y, color);
+                canvas.SetPixel(x, y, color);
             err += derr;
         }
     }
 
-    void Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
+    static void Triangle(Image &canvas, Vec2f p1, Vec2f p2, Vec2f p3, Color color)
     {
-        Vec3f v1 = {(float)(p2.x - p1.x), (float)(p3.x - p1.x), 1.0f};
-        Vec3f v2 = {(float)(p2.y - p1.y), (float)(p3.y - p1.y), 1.0f};
+        Vec3f v1 = {p2.x - p1.x, p3.x - p1.x, 1.0f};
+        Vec3f v2 = {p2.y - p1.y, p3.y - p1.y, 1.0f};
 
-        Rect rect = BoundingBox(p1, p2, p3);
-        for (int y = rect.top; y <= rect.bottom; ++y)
-            for (int x = rect.left; x <= rect.right; ++x)
+        Rect<float> rect = BoundingBox(p1, p2, p3);
+        for (float y = rect.top; y <= rect.bottom; ++y)
+            for (float x = rect.left; x <= rect.right; ++x)
             {
                 v1.z = p1.x - x;
                 v2.z = p1.y - y;
                 Vec3f tmp = Cross(v1, v2);
-                tmp = tmp / tmp.z;
+                tmp.x = tmp.x / tmp.z;
+                tmp.y = tmp.y / tmp.z;
                 Vec3f bar = Vec3f {1 - tmp.x - tmp.y, tmp.x, tmp.y};
 
                 if (bar.x >= 0.0f && bar.y >= 0.0f && bar.z >= 0.0f)
-                    canvas->SetPixel(x, y, color);
+                    canvas.SetPixel(x, y, color);
             }
+    }
+
+    static void Triangle(Image &canvas, Vec3f p1, Vec3f p2, Vec3f p3, Color color)
+    {
+        Vec3f v1 = {p2.x - p1.x, p3.x - p1.x, 1.0f};
+        Vec3f v2 = {p2.y - p1.y, p3.y - p1.y, 1.0f};
+
+        Rect<float> rect = BoundingBox(p1, p2, p3);
+        for (float y = rect.top; y <= rect.bottom; ++y)
+            for (float x = rect.left; x <= rect.right; ++x)
+            {
+                v1.z = p1.x - x;
+                v2.z = p1.y - y;
+                Vec3f tmp = Cross(v1, v2);
+                tmp.x = tmp.x / tmp.z;
+                tmp.y = tmp.y / tmp.z;
+                Vec3f bar = Vec3f {1 - tmp.x - tmp.y, tmp.x, tmp.y};
+
+                if (bar.x >= 0.0f && bar.y >= 0.0f && bar.z >= 0.0f)
+                    canvas.SetPixel(x, y, color);
+            }
+    }
+};
+
+class Renderer
+{
+    Mat4f transformMatrix;
+
+public:
+    Image *canvas;
+    Camera camera;
+    Viewport viewport;
+
+    Renderer(Image *canvas)
+    {
+        this->canvas = canvas;
+        viewport.Set(0, canvas->width, 0, canvas->height);
+        camera.Perspective(45.0f, 4.0f / 3.0f, 1.0f, 100.0f);
+        UpdateTransformMatrix();
+    }
+
+    void UpdateTransformMatrix()
+    {
+        transformMatrix = viewport.mat * camera.proj * camera.view;
+    }
+
+    size_t Width() { return canvas->width; }
+    size_t Height() { return canvas->height; }
+
+    inline Vec3f Transform(Vec3f &p)
+    {
+        Vec4f ext = Embed<3, float>(p, 1);
+        Vec4f tr = transformMatrix * ext;
+        float wInv = 1.0f / tr.w;
+        return Vec3f {tr.x * wInv, tr.y * wInv, tr.z * wInv};
+    }
+
+    void Clear(Color color = Color(0))
+    {
+        canvas->Clear(color);
+    }
+
+    void SetPixel(uint32_t x, uint32_t y, Color color)
+    {
+        canvas->SetPixel(x, y, color);
+    }
+
+    void DrawRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
+    {
+        Rasterizer::Rectangle(*canvas, x1, y1, x2, y2, color);
+    }
+
+    void DrawSolidRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
+    {
+        Rasterizer::SolidRect(*canvas, x1, y1, x2, y2, color);
+    }
+
+    void Line(Vec2i p1, Vec2i p2, Color color)
+    {
+        Rasterizer::Line(*canvas, p1, p2, color);
+    }
+
+    void Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
+    {
+        Rasterizer::Triangle(*canvas, p1, p2, p3, color);
+    }
+
+    void TriangleMesh(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
+    {
+        Vec2i v1 = Vec2i( Project<2, float>(Transform(p1)) );
+        Vec2i v2 = Vec2i( Project<2, float>(Transform(p2)) );
+        Vec2i v3 = Vec2i( Project<2, float>(Transform(p3)) );
+        Rasterizer::Line(*canvas, v1, v2, color);
+        Rasterizer::Line(*canvas, v2, v3, color);
+        Rasterizer::Line(*canvas, v3, v1, color);
+    }
+
+    void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
+    {
+        Vec3f v1 = Transform(p1);
+        Vec3f v2 = Transform(p2);
+        Vec3f v3 = Transform(p3);
+        Rasterizer::Triangle(*canvas, p1, p2, p3, color);
     }
 };
 
