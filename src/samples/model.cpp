@@ -14,9 +14,9 @@ Color color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
 
 float angle = 0.0f;
 float angleSpeed = 0.01;
-const float maxViewpoint = .5f;
+const float maxViewpoint = 3.0f;
 
-void Process()
+void Process(Renderer &renderer, Input &input)
 {
     static const float PI = 3.14159265f;
     angle += angleSpeed;
@@ -26,15 +26,15 @@ void Process()
 
 void Draw(Renderer &renderer)
 {
-    float x = sin(2.0f * angle) * maxViewpoint;
-    float y = cos(2.0f * angle) * maxViewpoint;
+    // float x = sin(2.0f * angle) * maxViewpoint;
+    // float y = cos(2.0f * angle) * maxViewpoint;
 
-    renderer.camera.LookAt(
-        Vec3f {0.0f, 0.0f, 0.0f},
-        Vec3f {x, 0.0f, y},
-        Vec3f {0.0f, 1.0f, 0.0f});
+    // renderer.camera.LookAt(
+    //     Vec3f {0.0f, 0.0f, 0.0f},
+    //     Vec3f {x, 0.0f, y},
+    //     Vec3f {0.0f, 1.0f, 0.0f});
 
-    renderer.UpdateTransformMatrix();
+    // renderer.UpdateTransformMatrix();
 
     renderer.Clear();
     for (auto face = model.faces.begin(); face != model.faces.end(); ++face)

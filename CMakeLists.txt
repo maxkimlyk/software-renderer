@@ -32,3 +32,4 @@ add_custom_target(data_files
         ${CMAKE_SOURCE_DIR}/data ${OUTPUT_DIRECTORY}/)
 
 add_dependencies(model data_files)
+add_dependencies(scene data_files)

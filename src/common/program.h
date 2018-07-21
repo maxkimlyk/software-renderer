@@ -10,22 +10,33 @@ class Program
 {
     Window *window;
     Canvas<uint32_t> *canvas;
-    Renderer *renderer;
 
     std::string windowCaption;
 
     bool isRunning;
 
 public:
-    void (*ProcessCallback)();
+    Renderer *renderer;
+    Input *input;
+
+    void (*InitCallback)(Renderer &renderer);
+    void (*ProcessCallback)(Renderer &renderer, Input &input);
     void (*DrawCallback)(Renderer &renderer);
 
     DWORD processTimeout = 20;
+
+    Program()
+    {
+        InitCallback = NULL;
+        ProcessCallback = NULL;
+        DrawCallback = NULL;
+    }
 
     ~Program()
     {
         DELETE(canvas);
         DELETE(renderer);
+        DELETE(input);
         DELETE(window);
     }
 
@@ -33,7 +44,8 @@ public:
     {
         canvas = new Canvas<uint32_t>(windowWidth, windowHeight);
         renderer = new Renderer(canvas);
-        window = new Window(renderer);
+        input = new Input();
+        window = new Window(renderer, input);
 
         int status = window->Create(windowWidth, windowHeight, windowCaption);
         if (status != 0)
@@ -43,6 +55,9 @@ public:
         }
 
         this->windowCaption = windowCaption;
+
+        if (InitCallback)
+            InitCallback(*renderer);
 
         return MainLoop();
     }
@@ -73,7 +88,7 @@ private:
             DWORD timeNow = timeGetTime();
             while (timeNow - lastProcessTime >= processTimeout)
             {
-                ProcessCallback();
+                ProcessCallback(*renderer, *input);
                 updated = true;
                 lastProcessTime += processTimeout;
             }

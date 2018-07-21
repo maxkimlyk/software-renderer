@@ -14,7 +14,7 @@ int y = HEIGHT / 2;
 
 Color color(0);
 
-void Process()
+void Process(Renderer &renderer, Input &input)
 {
     const float PI = 3.141592f;
     angle += PI / 100;

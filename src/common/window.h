@@ -6,6 +6,7 @@
 
 #include "canvas.h"
 #include "renderer.h"
+#include "input.h"
 
 static const char *WINDOW_CLASS_NAME = "rendererwindowclass";
 static const DWORD BPP = 32;
@@ -17,13 +18,15 @@ class Window
     HWND hWnd;
 
     Renderer *renderer;
+    Input *input;
 
 public:
     bool closed;
 
-    Window(Renderer *renderer)
+    Window(Renderer *renderer, Input *input)
     {
         this->renderer = renderer;
+        this->input = input;
     }
 
     int Create(size_t width, size_t height, const std::string &caption)
@@ -199,6 +202,21 @@ private:
         case WM_CLOSE:
             ReleaseDC(hWnd, hCompatibleDC);
             PostQuitMessage(0);
+            return 0;
+
+        case WM_KEYDOWN:
+            thisptr->input->OnKeyDown(wParam);
+            return 0;
+
+        case WM_KEYUP:
+            thisptr->input->OnKeyUp(wParam);
+            return 0;
+
+        case WM_ACTIVATE:
+            if (HIWORD(wParam) == 0)
+                thisptr->input->OnFocus();
+            else
+                thisptr->input->OnFocusLost();
             return 0;
         }
 

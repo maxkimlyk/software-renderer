@@ -159,12 +159,12 @@ Vec<3, T> Cross(const Vec<3, T> &lhs, const Vec<3, T> &rhs)
 }
 
 template <size_t n, class T>
-Vec<n+1, T> Embed(const Vec<n, T> &vec, T value = 1)
+Vec<n, T> Embed(const Vec<n-1, T> &vec, T value = 1)
 {
-    Vec<n+1, T> newVec;
-    for (size_t i = 0; i < n; ++i)
+    Vec<n, T> newVec;
+    for (size_t i = 0; i < n-1; ++i)
         newVec[i] = vec[i];
-    newVec[n] = value;
+    newVec[n-1] = value;
     return newVec;
 }
 

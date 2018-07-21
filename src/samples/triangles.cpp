@@ -25,7 +25,7 @@ inline int randSize()
     return rand() % ELEMENT_SIZE_FACTOR - ELEMENT_SIZE_FACTOR / 2;
 }
 
-void Process()
+void Process(Renderer &renderer, Input &input)
 {
     for (auto elem = Elements.begin(); elem != Elements.end();)
     {
