@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 #include "../common/geometry.h"
+#include "../common/transforms.h"
 
 TEST_CASE( "Vector", "[Vec]" )
 {
@@ -36,9 +37,30 @@ TEST_CASE( "Matrix", "[Mat]" )
 
     Mat3f mat2 = {{1.0f, 2.0f, 3.0f}, {4.0f, 5.0f, 6.0f}, {2.0f, 2.0f, 8.0f}};
     Mat3f inv = Inverse(mat2);
-    CHECK((mat2 * inv - id).MaxAbs() < 0.001);
+    CHECK((mat2 * inv - id).MaxAbs() < 0.001f);
 
     CHECK(Transpose(mat2) == Mat3f {{1.0f, 4.0f, 2.0f}, {2.0f, 5.0f, 2.0f}, {3.0f, 6.0f, 8.0f}});
 
     CHECK(Mat3i(mat1) == Mat3i {{0, 1, 2}, {0, 1, 2}, {3, 4, 5}});
+}
+
+TEST_CASE( "Rotation", "[Transform]" )
+{
+    const float eps = 0.001f;
+
+    Mat4f testRotate0 = Transform::Rotate(0.0f, Vec3f {3.0f, 2.0f, 1.0f});
+    Mat4f refRotate0 = Mat4f::Identity();
+    CHECK((refRotate0 - testRotate0).MaxAbs() < eps);
+
+    const float angle = 1.0f;
+    Mat4f testRotateX = Transform::Rotate(angle, Vec3f {1.0f, 0.0f, 0.0f});
+    Mat4f testRotateY = Transform::Rotate(angle, Vec3f {0.0f, 1.0f, 0.0f});
+    Mat4f testRotateZ = Transform::Rotate(angle, Vec3f {0.0f, 0.0f, 1.0f});
+    Mat4f refRotateX = Transform::RotateX(angle);
+    Mat4f refRotateY = Transform::RotateY(angle);
+    Mat4f refRotateZ = Transform::RotateZ(angle);
+
+    CHECK((refRotateX - testRotateX).MaxAbs() < eps);
+    CHECK((refRotateY - testRotateY).MaxAbs() < eps);
+    CHECK((refRotateZ - testRotateZ).MaxAbs() < eps);
 }

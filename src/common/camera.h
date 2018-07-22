@@ -4,34 +4,57 @@
 #include "geometry.h"
 #include "transforms.h"
 
-// class Camera
-// {
-//     friend class Renderer;
+class Camera
+{
+    Vec3f position;
+    Vec3f direction;
+    Vec3f upDirection;
+    Vec3f rightDirection;
 
-//     Mat4f view;
-//     Mat4f proj;
+public:
+    Camera()
+    {
+        position = Vec3f {0.0f, 0.0f, 0.0f};
+        direction = Vec3f {0.0f, 0.0f, 1.0f};
+        upDirection = Vec3f {0.0f, 1.0f, 0.0f};
+        rightDirection = Cross(direction, upDirection);
+    }
 
-// public:
-//     float updownAngle;
-//     float leftrightAngle;
-//     Vec3f position;
+    void LookAt(Vec3f eye, Vec3f position)
+    {
+        this->direction = eye - position;
+        this->rightDirection = Cross(direction, upDirection);
+        this->position = position;
+    }
 
-//     Camera(float disposal = 1.0f)
-//     {
-//         updownAngle = 0.0f;
-//         leftrightAngle = 0.0f;
+    void Yaw(float angle)
+    {
+        Mat3f transform = Reduce<3, float>( Transform::RotateY(angle) );
+        direction = transform * direction;
+        rightDirection = transform * rightDirection;
+    }
 
-//         view = Mat4f::Identity();
-//         proj = Mat4f::Identity();
-//         Frustum(-1, 1, -1, 1, 1.0f, 100.0f);
-//     }
+    void Pitch(float angle)
+    {
+        Mat3f transform = Reduce<3, float>( Transform::Rotate(angle, rightDirection) );
+        direction = transform * direction;
+        rightDirection = transform * rightDirection;
+    }
 
-//     void UpdateView()
-//     {
-//         view = Transform::RotateX(-updownAngle) *
-//             Transform::RotateY(-leftrightAngle) *
-//             Transform::Translate(-position.x, -position.y, -position.z);
-//     }
-// };
+    void Walk(float dist)
+    {
+        position = position + dist * direction;
+    }
+
+    void WalkRight(float dist)
+    {
+        position = position + dist * rightDirection;
+    }
+
+    Mat4f ViewMatrix()
+    {
+        return Transform::LookAt(position + direction, position, upDirection);
+    }
+};
 
 #endif

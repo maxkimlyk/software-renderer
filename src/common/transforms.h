@@ -15,13 +15,14 @@ namespace Transform
         };
     }
 
+    template <size_t n = 4>
     Mat4f RotateY(float angle)
     {
         return Mat4f {
-            {cosf(angle),    0,  -sinf(angle),   0},
-            {0,              1,  0,              0},
-            {sinf(angle),    0,  cosf(angle),    0},
-            {0,              0,  0,              1}
+            {cosf(angle),    0,  sinf(angle),   0},
+            {0,              1,  0,             0},
+            {-sinf(angle),   0,  cosf(angle),   0},
+            {0,              0,  0,             1}
         };
     }
 
@@ -35,7 +36,42 @@ namespace Transform
         };
     }
 
-    // TODO: rotate around specific axis
+    Mat4f NewBasis(Vec3f newx, Vec3f newy, Vec3f newz)
+    {
+        Mat4f mat = Mat4f::Identity();
+        mat[0][0] = newx.x; mat[0][1] = newx.y; mat[0][2] = newx.z;
+        mat[1][0] = newy.x; mat[1][1] = newy.y; mat[1][2] = newy.z;
+        mat[2][0] = newz.x; mat[2][1] = newz.y; mat[2][2] = newz.z;
+        return mat;
+    }
+
+    Mat4f NewBasis(Vec3f newx, Vec3f newy, Vec3f newz, Vec3f origin)
+    {
+        Mat4f translation = Mat4f::Identity();
+        translation[0][3] = - origin.x;
+        translation[1][3] = - origin.y;
+        translation[2][3] = - origin.z;
+        return NewBasis(newx, newy, newz) * translation;
+    }
+
+    Mat4f Rotate(float angle, Vec3f axis)
+    {
+        if (axis.x == 0.0f && axis.y == 0.0f) // rotation around z axis
+            return RotateZ(angle);
+
+        float norm = axis.Norm();
+        if (norm != 1.0f && norm != 0.0f)
+            axis = axis / norm;
+
+        Vec3f ortogonal = Normalize( Vec3f {axis.y, -axis.x, 0} ); // orthogonal * axis == 0 && ortogonal != Vec3f {0, 0, 0}
+        Vec3f third = Normalize( Cross(axis, ortogonal) );
+
+        Mat4f toNewBasis = NewBasis(axis, ortogonal, third);
+        Mat4f rotate = RotateX(angle);
+        Mat4f toOldBasis = Transpose(toNewBasis); // toNewBasis is orthogonal matrix
+
+        return toOldBasis * rotate * toNewBasis;
+    }
 
     Mat4f Translate(float x, float y, float z)
     {
@@ -52,18 +88,7 @@ namespace Transform
         Vec3f e3 = Normalize(center - eye);
         Vec3f e1 = Normalize(Cross(up, e3));
         Vec3f e2 = Normalize(Cross(e3, e1));
-
-        Mat4f newBasis = Mat4f::Identity();
-        newBasis[0][0] = e1.x; newBasis[0][1] = e1.y; newBasis[0][2] = e1.z;
-        newBasis[1][0] = e2.x; newBasis[1][1] = e2.y; newBasis[1][2] = e2.z;
-        newBasis[2][0] = e3.x; newBasis[2][1] = e3.y; newBasis[2][2] = e3.z;
-
-        Mat4f translation = Mat4f::Identity();
-        translation[0][3] = - center.x;
-        translation[1][3] = - center.y;
-        translation[2][3] = - center.z;
-
-        return newBasis * translation;
+        return NewBasis(e1, e2, e3, center);
     }
 };
 

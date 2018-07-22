@@ -353,6 +353,16 @@ Mat<n, T> Inverse(const Mat<n, T> &mat)
 }
 
 template<size_t n, class T>
+Mat<n, T> Reduce(const Mat<n+1, T> &mat)
+{
+    Mat<n, T> reduced;
+    for (size_t i = 0; i < n; ++i)
+        for (size_t j = 0; j < n; ++j)
+            reduced[i][j] = mat[i][j];
+    return reduced;
+}
+
+template<size_t n, class T>
 Mat<n, T> operator* (const Mat<n, T> &lhs, const Mat<n, T> &rhs)
 {
     Mat<n, T> res;

@@ -11,7 +11,7 @@ class Input
 public:
     Input()
     {
-        ZeroMemory(keys, sizeof(keys));
+        memset(keys, 0, sizeof(keys));
         active = true;
     }
 
@@ -44,7 +44,7 @@ public:
 
     void OnFocusLost()
     {
-        ZeroMemory(keys, sizeof(keys));
+        memset(keys, 0, sizeof(keys));
         active = false;
     }
 };
