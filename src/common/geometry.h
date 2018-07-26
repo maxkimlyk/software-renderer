@@ -5,6 +5,34 @@
 
 template <size_t n, class T> struct Mat;
 
+template <class T>
+struct Rect
+{
+    T left;
+    T right;
+    T top;
+    T bottom;
+};
+
+typedef Rect<float> Rectf;
+typedef Rect<double> Rectd;
+typedef Rect<int> Recti;
+
+template <class T>
+struct Box
+{
+    T xmin;
+    T xmax;
+    T ymin;
+    T ymax;
+    T zmin;
+    T zmax;
+};
+
+typedef Box<float> Boxf;
+typedef Box<double> Boxd;
+typedef Box<int> Boxi;
+
 template <size_t n, class T>
 struct Vec_
 {

@@ -4,48 +4,43 @@
 #include "canvas.h"
 #include "rasterizer.h"
 #include "transforms.h"
+#include "clipping.h"
 
 class Renderer
 {
-    Mat4f transformMatrix;
+    Mat4f viewProjMatrix;
+    Mat4f viewportMatrix;
+    Boxf viewportBox;
 
-    template<size_t n>
-    inline bool IsInsideIdentityBox(Vec<n, float> p)
+    Vec3f ProjectVertex(Vec3f vertex)
     {
-        for (size_t i = 0; i < 3; ++i)
-            if (p[i] < -1.0f || p[i] > 1.0f)
-                return false;
-        return true;
-    }
-
-    bool ProjectVertex(Vec3f vertex, Vec3f &screen)
-    {
-        Vec4f tmp = projViewMatrix * Embed<4, float>(vertex);
+        Vec4f tmp = viewProjMatrix * Embed<4, float>(vertex);
         Vec4f ndc = tmp / tmp.w;
-
         Vec4f screen4 = viewportMatrix * ndc;
-        screen = Project<3, float>(screen4);
-
-        if (!IsInsideIdentityBox(ndc))
-            return false;
-
-        return true;
+        return Project<3, float>(screen4);
     }
 
-    Mat4f projViewMatrix;
+    void SetViewport(float x0, float width, float y0, float height, float z0, float depth)
+    {
+        viewportMatrix = Projection::Viewport(0, canvas->width, 0, canvas->height, 0, 255);
+        viewportBox.xmin = x0;
+        viewportBox.xmax = x0 + width;
+        viewportBox.ymin = y0;
+        viewportBox.ymax = y0 + height;
+        viewportBox.zmin = z0;
+        viewportBox.zmax = z0 + depth;
+    }
 
 public:
     Image *canvas;
 
-    Mat4f viewportMatrix;
-    Mat4f projectionMatrix;
     Mat4f viewMatrix;
+    Mat4f projectionMatrix;
 
     Renderer(Image *canvas)
     {
         this->canvas = canvas;
-
-        viewportMatrix = Projection::Viewport(0, canvas->width, 0, canvas->height, 0, 255);
+        SetViewport(0, canvas->width, 0, canvas->height, 0, 255);
         projectionMatrix = Projection::Perspective(45.0f, (float)(canvas->width) / (float)(canvas->height), 0.01f, 100.0f);
         viewMatrix = Mat4f::Identity();
         UpdateMatrices();
@@ -53,19 +48,11 @@ public:
 
     void UpdateMatrices()
     {
-        projViewMatrix = projectionMatrix * viewMatrix;
+        viewProjMatrix = projectionMatrix * viewMatrix;
     }
 
     size_t Width() { return canvas->width; }
     size_t Height() { return canvas->height; }
-
-    // inline Vec3f Transform(Vec3f &p)
-    // {
-    //     // Vec4f ext = Embed<3, float>(p, 1);
-    //     // Vec4f tr = transformMatrix * ext;
-    //     // float wInv = 1.0f / tr.w;
-    //     // return Vec3f {tr.x * wInv, tr.y * wInv, tr.z * wInv};
-    // }
 
     void Clear(Color color = Color(0))
     {
@@ -99,23 +86,19 @@ public:
 
     void TriangleMesh(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
     {
-        Vec3f screen1, screen2, screen3;
-        bool visible1 = ProjectVertex(p1, screen1);
-        bool visible2 = ProjectVertex(p2, screen2);
-        bool visible3 = ProjectVertex(p3, screen3);
+        Vec3f screen1 = ProjectVertex(p1);
+        Vec3f screen2 = ProjectVertex(p2);
+        Vec3f screen3 = ProjectVertex(p3);
 
-        if (!visible1 && !visible2 && !visible3)
-        {
-            // std::cout << "Triangle " << v1 << ", " << v2 << ", " << v3 << " was clipped.\n";
-            return;
-        }
+        Vec3f clipped1, clipped2;
+        if (Clipping::ClipLine(screen1, screen2, viewportBox, clipped1, clipped2))
+            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
 
-        Vec2i s1 = Vec2i( Project<2, float>(screen1) );
-        Vec2i s2 = Vec2i( Project<2, float>(screen2) );
-        Vec2i s3 = Vec2i( Project<2, float>(screen3) );
-        Rasterizer::Line(*canvas, s1, s2, color);
-        Rasterizer::Line(*canvas, s2, s3, color);
-        Rasterizer::Line(*canvas, s3, s1, color);
+        if (Clipping::ClipLine(screen2, screen3, viewportBox, clipped1, clipped2))
+            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
+
+        if (Clipping::ClipLine(screen3, screen1, viewportBox, clipped1, clipped2))
+            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
     }
 
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color)

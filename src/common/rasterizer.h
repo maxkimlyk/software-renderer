@@ -5,15 +5,6 @@
 
 class Rasterizer
 {
-    template <class T>
-    struct Rect
-    {
-        T left;
-        T right;
-        T top;
-        T bottom;
-    };
-
     template<class T>
     static inline void MinMax(T a, T b, T c, T &min, T &max)
     {
@@ -32,7 +23,7 @@ class Rasterizer
     {
         Rect<T> rect;
         MinMax(p1[0], p2[0], p3[0], rect.left, rect.right);
-        MinMax(p1[1], p2[1], p3[1], rect.top, rect.bottom);
+        MinMax(p1[1], p2[1], p3[1], rect.bottom, rect.top);
         return rect;
     }
 
@@ -106,7 +97,7 @@ public:
         Vec3f v2 = {p2.y - p1.y, p3.y - p1.y, 1.0f};
 
         Rect<float> rect = BoundingBox(p1, p2, p3);
-        for (float y = rect.top; y <= rect.bottom; ++y)
+        for (float y = rect.bottom; y <= rect.top; ++y)
             for (float x = rect.left; x <= rect.right; ++x)
             {
                 v1.z = p1.x - x;
@@ -127,7 +118,7 @@ public:
         Vec3f v2 = {p2.y - p1.y, p3.y - p1.y, 1.0f};
 
         Rect<float> rect = BoundingBox(p1, p2, p3);
-        for (float y = rect.top; y <= rect.bottom; ++y)
+        for (float y = rect.bottom; y <= rect.top; ++y)
             for (float x = rect.left; x <= rect.right; ++x)
             {
                 v1.z = p1.x - x;

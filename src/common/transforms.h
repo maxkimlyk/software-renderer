@@ -73,6 +73,16 @@ namespace Transform
         return toOldBasis * rotate * toNewBasis;
     }
 
+    Mat4f Scale(float x, float y, float z)
+    {
+        return Mat4f {
+            {x, 0, 0, 0},
+            {0, y, 0, 0},
+            {0, 0, z, 0},
+            {0, 0, 0, 1}
+        };
+    }
+
     Mat4f Translate(float x, float y, float z)
     {
         return Mat4f {
