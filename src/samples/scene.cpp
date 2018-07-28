@@ -58,6 +58,12 @@ void Draw(Renderer &renderer)
         Vec3f v3 = face->v[2].coord;
         renderer.TriangleMesh(v1, v2, v3, color);
     }
+    // renderer.TriangleMesh(
+    //     Vec3f {5.0f, 0.0f, 5.0f},
+    //     Vec3f {5.0f, 0.0f, -5.0f},
+    //     Vec3f {-5.0f, 0.0f, -5.0f},
+    //     color
+    // );
 }
 
 int main()

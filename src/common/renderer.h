@@ -14,8 +14,18 @@ class Renderer
 
     Vec3f ProjectVertex(Vec3f vertex)
     {
-        Vec4f tmp = viewProjMatrix * Embed<4, float>(vertex);
-        Vec4f ndc = tmp / tmp.w;
+        Vec4f cs = viewMatrix * Embed<4, float>(vertex);
+        Vec4f tmp = projectionMatrix * cs;
+
+        float invW = 1.0f / tmp.w;
+        float invAbsW = cs.z < 0.0f ? invW : -invW;
+        Vec4f ndc = Vec4f {
+            tmp.x * invAbsW,
+            tmp.y * invAbsW,
+            tmp.z * invW,
+            1.0f
+        };
+
         Vec4f screen4 = viewportMatrix * ndc;
         return Project<3, float>(screen4);
     }
