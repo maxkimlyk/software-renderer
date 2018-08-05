@@ -112,12 +112,17 @@ public:
             }
     }
 
-    static void Triangle(Image &canvas, Vec3f p1, Vec3f p2, Vec3f p3, Color color)
+    static void TriangleBar(Image &canvas, Vec3f p1, Vec3f p2, Vec3f p3, Color color)
+    {
+        Rectf rect = BoundingBox(p1, p2, p3);
+        TriangleBar(canvas, p1, p2, p3, rect, color);
+    }
+
+    static void TriangleBar(Image &canvas, Vec3f p1, Vec3f p2, Vec3f p3, Rectf rect, Color color)
     {
         Vec3f v1 = {p2.x - p1.x, p3.x - p1.x, 1.0f};
         Vec3f v2 = {p2.y - p1.y, p3.y - p1.y, 1.0f};
 
-        Rect<float> rect = BoundingBox(p1, p2, p3);
         for (float y = rect.bottom; y <= rect.top; ++y)
             for (float x = rect.left; x <= rect.right; ++x)
             {

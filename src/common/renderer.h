@@ -17,12 +17,15 @@ class Renderer
         Vec4f cs = viewMatrix * Embed<4, float>(vertex);
         Vec4f tmp = projectionMatrix * cs;
 
+        if (tmp.w == 0.0f)
+            tmp.w = 0.0001f;
+
         float invW = 1.0f / tmp.w;
         float invAbsW = cs.z < 0.0f ? invW : -invW;
         Vec4f ndc = Vec4f {
             tmp.x * invAbsW,
             tmp.y * invAbsW,
-            tmp.z * invW,
+            tmp.z * invAbsW,
             1.0f
         };
 
@@ -32,7 +35,7 @@ class Renderer
 
     void SetViewport(float x0, float width, float y0, float height, float z0, float depth)
     {
-        viewportMatrix = Projection::Viewport(0, canvas->width, 0, canvas->height, 0, 255);
+        viewportMatrix = Projection::Viewport(x0, width, y0, height, z0, depth);
         viewportBox.xmin = x0;
         viewportBox.xmax = x0 + width;
         viewportBox.ymin = y0;
@@ -51,7 +54,7 @@ public:
     {
         this->canvas = canvas;
         SetViewport(0, canvas->width, 0, canvas->height, 0, 255);
-        projectionMatrix = Projection::Perspective(45.0f, (float)(canvas->width) / (float)(canvas->height), 0.01f, 100.0f);
+        projectionMatrix = Projection::Perspective(45.0f, (float)(canvas->width) / (float)(canvas->height), 0.001f, 100.0f);
         viewMatrix = Mat4f::Identity();
         UpdateMatrices();
     }
@@ -113,27 +116,15 @@ public:
 
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
     {
-        // Vec3f v1 = Transform(p1);
-        // Vec3f v2 = Transform(p2);
-        // Vec3f v3 = Transform(p3);
+        Vec3f screen1 = ProjectVertex(p1);
+        Vec3f screen2 = ProjectVertex(p2);
+        Vec3f screen3 = ProjectVertex(p3);
 
-        // Mat4f cameraMat = camera.proj * camera.view;
+        Rectf boundingRect;
+        bool visible = Clipping::TriangleClipRect(screen1, screen2, screen3, viewportBox, boundingRect);
 
-        // Vec3f v1 = cameraMat * Embed<4, float>(p1);
-        // Vec3f v2 = cameraMat * Embed<4, float>(p2);
-        // Vec3f v3 = cameraMat * Embed<4, float>(p3);
-
-        // if (!IsInsideIdentityBox(v1) || !IsInsideIdentityBox(v2) | !IsInsideIdentityBox(v3))
-        // {
-        //     std::cout << "Trienalge " << v1 << ", " << v2 << ", " << v3 << " was clipped.\n";
-        //     return;
-        // }
-
-        // v1 = viewport.mat * v1;
-        // v2 = viewport.mat * v2;
-        // v3 = viewport.mat * v3;
-
-        // Rasterizer::Triangle(*canvas, v1, v2, v3, color);
+        if (visible)
+            Rasterizer::TriangleBar(*canvas, screen1, screen2, screen3, boundingRect, color);
     }
 };
 

@@ -2,6 +2,7 @@
 #define _CLIP_H_
 
 #include "geometry.h"
+#include <algorithm>
 
 class Clipping
 {
@@ -113,30 +114,44 @@ public:
 
     static bool TriangleClipRect(Vec3f p1, Vec3f p2, Vec3f p3, Boxf box, Rectf &result)
     {
-        Vec3f clippedVerts[6];
+        Vec3f* first[] = {&p1, &p2, &p3};
+        Vec3f* second[] = {&p2, &p3, &p1};
 
-        bool inside = TriangleClip(p1, p2, p3, box, clippedVerts[0], clippedVerts[1], clippedVerts[2], clippedVerts[3], clippedVerts[4], clippedVerts[5]);
-        if (!inside)
-            return false;
+        bool rectInitialized = false;
 
-        result.left = clippedVerts[0].x;
-        result.right = clippedVerts[0].x;
-        result.top = clippedVerts[0].y;
-        result.bottom = clippedVerts[0].y;
-
-        for (size_t i = 1; i < 6; ++i)
+        for (size_t k = 0; k < 3; ++k)
         {
-            if (clippedVerts[i].x < result.left)
-                result.left = clippedVerts[i].x;
-            else if (clippedVerts[i].x > result.right)
-                result.right = clippedVerts[i].x;
-            if (clippedVerts[i].y < result.bottom)
-                result.bottom = clippedVerts[i].y;
-            else if (clippedVerts[i].y > result.top)
-                result.top = clippedVerts[i].y;
+            Vec3f clipped[2];
+            if (ClipLine(*first[k], *second[k], box, clipped[0], clipped[1]))
+            {
+                if (!rectInitialized)
+                {
+                    auto leftright = std::minmax(clipped[0].x, clipped[1].x);
+                    result.left = leftright.first;
+                    result.right = leftright.second;
+                    auto topbottom = std::minmax(clipped[0].y, clipped[1].y);
+                    result.bottom = topbottom.first;
+                    result.top = topbottom.second;
+                    rectInitialized = true;
+                }
+                else
+                {
+                    for (size_t i = 0; i < 2; ++i)
+                    {
+                        if (clipped[i].x < result.left)
+                            result.left = clipped[i].x;
+                        else if (clipped[i].x > result.right)
+                            result.right = clipped[i].x;
+                        if (clipped[i].y < result.bottom)
+                            result.bottom = clipped[i].y;
+                        else if (clipped[i].y > result.top)
+                            result.top = clipped[i].y;
+                    }
+                }
+            }
         }
 
-        return true;
+        return rectInitialized;
     }
 };
 

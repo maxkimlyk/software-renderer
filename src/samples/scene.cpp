@@ -7,10 +7,11 @@
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Scene";
-const char *MODEL_NAME = "scene.obj";
+const char *MODEL_NAME = "palm.obj";
 
 Model model;
 Color color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
+Vec3f lightDirection = Normalize(Vec3f {0, -0.2f, 3.0f});
 
 Camera camera;
 
@@ -56,12 +57,31 @@ void Draw(Renderer &renderer)
         Vec3f v1 = face->v[0].coord;
         Vec3f v2 = face->v[1].coord;
         Vec3f v3 = face->v[2].coord;
-        renderer.TriangleMesh(v1, v2, v3, color);
+
+        Vec3f norm = Normalize( Cross(v3 - v1, v3 - v2) );
+        float lightIntensity = lightDirection * norm;
+
+        if (lightIntensity > 0)
+        {
+            Color color(255 * lightIntensity, 255 * lightIntensity, 255 * lightIntensity);
+            renderer.Triangle(v1, v2, v3, color);
+        }
+
+        // renderer.TriangleMesh(v1, v2, v3, color);
+
     }
+
     // renderer.TriangleMesh(
     //     Vec3f {5.0f, 0.0f, 5.0f},
     //     Vec3f {5.0f, 0.0f, -5.0f},
     //     Vec3f {-5.0f, 0.0f, -5.0f},
+    //     color
+    // );
+
+    // renderer.TriangleMesh(
+    //     Vec3f {-1.0f, 0.0f, 1.0f},
+    //     Vec3f {1.0f, 0.0f, 1.0f},
+    //     Vec3f {1.0f, 1.0f, 1.0f},
     //     color
     // );
 }
