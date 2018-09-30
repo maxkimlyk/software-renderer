@@ -5,12 +5,15 @@
 #include "rasterizer.h"
 #include "transforms.h"
 #include "clipping.h"
+#include "bmp.h"
 
 class Renderer
 {
     Mat4f viewProjMatrix;
     Mat4f viewportMatrix;
     Boxf viewportBox;
+
+    Canvas<float> zbuffer;
 
     Vec3f ProjectVertex(Vec3f vertex)
     {
@@ -50,13 +53,20 @@ public:
     Mat4f viewMatrix;
     Mat4f projectionMatrix;
 
-    Renderer(Image *canvas)
+    Renderer(Image *canvas):
+        zbuffer(canvas->width, canvas->height)
     {
         this->canvas = canvas;
         SetViewport(0, canvas->width, 0, canvas->height, 0, 255);
-        projectionMatrix = Projection::Perspective(45.0f, (float)(canvas->width) / (float)(canvas->height), 0.001f, 100.0f);
+        projectionMatrix = Projection::Perspective(45.0f, (float)(canvas->width) / (float)(canvas->height), 0.01f, 10.0f);
         viewMatrix = Mat4f::Identity();
         UpdateMatrices();
+    }
+
+    int SnapshotZBuffer(const char *file)
+    {
+        Bmp bmp(file);
+        return bmp.WriteFromCanvas(zbuffer);
     }
 
     void UpdateMatrices()
@@ -70,6 +80,7 @@ public:
     void Clear(Color color = Color(0))
     {
         canvas->Clear(color);
+        zbuffer.Clear(UINT8_MAX);
     }
 
     void SetPixel(uint32_t x, uint32_t y, Color color)
@@ -124,7 +135,13 @@ public:
         bool visible = Clipping::TriangleClipRect(screen1, screen2, screen3, viewportBox, boundingRect);
 
         if (visible)
-            Rasterizer::TriangleBar(*canvas, screen1, screen2, screen3, boundingRect, color);
+        {
+            // screen1 = {std::floor(screen1.x), std::floor(screen1.y), screen1.z};
+            // screen2 = {std::floor(screen2.x), std::floor(screen2.y), screen2.z};
+            // screen3 = {std::floor(screen3.x), std::floor(screen3.y), screen3.z};
+            // Rasterizer::TriangleBar(*canvas, zbuffer, screen1, screen2, screen3, boundingRect, color);
+            Rasterizer::TriangleAlternative(*canvas, zbuffer, screen1, screen2, screen3, color);
+        }
     }
 };
 

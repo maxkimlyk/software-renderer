@@ -7,13 +7,16 @@
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Scene";
-const char *MODEL_NAME = "palm.obj";
+const char *MODEL_NAME = "head.obj";
+const char *SNAPSHOT_FILE = "snap.bmp";
 
 Model model;
 Color color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
 Vec3f lightDirection = Normalize(Vec3f {0, -0.2f, 3.0f});
 
 Camera camera;
+
+bool doSnapshot = false;
 
 void Init(Renderer &renderer)
 {
@@ -44,6 +47,8 @@ void Process(Renderer &renderer, Input &input)
         camera.Pitch(rotateAngle);
     if (input.IsDown(VK_DOWN))
         camera.Pitch(-rotateAngle);
+    if (input.IsPressed('P'))
+        doSnapshot = true;
 
     renderer.viewMatrix = camera.ViewMatrix();
     renderer.UpdateMatrices();
@@ -84,6 +89,13 @@ void Draw(Renderer &renderer)
     //     Vec3f {1.0f, 1.0f, 1.0f},
     //     color
     // );
+
+    if (doSnapshot)
+    {
+        if (renderer.SnapshotZBuffer(SNAPSHOT_FILE) == 0)
+            LOG("Snapshot to %s", SNAPSHOT_FILE);
+        doSnapshot = false;
+    }
 }
 
 int main()
