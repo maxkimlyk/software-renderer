@@ -110,7 +110,6 @@ public:
         int totalHeight = p3.y - p1.y;
         for (int y = p1.y; y <= p3.y; ++y)
         {
-            // bool upperSegment = y > p2.y || p2.y - p2.y; // WHAT DID IT MEAN?
             bool upperSegment = y > p2.y;
             int segmentHeight = upperSegment ? p3.y - p2.y : p2.y - p1.y;
 
@@ -120,18 +119,30 @@ public:
             Vec3f v1 = p1 + t * (p3 - p1);
             Vec3f v2 = upperSegment ? p2 + u * (p3 - p2) : p1 + u * (p2 - p1);
 
-            if (v1.x > v2.x)
+            if ((int)(v1.x) == (int)(v2.x))
+            {
+                if (v1.z < zBuffer.AtSafe(v1.x, y))
+                {
+                    zBuffer.SetPixel(v1.x, y, v1.z);
+                    canvas.SetPixel(v1.x, y, color);
+                }
+            }
+            else
+            {
+                if (v1.x > v2.x)
                 std::swap(v1, v2);
 
-            for (int x = v1.x; x <= v2.x; ++x)
-            {
-                float s = (v2.x == v1.x) ? 1.0f : (x - v1.x) / (v2.x - v1.x);
-                Vec3f p = v1 + s * (v2 - v1);
-
-                if (p.z < zBuffer.AtSave(x, y))
+                float invXLength = 1.0f / (v2.x - v1.x);
+                for (int x = v1.x; x <= v2.x; ++x)
                 {
-                    zBuffer.SetPixel(x, y, p.z);
-                    canvas.SetPixel(x, y, color);
+                    float s = (x - v1.x) * invXLength;
+                    Vec3f p = v1 + s * (v2 - v1);
+
+                    if (p.z < zBuffer.AtSafe(x, y))
+                    {
+                        zBuffer.SetPixel(x, y, p.z);
+                        canvas.SetPixel(x, y, color);
+                    }
                 }
             }
         }
@@ -188,7 +199,7 @@ public:
                     continue;
 
                 uint8_t z = (uint8_t)(bar * Vec3f {p1.z, p2.z, p3.z});
-                if (z < zbuffer.AtSave(x, y))
+                if (z < zbuffer.AtSafe(x, y))
                 {
                     zbuffer.SetPixel(x, y, z);
                     canvas.SetPixel(x, y, color);

@@ -61,7 +61,7 @@ public:
         return ptr[x + (height - 1 - y) * width];
     }
 
-    T& AtSave(size_t x, size_t y)
+    T& AtSafe(size_t x, size_t y)
     {
         if ((uint32_t)(x) < width && (uint32_t)(y) < height)
             return At(x, y);
