@@ -120,7 +120,7 @@ namespace Projection
 
     Mat4f Perspective(float fovyInDegrees, float aspectRatio, float znear, float zfar)
     {
-        float ymax = znear * std::tan(fovyInDegrees * M_PI / 360.0);
+        float ymax = znear * std::tan(fovyInDegrees * M_PI / 360.0f);
         float xmax = ymax * aspectRatio;
         return Frustum(-xmax, xmax, -ymax, ymax, znear, zfar);
     }

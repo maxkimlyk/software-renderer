@@ -2,6 +2,7 @@
 #define _GEOMETRY_H_
 
 #include "definitions.h"
+#include <initializer_list>
 
 template <size_t n, class T> struct Mat;
 

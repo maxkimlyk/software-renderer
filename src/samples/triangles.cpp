@@ -1,68 +1,70 @@
 #include "../common/program.h"
 #include <cmath>
-#include <list>
+#include <vector>
 
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Triangles";
 
-const size_t ELEMENTS_AMOUNT = 100;
-const uint32_t CHANCE_FACTOR = 8;
-const uint32_t ELEMENT_SIZE_FACTOR = 150;
-const uint8_t MIN_INTENSITY = 10;
-const uint8_t FADE_SPEED = 3;
+const size_t POINTS_AMOUNT = 100;
+const float VARIANCE = 4.0f;
 
-struct Element
+float z = -5.0f;
+std::vector<Vec3f> points;
+
+void Init(Renderer &renderer)
 {
-    Vec2i verts[3];
-    Color color;
-};
+    const auto randf = []() { return (float)(rand()) / (float)(RAND_MAX) - 0.5f; };
 
-std::list<Element> Elements;
-
-inline int randSize()
-{
-    return rand() % ELEMENT_SIZE_FACTOR - ELEMENT_SIZE_FACTOR / 2;
+    points.reserve(POINTS_AMOUNT);
+    for (size_t i = 0; i < POINTS_AMOUNT; ++i)
+    {
+        float x = randf() * VARIANCE;
+        float y = randf() * VARIANCE;
+        points.emplace_back(Vec3f {x, y, 0.0f});
+    }
 }
 
 void Process(Renderer &renderer, Input &input)
 {
-    for (auto elem = Elements.begin(); elem != Elements.end();)
-    {
-        if (elem->color.r < MIN_INTENSITY || elem->color.g < MIN_INTENSITY || elem->color.b < MIN_INTENSITY)
-        {
-            elem = Elements.erase(elem);
-        }
-        else
-        {
-            elem->color.r -= FADE_SPEED;
-            elem->color.g -= FADE_SPEED;
-            elem->color.b -= FADE_SPEED;
-            ++elem;
-        }
-    }
-
-    if (Elements.size() < ELEMENTS_AMOUNT && rand() % CHANCE_FACTOR == 0)
-    {
-        Element newElem;
-        newElem.verts[0] = Vec2i {rand() % WIDTH, rand() % HEIGHT};
-        newElem.verts[1] = newElem.verts[0] + Vec2i {randSize(), randSize()};
-        newElem.verts[2] = newElem.verts[0] + Vec2i {randSize(), randSize()};
-        newElem.color = Color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
-        Elements.push_back(newElem);
-    }
+    if (input.IsDown(0x26))
+        z += 0.1f;
+    if (input.IsDown(0x28))
+        z -= 0.1f;
 }
 
 void Draw(Renderer &renderer)
 {
+    static const Color red(230, 0, 0);
+    static const Color green(0, 230, 0);
+    static const Color yellow(230, 230, 0);
+    static const Color margenta(230, 0, 230);
+    static const Color cyan(0, 230, 230);
+    static const Color white(230, 230, 230);
+
     renderer.Clear();
-    for (auto elem = Elements.begin(); elem != Elements.end(); ++elem)
-        renderer.Triangle(elem->verts[0], elem->verts[1], elem->verts[2], elem->color);
+
+    for (Vec3f v : points)
+    {
+        v.z = z;
+        renderer.Triangle(v, v, v, white);
+    }
+
+    renderer.Triangle(Vec3f {0, 0, z}, Vec3f {0, 0.5, z}, Vec3f {0.5, 0, z}, yellow);
+    renderer.Triangle(Vec3f {1, 0, z}, Vec3f {1.4f, 1, z}, Vec3f {1.6f, -0.6f, z}, green);
+    renderer.Triangle(Vec3f {-1, 0, z}, Vec3f {-1.5f, 1, z}, Vec3f {-0.8f, 1, z}, red);
+    renderer.Triangle(Vec3f {0, 1.3f, z}, Vec3f {-1.5f, 1.3f, z}, Vec3f {-0.8f, 1.8f, z}, margenta);
+
+    renderer.Triangle(Vec3f {-2, 1.5, z}, Vec3f {-2, 2, z}, Vec3f {-2, -1, z}, cyan);
+    renderer.Triangle(Vec3f {2, 2, z}, Vec3f {2, 2, z}, Vec3f {2, -1, z}, cyan);
+    renderer.Triangle(Vec3f {2, 2, z}, Vec3f {2, 2, z}, Vec3f {-2, 2, z}, cyan);
+    renderer.Triangle(Vec3f {2, -1, z}, Vec3f {1.1f, -1, z}, Vec3f {-2, -1, z}, cyan);
 }
 
 int main()
 {
     Program program;
+    program.InitCallback = Init;
     program.ProcessCallback = Process;
     program.DrawCallback = Draw;
     return program.Run(WIDTH, HEIGHT, CAPTION);

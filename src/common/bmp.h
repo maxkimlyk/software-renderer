@@ -89,8 +89,8 @@ public:
         stream.write((const char*)(&pltColors), sizeof(pltColors));
         stream.write((const char*)(&impColors), sizeof(impColors));
 
-        for(int i = 0; i < dimensions[0]; ++i)
-            for(int j = 0; j < dimensions[1]; ++j)
+        for(size_t i = 0; i < dimensions[0]; ++i)
+            for(size_t j = 0; j < dimensions[1]; ++j)
             {
                 T pixel = canvas.At(i, j);
                 WritePixel(pixel);
