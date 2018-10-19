@@ -59,6 +59,9 @@ void Draw(Renderer &renderer)
     renderer.Triangle(Vec3f {2, 2, z}, Vec3f {2, 2, z}, Vec3f {2, -1, z}, cyan);
     renderer.Triangle(Vec3f {2, 2, z}, Vec3f {2, 2, z}, Vec3f {-2, 2, z}, cyan);
     renderer.Triangle(Vec3f {2, -1, z}, Vec3f {1.1f, -1, z}, Vec3f {-2, -1, z}, cyan);
+
+    renderer.Triangle(Vec3f {-2.0, 2.0, z}, Vec3f {-2.0, 2.0, z}, Vec3f {2.0, -1.0, z}, cyan);
+    renderer.Triangle(Vec3f {2.0, 2.0, z}, Vec3f {2.0, 2.0, z}, Vec3f {-2.0, -1.0, z}, cyan);
 }
 
 int main()

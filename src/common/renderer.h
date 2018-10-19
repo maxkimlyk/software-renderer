@@ -131,17 +131,7 @@ public:
         Vec3f screen2 = ProjectVertex(p2);
         Vec3f screen3 = ProjectVertex(p3);
 
-        Rectf boundingRect;
-        bool visible = Clipping::TriangleClipRect(screen1, screen2, screen3, viewportBox, boundingRect);
-
-        if (visible)
-        {
-            // screen1 = {std::floor(screen1.x), std::floor(screen1.y), screen1.z};
-            // screen2 = {std::floor(screen2.x), std::floor(screen2.y), screen2.z};
-            // screen3 = {std::floor(screen3.x), std::floor(screen3.y), screen3.z};
-            // Rasterizer::TriangleBar(*canvas, zbuffer, screen1, screen2, screen3, boundingRect, color);
-            Rasterizer::TriangleAlternative(*canvas, zbuffer, screen1, screen2, screen3, color);
-        }
+        Rasterizer::Triangle(*canvas, zbuffer, screen1, screen2, screen3, color);
     }
 };
 
