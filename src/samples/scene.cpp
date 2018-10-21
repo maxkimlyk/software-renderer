@@ -68,7 +68,7 @@ void Draw(Renderer &renderer)
 
         if (lightIntensity > 0)
         {
-            Color color(255 * lightIntensity, 255 * lightIntensity, 255 * lightIntensity);
+            Color color((uint8_t)(255 * lightIntensity), (uint8_t)(255 * lightIntensity), (uint8_t)(255 * lightIntensity));
             renderer.Triangle(v1, v2, v3, color);
         }
 

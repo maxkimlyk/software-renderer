@@ -26,6 +26,7 @@ foreach(TEST ${TESTS})
     get_filename_component(NAME ${TEST} NAME_WE)
     add_executable(${NAME} ${TEST})
     target_include_directories(${NAME} PRIVATE src/external)
+    target_link_libraries(${NAME} ${LIBS})
 endforeach(TEST)
 
 add_custom_target(data_files

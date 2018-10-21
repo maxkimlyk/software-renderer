@@ -1,5 +1,6 @@
 #include "../common/program.h"
 #include "../common/model.h"
+#include "../common/camera.h"
 #include <cmath>
 #include <list>
 
@@ -13,8 +14,12 @@ Model model;
 Color color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
 
 float angle = 0.0f;
-float angleSpeed = 0.01;
+float angleSpeed = 0.01f;
 const float maxViewpoint = 3.0f;
+
+void Init(Renderer &renderer)
+{
+}
 
 void Process(Renderer &renderer, Input &input)
 {
@@ -26,15 +31,18 @@ void Process(Renderer &renderer, Input &input)
 
 void Draw(Renderer &renderer)
 {
-    // float x = sin(2.0f * angle) * maxViewpoint;
-    // float y = cos(2.0f * angle) * maxViewpoint;
+    static Camera camera;
 
-    // renderer.camera.LookAt(
-    //     Vec3f {0.0f, 0.0f, 0.0f},
-    //     Vec3f {x, 0.0f, y},
-    //     Vec3f {0.0f, 1.0f, 0.0f});
+    float x = 0.5f * sin(2.0f * angle) * maxViewpoint;
+    float y = 0.5f * cos(2.0f * angle) * maxViewpoint;
 
-    // renderer.UpdateTransformMatrix();
+    camera.LookAt(
+        Vec3f {0.0f, 0.5f, 0.0f},
+        Vec3f {x, 1.0f, y}
+    );
+
+    renderer.viewMatrix = camera.ViewMatrix();
+    renderer.UpdateMatrices();
 
     renderer.Clear();
     for (auto face = model.faces.begin(); face != model.faces.end(); ++face)
@@ -56,6 +64,7 @@ int main()
     model.Normalize();
 
     Program program;
+    program.InitCallback = Init;
     program.ProcessCallback = Process;
     program.DrawCallback = Draw;
     return program.Run(WIDTH, HEIGHT, CAPTION);

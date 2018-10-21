@@ -3,6 +3,7 @@
 
 #include "definitions.h"
 #include <initializer_list>
+#include <iostream>
 
 template <size_t n, class T> struct Mat;
 

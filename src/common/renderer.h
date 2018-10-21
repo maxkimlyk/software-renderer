@@ -57,7 +57,7 @@ public:
         zbuffer(canvas->width, canvas->height)
     {
         this->canvas = canvas;
-        SetViewport(0, canvas->width, 0, canvas->height, 0, 255);
+        SetViewport(0.0, (float)(canvas->width), 0.0, (float)(canvas->height), 0.0, 255.0);
         projectionMatrix = Projection::Perspective(45.0f, (float)(canvas->width) / (float)(canvas->height), 0.01f, 10.0f);
         viewMatrix = Mat4f::Identity();
         UpdateMatrices();
