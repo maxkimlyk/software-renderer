@@ -90,7 +90,7 @@ void Line(Image &canvas, Vec2i p1, Vec2i p2, Color color)
 
 inline void PutPixel(Image &canvas, Canvas<float> &zBuffer, int x, int y, float z, Color color)
 {
-    if (z < zBuffer.At(x, y))
+    if (z >= 0 && z < zBuffer.At(x, y))
     {
         zBuffer.SetPixel(x, y, z);
         canvas.SetPixel(x, y, color);
@@ -229,11 +229,7 @@ void Triangle(Image &canvas, Canvas<float> &zBuffer, Vec3f p1, Vec3f p2, Vec3f p
         {
             Vec3f bar = {1.0f - t, 0.0f, t};
             float z = bar * zs;
-            if (z < zBuffer.At(x1, y))
-            {
-                zBuffer.SetPixel(x1, y, z);
-                canvas.SetPixel(x1, y, color);
-            }
+            PutPixel(canvas, zBuffer, x1, y, z, color);
         }
         else
         {
@@ -261,11 +257,7 @@ void Triangle(Image &canvas, Canvas<float> &zBuffer, Vec3f p1, Vec3f p2, Vec3f p
                 }
 
                 float z = bar * zs;
-                if (z < zBuffer.At(x, y))
-                {
-                    zBuffer.SetPixel(x, y, z);
-                    canvas.SetPixel(x, y, color);
-                }
+                PutPixel(canvas, zBuffer, x, y, z, color);
             }
         }
     }
