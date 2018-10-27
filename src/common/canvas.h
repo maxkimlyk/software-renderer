@@ -2,6 +2,7 @@
 #define _CANVAS_H_
 
 #include "utils.h"
+#include "../external/tgaimage/tgaimage.h"
 
 union Color
 {
@@ -44,16 +45,20 @@ public:
     size_t width;
     size_t height;
 
-    Canvas(size_t width, size_t height)
+    Canvas():
+        width(0), height(0), ptr(nullptr)
     {
-        this->width = width;
-        this->height = height;
-        ptr = new T [width * height];
+    }
+
+    Canvas(size_t width, size_t height):
+        width(width), height(height), ptr(new T [width * height])
+    {
     }
 
     ~Canvas()
     {
-        delete [] ptr;
+        if (ptr != nullptr)
+            delete [] ptr;
     }
 
     T& At(size_t x, size_t y)
@@ -111,8 +116,18 @@ public:
 
         memcpy(dstptr, ptr, sizeof(T) * width * height);
     }
+
+    void Reserve(size_t width, size_t height)
+    {
+        if (ptr != nullptr)
+            delete [] ptr;
+
+        ptr = new T [width * height];
+    }
 };
 
 typedef Canvas<uint32_t> Image;
+
+int LoadTGA(const char *path, Image &result);
 
 #endif

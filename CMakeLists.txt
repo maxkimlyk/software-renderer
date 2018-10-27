@@ -10,8 +10,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIRECTORY})
 file(GLOB COMMON_FILES src/common/*)
 add_library(renderer ${COMMON_FILES})
 
+add_library(tgaimage src/external/tgaimage/tgaimage.cpp)
+
 list(APPEND LIBS
-    renderer kernel32 user32 gdi32 winmm
+    renderer kernel32 user32 gdi32 winmm tgaimage
 )
 
 file(GLOB SAMPLES src/samples/*.cpp)

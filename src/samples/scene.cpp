@@ -8,10 +8,11 @@ const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Scene";
 const char *MODEL_NAME = "head.obj";
-const char *SNAPSHOT_FILE = "snap.bmp";
+const char *TEXTURE_FILE = "head_diffuse.tga";
 
 Model model;
-Color color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
+Image texture;
+
 Vec3f lightDirection = Normalize(Vec3f {0, -0.2f, 3.0f});
 
 Camera camera;
@@ -67,6 +68,10 @@ int main()
 {
     ObjReader reader;
     int status = reader.ReadModel(MODEL_NAME, model);
+    if (status != 0)
+        return status;
+
+    status = LoadTGA(TEXTURE_FILE, texture);
     if (status != 0)
         return status;
 
