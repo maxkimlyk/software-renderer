@@ -16,8 +16,6 @@ Vec3f lightDirection = Normalize(Vec3f {0, -0.2f, 3.0f});
 
 Camera camera;
 
-bool doSnapshot = false;
-
 void Init(Renderer &renderer)
 {
     camera.LookAt(
@@ -47,8 +45,6 @@ void Process(Renderer &renderer, Input &input)
         camera.Pitch(rotateAngle);
     if (input.IsDown(VK_DOWN))
         camera.Pitch(-rotateAngle);
-    if (input.IsPressed('P'))
-        doSnapshot = true;
 
     renderer.viewMatrix = camera.ViewMatrix();
     renderer.UpdateMatrices();
@@ -63,38 +59,7 @@ void Draw(Renderer &renderer)
         Vec3f v2 = face->v[1].coord;
         Vec3f v3 = face->v[2].coord;
 
-        Vec3f norm = Normalize( Cross(v3 - v1, v3 - v2) );
-        float lightIntensity = lightDirection * norm;
-
-        if (lightIntensity > 0)
-        {
-            Color color((uint8_t)(255 * lightIntensity), (uint8_t)(255 * lightIntensity), (uint8_t)(255 * lightIntensity));
-            renderer.Triangle(v1, v2, v3, color);
-        }
-
-        // renderer.TriangleMesh(v1, v2, v3, color);
-
-    }
-
-    // renderer.TriangleMesh(
-    //     Vec3f {5.0f, 0.0f, 5.0f},
-    //     Vec3f {5.0f, 0.0f, -5.0f},
-    //     Vec3f {-5.0f, 0.0f, -5.0f},
-    //     color
-    // );
-
-    // renderer.TriangleMesh(
-    //     Vec3f {-1.0f, 0.0f, 1.0f},
-    //     Vec3f {1.0f, 0.0f, 1.0f},
-    //     Vec3f {1.0f, 1.0f, 1.0f},
-    //     color
-    // );
-
-    if (doSnapshot)
-    {
-        if (renderer.SnapshotZBuffer(SNAPSHOT_FILE) == 0)
-            LOG("Snapshot to %s", SNAPSHOT_FILE);
-        doSnapshot = false;
+        renderer.Triangle(v1, v2, v3);
     }
 }
 

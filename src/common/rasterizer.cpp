@@ -1,4 +1,5 @@
 #include "rasterizer.h"
+#include "shader.h"
 
 namespace Rasterizer
 {
@@ -97,7 +98,18 @@ inline void PutPixel(Image &canvas, Canvas<float> &zBuffer, int x, int y, float 
     }
 }
 
-inline void HorizontalDegenerateTriangle(Image &canvas, Canvas<float> &zBuffer, Vec3f p1, Vec3f p2, Vec3f p3, Color color)
+inline void PutShaderedPixel(Image &canvas, Canvas<float> &zBuffer, int x, int y, float z, Vec3f bar, Shader& shader)
+{
+    Color color;
+
+    if (z >= 0 && z < zBuffer.At(x, y) && shader.pixel(bar, color))
+    {
+        zBuffer.SetPixel(x, y, z);
+        canvas.SetPixel(x, y, color);
+    }
+}
+
+inline void HorizontalDegenerateTriangle(Image &canvas, Canvas<float> &zBuffer, Vec3f p1, Vec3f p2, Vec3f p3, Shader& shader)
 {
     // TODO: test this code
 
@@ -123,9 +135,9 @@ inline void HorizontalDegenerateTriangle(Image &canvas, Canvas<float> &zBuffer, 
     if (x1 == x3)
     {
         int x = (int)p1.x;
-        PutPixel(canvas, zBuffer, x, y, p1.z, color);
-        PutPixel(canvas, zBuffer, x, y, p2.z, color);
-        PutPixel(canvas, zBuffer, x, y, p3.z, color);
+        PutShaderedPixel(canvas, zBuffer, x, y, p1.z, Vec3f {1.0f, 0.0f, 0.0f}, shader);
+        PutShaderedPixel(canvas, zBuffer, x, y, p2.z, Vec3f {0.0f, 1.0f, 0.0f}, shader);
+        PutShaderedPixel(canvas, zBuffer, x, y, p3.z, Vec3f {0.0f, 0.0f, 1.0f}, shader);
         return;
     }
 
@@ -143,7 +155,7 @@ inline void HorizontalDegenerateTriangle(Image &canvas, Canvas<float> &zBuffer, 
         // first side
         Vec3f bar = {(1.0f - t), 0.0f, t};
         float z = zs * bar;
-        PutPixel(canvas, zBuffer, x, y, z, color);
+        PutShaderedPixel(canvas, zBuffer, x, y, z, bar, shader);
 
         // sedond side
         if (rightSegment)
@@ -152,11 +164,31 @@ inline void HorizontalDegenerateTriangle(Image &canvas, Canvas<float> &zBuffer, 
             bar = Vec3f {(1.0f - u), u, 0.0f};
 
         z = zs * bar;
-        PutPixel(canvas, zBuffer, x, y, z, color);
+        PutShaderedPixel(canvas, zBuffer, x, y, z, bar, shader);
     }
 }
 
-void Triangle(Image &canvas, Canvas<float> &zBuffer, Vec3f p1, Vec3f p2, Vec3f p3, Color color)
+template <class T>
+inline void minmax(T v1, T v2, T v3, T& min, T& max)
+{
+    if (v1 < v2)
+    {
+        min = v1;
+        max = v2;
+    }
+    else
+    {
+        min = v2;
+        max = v1;
+    }
+
+    if (v3 < min)
+        min = v3;
+    else if (v3 > max)
+        max = v3;
+}
+
+void Triangle(Image &canvas, Canvas<float> &zBuffer, float farZ, Vec3f p1, Vec3f p2, Vec3f p3, Shader& shader)
 {
     // remove this later
     Vec3f zs = {p1.z, p2.z, p3.z};
@@ -178,32 +210,23 @@ void Triangle(Image &canvas, Canvas<float> &zBuffer, Vec3f p1, Vec3f p2, Vec3f p
     if (i1.y >= height || i3.y < 0)
         return;
 
-    if (i1.y == i3.y)
-    {
-        HorizontalDegenerateTriangle(canvas, zBuffer, p1, p2, p3, color);
-        return;
-    }
-
     int minX, maxX;
-
-    if (i1.x < i2.x)
-    {
-        minX = i1.x;
-        maxX = i2.x;
-    }
-    else
-    {
-        minX = i2.x;
-        maxX = i1.x;
-    }
-
-    if (i3.x < minX)
-        minX = i3.x;
-    else if (i3.x > maxX)
-        maxX = i3.x;
+    minmax(i1.x, i2.x, i3.x, minX, maxX);
 
     if (maxX < 0 || minX >= width)
         return;
+
+    float minZ, maxZ;
+    minmax(p1.z, p2.z, p3.z, minZ, maxZ);
+
+    if (minZ < 0 || maxZ >= farZ)
+        return;
+
+    if (i1.y == i3.y)
+    {
+        HorizontalDegenerateTriangle(canvas, zBuffer, p1, p2, p3, shader);
+        return;
+    }
 
     int startY = i1.y < 0 ? 0 : i1.y;
     int endY = i3.y >= height ? height - 1 : i3.y;
@@ -228,8 +251,7 @@ void Triangle(Image &canvas, Canvas<float> &zBuffer, Vec3f p1, Vec3f p2, Vec3f p
         if (x1 == x2)
         {
             Vec3f bar = {1.0f - t, 0.0f, t};
-            float z = bar * zs;
-            PutPixel(canvas, zBuffer, x1, y, z, color);
+            PutShaderedPixel(canvas, zBuffer, x1, y, bar * zs, bar, shader);
         }
         else
         {
@@ -256,8 +278,7 @@ void Triangle(Image &canvas, Canvas<float> &zBuffer, Vec3f p1, Vec3f p2, Vec3f p
                     bar = Vec3f {b1, b2, 1.0f - b1 - b2};
                 }
 
-                float z = bar * zs;
-                PutPixel(canvas, zBuffer, x, y, z, color);
+                PutShaderedPixel(canvas, zBuffer, x, y, bar * zs, bar, shader);
             }
         }
     }

@@ -6,6 +6,7 @@
 #include "transforms.h"
 #include "clipping.h"
 #include "bmp.h"
+#include "shader.h"
 
 class Renderer
 {
@@ -53,8 +54,11 @@ public:
     Mat4f viewMatrix;
     Mat4f projectionMatrix;
 
+    Shader &shader;
+
     Renderer(Image *canvas):
-        zbuffer(canvas->width, canvas->height)
+        zbuffer(canvas->width, canvas->height),
+        shader(DefaultShaders::flatShader)
     {
         this->canvas = canvas;
         SetViewport(0.0, (float)(canvas->width), 0.0, (float)(canvas->height), 0.0, 255.0);
@@ -127,11 +131,24 @@ public:
 
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
     {
+        DefaultShaders::SolidColor solidColorShader(color);
+
         Vec3f screen1 = ProjectVertex(p1);
         Vec3f screen2 = ProjectVertex(p2);
         Vec3f screen3 = ProjectVertex(p3);
 
-        Rasterizer::Triangle(*canvas, zbuffer, screen1, screen2, screen3, color);
+        Rasterizer::Triangle(*canvas, zbuffer, viewportBox.zmax, screen1, screen2, screen3, solidColorShader);
+    }
+
+    void Triangle(Vec3f p1, Vec3f p2, Vec3f p3)
+    {
+        shader.vertex(p1, p2, p3);
+
+        Vec3f screen1 = ProjectVertex(p1);
+        Vec3f screen2 = ProjectVertex(p2);
+        Vec3f screen3 = ProjectVertex(p3);
+
+        Rasterizer::Triangle(*canvas, zbuffer, viewportBox.zmax, screen1, screen2, screen3, shader);
     }
 };
 
