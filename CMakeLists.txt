@@ -3,15 +3,15 @@ cmake_minimum_required(VERSION 3.12)
 project(SoftwareRenderer)
 set (CMAKE_CXX_STANDARD 14)
 
-set(OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 if (WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIRECTORY})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIRECTORY})
     list(APPEND LIBS kernel32 user32 gdi32 winmm)
+    file(GLOB PLATFORM_SRC src/platform/windows/*)
 endif (WIN32)
 
 if (UNIX)
+    set(OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
     list(APPEND LIBS X11)
     file(GLOB PLATFORM_SRC src/platform/linux/*)

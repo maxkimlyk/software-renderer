@@ -4,9 +4,9 @@
 #include <windows.h>
 #include <string>
 
-#include "canvas.h"
-#include "renderer.h"
-#include "input.h"
+#include "../../renderer/canvas.h"
+#include "../../renderer/renderer.h"
+#include "../../renderer/input.h"
 
 static const char *WINDOW_CLASS_NAME = "rendererwindowclass";
 static const DWORD BPP = 32;
@@ -17,16 +17,16 @@ class Window
     HINSTANCE hInstance;
     HWND hWnd;
 
-    Renderer *renderer;
+    sr::Renderer *renderer;
     Input *input;
 
 public:
     bool closed;
 
-    Window(Renderer *renderer, Input *input)
+    Window(sr::Renderer *renderer /*, Input *input */)
     {
         this->renderer = renderer;
-        this->input = input;
+        // this->input = input;
     }
 
     int Create(size_t width, size_t height, const std::string &caption)
@@ -74,7 +74,7 @@ public:
 
     int MainLoopRoutine()
     {
-        MSG msg; 
+        MSG msg;
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT)
@@ -204,20 +204,20 @@ private:
             PostQuitMessage(0);
             return 0;
 
-        case WM_KEYDOWN:
-            thisptr->input->OnKeyDown(wParam);
-            return 0;
+        // case WM_KEYDOWN:
+        //     thisptr->input->OnKeyDown(wParam);
+        //     return 0;
 
-        case WM_KEYUP:
-            thisptr->input->OnKeyUp(wParam);
-            return 0;
+        // case WM_KEYUP:
+        //     thisptr->input->OnKeyUp(wParam);
+        //     return 0;
 
-        case WM_ACTIVATE:
-            if (HIWORD(wParam) == 0)
-                thisptr->input->OnFocus();
-            else
-                thisptr->input->OnFocusLost();
-            return 0;
+        // case WM_ACTIVATE:
+        //     if (HIWORD(wParam) == 0)
+        //         thisptr->input->OnFocus();
+        //     else
+        //         thisptr->input->OnFocusLost();
+        //     return 0;
         }
 
         return DefWindowProc(hWnd, uMsg, wParam, lParam);
