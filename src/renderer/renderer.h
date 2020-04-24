@@ -2,11 +2,14 @@
 #define _RENDERER_H_
 
 #include "canvas.h"
+#include "clipping.h"
 #include "rasterizer.h"
 #include "transforms.h"
-#include "clipping.h"
-#include "bmp.h"
+// #include "bmp.h"
 #include "shader.h"
+
+namespace sr
+{
 
 class Renderer
 {
@@ -26,12 +29,7 @@ class Renderer
 
         float invW = 1.0f / tmp.w;
         float invAbsW = cs.z < 0.0f ? invW : -invW;
-        Vec4f ndc = Vec4f {
-            tmp.x * invAbsW,
-            tmp.y * invAbsW,
-            tmp.z * invAbsW,
-            1.0f
-        };
+        Vec4f ndc = Vec4f{tmp.x * invAbsW, tmp.y * invAbsW, tmp.z * invAbsW, 1.0f};
 
         Vec4f screen4 = viewportMatrix * ndc;
         return Project<3, float>(screen4);
@@ -48,38 +46,44 @@ class Renderer
         viewportBox.zmax = z0 + depth;
     }
 
-public:
-    Image *canvas;
+  public:
+    Image* canvas;
 
     Mat4f viewMatrix;
     Mat4f projectionMatrix;
 
-    Shader &shader;
+    Shader& shader;
 
-    Renderer(Image *canvas):
-        zbuffer(canvas->width, canvas->height),
-        shader(DefaultShaders::flatShader)
+    Renderer(Image* canvas)
+        : zbuffer(canvas->width, canvas->height), shader(DefaultShaders::flatShader)
     {
         this->canvas = canvas;
         SetViewport(0.0, (float)(canvas->width), 0.0, (float)(canvas->height), 0.0, 255.0);
-        projectionMatrix = Projection::Perspective(45.0f, (float)(canvas->width) / (float)(canvas->height), 0.01f, 10.0f);
+        projectionMatrix = Projection::Perspective(
+            45.0f, (float)(canvas->width) / (float)(canvas->height), 0.01f, 10.0f);
         viewMatrix = Mat4f::Identity();
         UpdateMatrices();
     }
 
-    int SnapshotZBuffer(const char *file)
-    {
-        Bmp bmp(file);
-        return bmp.WriteFromCanvas(zbuffer);
-    }
+    // int SnapshotZBuffer(const char *file)
+    // {
+    //     Bmp bmp(file);
+    //     return bmp.WriteFromCanvas(zbuffer);
+    // }
 
     void UpdateMatrices()
     {
         viewProjMatrix = projectionMatrix * viewMatrix;
     }
 
-    size_t Width() { return canvas->width; }
-    size_t Height() { return canvas->height; }
+    size_t Width()
+    {
+        return canvas->width;
+    }
+    size_t Height()
+    {
+        return canvas->height;
+    }
 
     void Clear(Color color = Color(0))
     {
@@ -120,13 +124,16 @@ public:
 
         Vec3f clipped1, clipped2;
         if (Clipping::ClipLine(screen1, screen2, viewportBox, clipped1, clipped2))
-            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
+            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2),
+                             color);
 
         if (Clipping::ClipLine(screen2, screen3, viewportBox, clipped1, clipped2))
-            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
+            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2),
+                             color);
 
         if (Clipping::ClipLine(screen3, screen1, viewportBox, clipped1, clipped2))
-            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
+            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2),
+                             color);
     }
 
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
@@ -137,7 +144,8 @@ public:
         Vec3f screen2 = ProjectVertex(p2);
         Vec3f screen3 = ProjectVertex(p3);
 
-        Rasterizer::Triangle(*canvas, zbuffer, viewportBox.zmax, screen1, screen2, screen3, solidColorShader);
+        Rasterizer::Triangle(*canvas, zbuffer, viewportBox.zmax, screen1, screen2, screen3,
+                             solidColorShader);
     }
 
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3)
@@ -151,5 +159,7 @@ public:
         Rasterizer::Triangle(*canvas, zbuffer, viewportBox.zmax, screen1, screen2, screen3, shader);
     }
 };
+
+} // namespace sr
 
 #endif

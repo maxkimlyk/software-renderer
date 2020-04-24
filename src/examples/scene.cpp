@@ -1,6 +1,6 @@
-#include "../common/program.h"
-#include "../common/model.h"
-#include "../common/camera.h"
+#include "../renderer/program.h"
+#include "../renderer/model.h"
+#include "../renderer/camera.h"
 
 #include <cmath>
 
@@ -17,7 +17,7 @@ Vec3f lightDirection = Normalize(Vec3f {0, -0.2f, 3.0f});
 
 Camera camera;
 
-void Init(Renderer &renderer)
+void Init(sr::Renderer &renderer)
 {
     camera.LookAt(
         Vec3f {0.0f, 0.0f, 0.0f},
@@ -25,7 +25,7 @@ void Init(Renderer &renderer)
     );
 }
 
-void Process(Renderer &renderer, Input &input)
+void Process(sr::Renderer &renderer, Input &input)
 {
     const float walkDistance = 0.01f;
     const float rotateAngle = 0.05f;
@@ -38,20 +38,20 @@ void Process(Renderer &renderer, Input &input)
         camera.WalkRight(-walkDistance);
     if (input.IsDown('D'))
         camera.WalkRight(walkDistance);
-    if (input.IsDown(VK_LEFT))
-        camera.Yaw(rotateAngle);
-    if (input.IsDown(VK_RIGHT))
-        camera.Yaw(-rotateAngle);
-    if (input.IsDown(VK_UP))
-        camera.Pitch(rotateAngle);
-    if (input.IsDown(VK_DOWN))
-        camera.Pitch(-rotateAngle);
+    // if (input.IsDown(VK_LEFT))
+    //     camera.Yaw(rotateAngle);
+    // if (input.IsDown(VK_RIGHT))
+    //     camera.Yaw(-rotateAngle);
+    // if (input.IsDown(VK_UP))
+    //     camera.Pitch(rotateAngle);
+    // if (input.IsDown(VK_DOWN))
+    //     camera.Pitch(-rotateAngle);
 
     renderer.viewMatrix = camera.ViewMatrix();
     renderer.UpdateMatrices();
 }
 
-void Draw(Renderer &renderer)
+void Draw(sr::Renderer &renderer)
 {
     renderer.Clear();
     for (auto face = model.faces.begin(); face != model.faces.end(); ++face)
@@ -77,7 +77,7 @@ int main()
 
     model.Normalize();
 
-    Program program;
+    sr::Program program;
     program.InitCallback = Init;
     program.ProcessCallback = Process;
     program.DrawCallback = Draw;

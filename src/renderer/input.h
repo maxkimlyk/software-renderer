@@ -1,7 +1,7 @@
 #ifndef _INPUT_H_
 #define _INPUT_H_
 
-#include <windows.h>
+#include "../platform/platform_dependent.h"
 
 class Input
 {

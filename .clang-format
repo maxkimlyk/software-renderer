@@ -1,0 +1,21 @@
+BasedOnStyle: LLVM
+DerivePointerAlignment: false
+PointerAlignment: Left
+ColumnLimit: 100
+IndentWidth: 4
+AllowShortFunctionsOnASingleLine: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterEnum: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  SplitEmptyFunction: false
+

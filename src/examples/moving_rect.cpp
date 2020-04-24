@@ -1,4 +1,4 @@
-#include "../common/program.h"
+#include "../renderer/program.h"
 #include <cmath>
 
 const size_t WIDTH = 800;
@@ -14,7 +14,7 @@ int y = HEIGHT / 2;
 
 Color color(0);
 
-void Process(Renderer &renderer, Input &input)
+void Process(sr::Renderer &renderer, Input &input)
 {
     const float PI = 3.141592f;
     angle += PI / 100;
@@ -32,7 +32,7 @@ void Process(Renderer &renderer, Input &input)
     );
 }
 
-void Draw(Renderer &renderer)
+void Draw(sr::Renderer &renderer)
 {
     renderer.Clear();
     renderer.DrawSolidRect(x, y, x + rectWidth, y + rectHeight, color);
@@ -40,7 +40,7 @@ void Draw(Renderer &renderer)
 
 int main()
 {
-    Program program;
+    sr::Program program;
     program.ProcessCallback = Process;
     program.DrawCallback = Draw;
     return program.Run(WIDTH, HEIGHT, CAPTION);

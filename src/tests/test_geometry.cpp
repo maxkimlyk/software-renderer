@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
-#include "../common/geometry.h"
-#include "../common/transforms.h"
+#include "../renderer/geometry.h"
+#include "../renderer/transforms.h"
 
 TEST_CASE( "Vector", "[Vec]" )
 {

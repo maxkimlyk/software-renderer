@@ -1,5 +1,5 @@
-#ifndef _WINDOW_H_
-#define _WINDOW_H_
+#ifndef _WINDOWS_WINDOW_H_
+#define _WINDOWS_WINDOW_H_
 
 #include <windows.h>
 #include <string>
@@ -74,7 +74,7 @@ public:
 
     int MainLoopRoutine()
     {
-        MSG msg;
+        MSG msg; 
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT)

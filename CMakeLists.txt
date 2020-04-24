@@ -4,24 +4,34 @@ project(SoftwareRenderer)
 set (CMAKE_CXX_STANDARD 14)
 
 set(OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIRECTORY})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIRECTORY})
 
-file(GLOB COMMON_FILES src/common/*)
-add_library(renderer ${COMMON_FILES})
+if (WIN32)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIRECTORY})
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIRECTORY})
+    list(APPEND LIBS kernel32 user32 gdi32 winmm)
+endif (WIN32)
+
+if (UNIX)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+    list(APPEND LIBS X11)
+    file(GLOB PLATFORM_SRC src/platform/linux/*)
+endif (UNIX)
+
+file(GLOB RENDERER_SRC src/renderer/*)
+add_library(renderer ${RENDERER_SRC} ${PLATFORM_SRC})
 
 add_library(tgaimage src/external/tgaimage/tgaimage.cpp)
 
-list(APPEND LIBS
-    renderer kernel32 user32 gdi32 winmm tgaimage
-)
+list(APPEND LIBS renderer tgaimage)
+list(APPEND LIBS renderer)
 
-file(GLOB SAMPLES src/samples/*.cpp)
-foreach(SAMPLE ${SAMPLES})
-    get_filename_component(NAME ${SAMPLE} NAME_WE)
-    add_executable(${NAME} ${SAMPLE})
+file(GLOB EXAMPLES src/examples/*.cpp)
+
+foreach(EXAMPLE ${EXAMPLES})
+    get_filename_component(NAME ${EXAMPLE} NAME_WE)
+    add_executable(${NAME} ${EXAMPLE})
     target_link_libraries(${NAME} ${LIBS})
-endforeach(SAMPLE)
+endforeach(EXAMPLE)
 
 file(GLOB TESTS src/tests/*.cpp)
 foreach(TEST ${TESTS})

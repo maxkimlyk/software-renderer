@@ -1,4 +1,4 @@
-#include "../common/program.h"
+#include "../renderer/program.h"
 #include <cmath>
 #include <vector>
 
@@ -12,7 +12,7 @@ const float VARIANCE = 4.0f;
 float z = -5.0f;
 std::vector<Vec3f> points;
 
-void Init(Renderer &renderer)
+void Init(sr::Renderer &renderer)
 {
     const auto randf = []() { return (float)(rand()) / (float)(RAND_MAX) - 0.5f; };
 
@@ -25,7 +25,7 @@ void Init(Renderer &renderer)
     }
 }
 
-void Process(Renderer &renderer, Input &input)
+void Process(sr::Renderer &renderer, Input &input)
 {
     if (input.IsDown(0x26))
         z += 0.1f;
@@ -33,7 +33,7 @@ void Process(Renderer &renderer, Input &input)
         z -= 0.1f;
 }
 
-void Draw(Renderer &renderer)
+void Draw(sr::Renderer &renderer)
 {
     static const Color red(230, 0, 0);
     static const Color green(0, 230, 0);
@@ -66,7 +66,7 @@ void Draw(Renderer &renderer)
 
 int main()
 {
-    Program program;
+    sr::Program program;
     program.InitCallback = Init;
     program.ProcessCallback = Process;
     program.DrawCallback = Draw;

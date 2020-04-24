@@ -1,4 +1,4 @@
-#include "../common/program.h"
+#include "../renderer/program.h"
 #include <cmath>
 #include <list>
 
@@ -25,7 +25,7 @@ inline int randSize()
     return rand() % ELEMENT_SIZE_FACTOR - ELEMENT_SIZE_FACTOR / 2;
 }
 
-void Process(Renderer &renderer, Input &input)
+void Process(sr::Renderer &renderer, Input &input)
 {
     for (auto elem = Elements.begin(); elem != Elements.end();)
     {
@@ -45,7 +45,7 @@ void Process(Renderer &renderer, Input &input)
     if (Elements.size() < ELEMENTS_AMOUNT && rand() % CHANCE_FACTOR == 0)
     {
         Element newElem;
-        newElem.verts[0] = Vec2i {rand() % WIDTH, rand() % HEIGHT};
+        newElem.verts[0] = Vec2i {static_cast<int>(rand() % WIDTH), static_cast<int>(rand() % HEIGHT)};
         newElem.verts[1] = newElem.verts[0] + Vec2i {randSize(), randSize()};
         newElem.verts[2] = newElem.verts[0] + Vec2i {randSize(), randSize()};
         newElem.color = Color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
@@ -53,7 +53,7 @@ void Process(Renderer &renderer, Input &input)
     }
 }
 
-void Draw(Renderer &renderer)
+void Draw(sr::Renderer &renderer)
 {
     renderer.Clear();
     for (auto elem = Elements.begin(); elem != Elements.end(); ++elem)
@@ -62,7 +62,7 @@ void Draw(Renderer &renderer)
 
 int main()
 {
-    Program program;
+    sr::Program program;
     program.ProcessCallback = Process;
     program.DrawCallback = Draw;
     return program.Run(WIDTH, HEIGHT, CAPTION);

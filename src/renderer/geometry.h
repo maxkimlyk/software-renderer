@@ -74,22 +74,24 @@ struct Vec_<4, T>
 template <size_t n, class T>
 struct Vec : Vec_<n, T>
 {
+    using base = Vec_<n, T>;
+
     Vec() {}
     Vec(std::initializer_list<T> list)
     {
         size_t i = 0;
         for (auto elem = list.begin(); elem != list.end(); ++i, ++elem)
-            v[i] = *elem;
+            base::v[i] = *elem;
     }
 
     T& operator[] (size_t index)
     {
-        return v[index];
+        return base::v[index];
     }
 
     const T& operator[] (size_t index) const
     {
-        return v[index];
+        return base::v[index];
     }
 
     template <class T2>
@@ -97,14 +99,14 @@ struct Vec : Vec_<n, T>
     {
         Vec<n, T2> other;
         for (size_t i = 0; i < n; ++i)
-            other[i] = (T2)(v[i]);
+            other[i] = (T2)(base::v[i]);
         return other;
     }
 
     void Fill(T val)
     {
         for (size_t i = 0; i < n; ++i)
-            v[i] = val;
+            base::v[i] = val;
     }
 
     T Norm()

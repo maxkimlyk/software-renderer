@@ -1,8 +1,10 @@
 #ifndef _CANVAS_H_
 #define _CANVAS_H_
 
-#include "utils.h"
+#include <string.h>
+
 #include "../external/tgaimage/tgaimage.h"
+#include "utils.h"
 
 union Color
 {
@@ -15,7 +17,8 @@ union Color
     };
     uint32_t value;
 
-    Color() {}
+    Color()
+    {}
 
     Color(uint8_t r, uint8_t g, uint8_t b)
     {
@@ -36,29 +39,29 @@ union Color
     }
 };
 
-template <class T>
-class Canvas
+template <class T> class Canvas
 {
-    T *ptr;
+    T* ptr;
 
-public:
+    size_t GetPitchedStride(size_t pitch) const
+    {
+        return (width + (pitch - 1)) / pitch * pitch;
+    }
+
+  public:
     size_t width;
     size_t height;
 
-    Canvas():
-        width(0), height(0), ptr(nullptr)
-    {
-    }
+    Canvas() : width(0), height(0), ptr(nullptr)
+    {}
 
-    Canvas(size_t width, size_t height):
-        width(width), height(height), ptr(new T [width * height])
-    {
-    }
+    Canvas(size_t width, size_t height) : width(width), height(height), ptr(new T[width * height])
+    {}
 
     ~Canvas()
     {
         if (ptr != nullptr)
-            delete [] ptr;
+            delete[] ptr;
     }
 
     T& At(size_t x, size_t y)
@@ -100,34 +103,37 @@ public:
             At(x, y) = value;
     }
 
-    void CopyTo(uint32_t *dstptr, size_t size)
+    void CopyTo(uint32_t* dstptr, size_t size) const
     {
-        if (!dstptr)
-        {
-            WARNING("Canvas::CopyTo gets null dstptr\n");
-            return;
-        }
-
-        if (size < sizeof(uint32_t) * width * height)
-        {
-            WARNING("Canvas::CopyTo gets invalid size\n");
-            return;
-        }
-
         memcpy(dstptr, ptr, sizeof(T) * width * height);
+    }
+
+    void CopyPitched(uint32_t* dstptr, size_t pitch) const
+    {
+        const size_t stride = GetPitchedStride(pitch);
+        for (size_t i = 0; i < height; ++i)
+        {
+            memcpy(dstptr + i * stride, ptr + i * width, sizeof(T) * width);
+        }
+    }
+
+    size_t GetPitchedSize(size_t pitch) const
+    {
+        const size_t stride = GetPitchedStride(pitch);
+        return stride * height * sizeof(T);
     }
 
     void Reserve(size_t width, size_t height)
     {
         if (ptr != nullptr)
-            delete [] ptr;
+            delete[] ptr;
 
-        ptr = new T [width * height];
+        ptr = new T[width * height];
     }
 };
 
 typedef Canvas<uint32_t> Image;
 
-int LoadTGA(const char *path, Image &result);
+int LoadTGA(const char* path, Image& result);
 
 #endif

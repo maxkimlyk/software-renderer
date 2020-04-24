@@ -1,6 +1,6 @@
-#include "../common/program.h"
-#include "../common/model.h"
-#include "../common/camera.h"
+#include "../renderer/program.h"
+#include "../renderer/model.h"
+#include "../renderer/camera.h"
 #include <cmath>
 #include <list>
 
@@ -17,11 +17,11 @@ float angle = 0.0f;
 float angleSpeed = 0.01f;
 const float maxViewpoint = 3.0f;
 
-void Init(Renderer &renderer)
+void Init(sr::Renderer &renderer)
 {
 }
 
-void Process(Renderer &renderer, Input &input)
+void Process(sr::Renderer &renderer, Input &input)
 {
     static const float PI = 3.14159265f;
     angle += angleSpeed;
@@ -29,7 +29,7 @@ void Process(Renderer &renderer, Input &input)
         angle -= 2 * PI;
 }
 
-void Draw(Renderer &renderer)
+void Draw(sr::Renderer &renderer)
 {
     static Camera camera;
 
@@ -63,7 +63,7 @@ int main()
 
     model.Normalize();
 
-    Program program;
+    sr::Program program;
     program.InitCallback = Init;
     program.ProcessCallback = Process;
     program.DrawCallback = Draw;

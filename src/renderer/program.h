@@ -3,27 +3,32 @@
 
 #include <sstream>
 
-#include "window.h"
+#include "../platform/platform_dependent.h"
 #include "renderer.h"
+#include "input.h"
+#include "window.h"
+
+namespace sr
+{
 
 class Program
 {
-    Window *window;
-    Canvas<uint32_t> *canvas;
+    Window* window;
+    Canvas<uint32_t>* canvas;
 
     std::string windowCaption;
 
     bool isRunning;
 
-public:
-    Renderer *renderer;
-    Input *input;
+  public:
+    Renderer* renderer;
+    Input* input;
 
-    void (*InitCallback)(Renderer &renderer);
-    void (*ProcessCallback)(Renderer &renderer, Input &input);
-    void (*DrawCallback)(Renderer &renderer);
+    void (*InitCallback)(Renderer& renderer);
+    void (*ProcessCallback)(Renderer& renderer, Input& input);
+    void (*DrawCallback)(Renderer& renderer);
 
-    DWORD processTimeout = 20;
+    uint32_t processInterval = 20;
 
     Program()
     {
@@ -40,12 +45,13 @@ public:
         DELETE(window);
     }
 
-    int Run(size_t windowWidth, size_t windowHeight, const std::string &windowCaption)
+    int Run(size_t windowWidth, size_t windowHeight, const std::string& windowCaption)
     {
         canvas = new Canvas<uint32_t>(windowWidth, windowHeight);
         renderer = new Renderer(canvas);
         input = new Input();
-        window = new Window(renderer, input);
+        // window = new Window(renderer, input);
+        window = new Window(renderer);
 
         int status = window->Create(windowWidth, windowHeight, windowCaption);
         if (status != 0)
@@ -62,15 +68,15 @@ public:
         return MainLoop();
     }
 
-private:
+  private:
     int MainLoop()
     {
         isRunning = true;
 
-        DWORD secBeginTime = timeGetTime();
+        uint32_t secBeginTime = GetTimeMs();
         uint32_t fpsCount = 0;
 
-        DWORD lastProcessTime = secBeginTime;
+        uint32_t lastProcessTime = secBeginTime;
 
         while (isRunning)
         {
@@ -85,18 +91,18 @@ private:
             fpsCount += 1;
 
             bool updated = false;
-            DWORD timeNow = timeGetTime();
-            while (timeNow - lastProcessTime >= processTimeout)
+            uint32_t timeNow = GetTimeMs();
+            while (timeNow - lastProcessTime >= processInterval)
             {
                 ProcessCallback(*renderer, *input);
                 updated = true;
-                lastProcessTime += processTimeout;
+                lastProcessTime += processInterval;
             }
 
             if (updated)
                 DrawCallback(*renderer);
 
-            if (timeGetTime() - secBeginTime >= 1000)
+            if (GetTimeMs() - secBeginTime >= 1000)
             {
                 std::ostringstream oss;
                 oss << windowCaption << " (FPS: " << fpsCount << ")";
@@ -109,5 +115,7 @@ private:
         return 0;
     }
 };
+
+} // namespace sr
 
 #endif

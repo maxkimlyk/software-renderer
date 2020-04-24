@@ -1,4 +1,4 @@
-#include "../common/model.h"
+#include "../renderer/model.h"
 
 int main()
 {

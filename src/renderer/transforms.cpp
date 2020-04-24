@@ -1,7 +1,4 @@
-#ifndef _TRANSFORMS_H_
-#define _TRANSFORMS_H_
-
-#include "geometry.h"
+#include "transforms.h"
 
 namespace Transform
 {
@@ -15,7 +12,6 @@ namespace Transform
         };
     }
 
-    template <size_t n = 4>
     Mat4f RotateY(float angle)
     {
         return Mat4f {
@@ -125,7 +121,7 @@ namespace Projection
         return Frustum(-xmax, xmax, -ymax, ymax, znear, zfar);
     }
 
-    Mat4f Viewport(float x0, float width, float y0, float height, float z0 = 0, float depth = 255)
+    Mat4f Viewport(float x0, float width, float y0, float height, float z0, float depth)
     {
         Mat4f mat = Mat4f::Identity();
         mat[0][0] = width / 2;
@@ -137,5 +133,3 @@ namespace Projection
         return mat;
     }
 };
-
-#endif
