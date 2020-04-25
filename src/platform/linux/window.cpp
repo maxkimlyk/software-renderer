@@ -4,75 +4,70 @@
 
 #include <X11/Xlib.h>
 
-#include "../../renderer/renderer.h"
-
 namespace
 {
 const size_t BYTES_PER_PIXEL = 3;
 const size_t PITCH = 8;
+const size_t WINDOW_BORDER_WIDTH = 5;
 } // namespace
 
 namespace sr
 {
 
-Window::Window(Renderer* renderer)
-{
-    this->renderer = renderer;
-}
+Window::Window(GetFrameFunc get_frame) : get_frame_(get_frame)
+{}
 
 int Window::Create(size_t width, size_t height, const std::string& caption)
 {
-    static const int border_width = 5;
-
-    this->width = width;
-    this->height = height;
-
-    display = XOpenDisplay(NULL);
-    visual = DefaultVisual(display, 0);
-    const int depth = DefaultDepth(display, 0);
+    display_ = XOpenDisplay(NULL);
+    visual_ = DefaultVisual(display_, 0);
+    const int depth = DefaultDepth(display_, 0);
 
     XSetWindowAttributes attributes;
-    attributes.background_pixel = XBlackPixel(display, 0);
+    attributes.background_pixel = XBlackPixel(display_, 0);
 
-    window = XCreateWindow(display, XRootWindow(display, 0), 0, 0, width, height, border_width,
-                           depth, InputOutput, visual, CWBackPixel, &attributes);
+    window_ =
+        XCreateWindow(display_, XRootWindow(display_, 0), 0, 0, width, height, WINDOW_BORDER_WIDTH,
+                      depth, InputOutput, visual_, CWBackPixel, &attributes);
 
     SetCaption(caption);
 
-    XSelectInput(display, window, ExposureMask | StructureNotifyMask);
+    XSelectInput(display_, window_, ExposureMask | StructureNotifyMask);
 
-    const int screen_num = DefaultScreen(display);
-    gc = DefaultGC(display, screen_num);
+    const int screen_num = DefaultScreen(display_);
+    gc_ = DefaultGC(display_, screen_num);
 
-    XMapWindow(display, window);
+    CreateImageBuffer(width, height);
+
+    XMapWindow(display_, window_);
 
     return 0;
 }
 
+void Window::CreateImageBuffer(size_t width, size_t height)
+{
+    width_ = width;
+    height_ = height;
+    stride_ = (width + PITCH - 1) / PITCH * PITCH;
+    const size_t size = stride_ * height * sizeof(uint32_t);
+    image_buffer_ = std::unique_ptr<uint8_t[]>(new uint8_t[size]);
+}
+
 void Window::SetCaption(const std::string& string)
 {
-    XStoreName(display, window, string.c_str());
+    XStoreName(display_, window_, string.c_str());
 }
 
 void Window::HandleExpose()
 {
-    // TODO: make this function better
-    static std::unique_ptr<uint8_t[]> image_buffer = nullptr;
+    const int screen_num = DefaultScreen(display_);
 
-    Canvas<uint32_t>* canvas = renderer->canvas;
+    Canvas<uint32_t>& frame = get_frame_();
 
-    if (!image_buffer)
-    {
-        const size_t size = canvas->GetPitchedSize(PITCH);
-        image_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[size]);
-    }
-
-    const int screen_num = DefaultScreen(display);
-
-    canvas->CopyPitched((uint32_t*)(image_buffer.get()), PITCH);
-    XImage* img = XCreateImage(display, visual, 8 * BYTES_PER_PIXEL, ZPixmap, 0,
-                               (char*)(image_buffer.get()), width, height, PITCH, 0);
-    XPutImage(display, window, DefaultGC(display, screen_num), img, 0, 0, 0, 0, width, height);
+    frame.CopyWithStride((uint32_t*)(image_buffer_.get()), stride_);
+    XImage* img = XCreateImage(display_, visual_, 8 * BYTES_PER_PIXEL, ZPixmap, 0,
+                               (char*)(image_buffer_.get()), width_, height_, PITCH, 0);
+    XPutImage(display_, window_, DefaultGC(display_, screen_num), img, 0, 0, 0, 0, width_, height_);
     XFree(img);
 }
 
@@ -82,7 +77,7 @@ void Window::MainLoopRoutine()
     {
         XEvent event;
         bool is_new_event =
-            XCheckWindowEvent(display, window, ExposureMask | StructureNotifyMask, &event);
+            XCheckWindowEvent(display_, window_, ExposureMask | StructureNotifyMask, &event);
         if (!is_new_event)
             return;
 
@@ -101,7 +96,7 @@ void Window::Redraw()
 {
     XEvent event;
     event.type = Expose;
-    XSendEvent(display, window, False, ExposureMask, &event);
+    XSendEvent(display_, window_, False, ExposureMask, &event);
 }
 
 } // namespace sr

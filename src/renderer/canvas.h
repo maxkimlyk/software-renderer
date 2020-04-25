@@ -43,11 +43,6 @@ template <class T> class Canvas
 {
     T* ptr;
 
-    size_t GetPitchedStride(size_t pitch) const
-    {
-        return (width + (pitch - 1)) / pitch * pitch;
-    }
-
   public:
     size_t width;
     size_t height;
@@ -108,19 +103,12 @@ template <class T> class Canvas
         memcpy(dstptr, ptr, sizeof(T) * width * height);
     }
 
-    void CopyPitched(uint32_t* dstptr, size_t pitch) const
+    void CopyWithStride(uint32_t* dstptr, size_t stride) const
     {
-        const size_t stride = GetPitchedStride(pitch);
         for (size_t i = 0; i < height; ++i)
         {
             memcpy(dstptr + i * stride, ptr + i * width, sizeof(T) * width);
         }
-    }
-
-    size_t GetPitchedSize(size_t pitch) const
-    {
-        const size_t stride = GetPitchedStride(pitch);
-        return stride * height * sizeof(T);
     }
 
     void Reserve(size_t width, size_t height)

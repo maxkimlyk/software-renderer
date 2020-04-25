@@ -51,7 +51,9 @@ class Program
         renderer = new Renderer(canvas);
         input = new Input();
         // window = new Window(renderer, input);
-        window = new Window(renderer);
+
+        const auto get_frame = [this]() -> Canvas<uint32_t>& { return *renderer->canvas; };
+        window = new Window(get_frame);
 
         int status = window->Create(windowWidth, windowHeight, windowCaption);
         if (status != 0)
