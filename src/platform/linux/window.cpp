@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 namespace
 {
@@ -41,6 +42,8 @@ int Window::Create(size_t width, size_t height, const std::string& caption)
 
     XMapWindow(display_, window_);
 
+    PreventResizing();
+
     return 0;
 }
 
@@ -53,12 +56,23 @@ void Window::CreateImageBuffer(size_t width, size_t height)
     image_buffer_ = std::unique_ptr<uint8_t[]>(new uint8_t[size]);
 }
 
+void Window::PreventResizing() const
+{
+    XSizeHints* sh = XAllocSizeHints();
+    sh->flags =  PMinSize | PMaxSize;
+    sh->min_width = width_;
+    sh->min_height = height_;
+    sh->max_width = width_;
+    sh->max_height = height_;
+    XSetWMNormalHints(display_, window_, sh);
+}
+
 void Window::SetCaption(const std::string& string)
 {
     XStoreName(display_, window_, string.c_str());
 }
 
-void Window::HandleExpose()
+void Window::HandleExpose() const
 {
     const int screen_num = DefaultScreen(display_);
 

@@ -27,8 +27,9 @@ class Window
     bool closed = false; // TODO
 
   private:
-    void HandleExpose();
+    void HandleExpose() const ;
     void CreateImageBuffer(size_t width, size_t height);
+    void PreventResizing() const;
 
     ::Display* display_;
     ::Visual* visual_;
