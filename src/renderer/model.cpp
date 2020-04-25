@@ -23,7 +23,7 @@ void Model::Normalize()
             face->v[i].coord = face->v[i].coord * invMaxNorm;
 }
 
-std::vector<std::string> ObjReader::Split(std::string &string)
+std::vector<std::string> ObjReader::Split(std::string& string)
 {
     auto pred = [](char ch) {
         return ch == ' ' || ch == '\\' || ch == '/' || ch == '\t' || ch == '\r';
@@ -46,18 +46,17 @@ std::vector<std::string> ObjReader::Split(std::string &string)
     return parts;
 }
 
-template <class T>
-bool ObjReader::TryParse(std::string &str, T &res)
+template <class T> bool ObjReader::TryParse(std::string& str, T& res)
 {
     std::istringstream stream(str);
     return bool(stream >> res);
 }
 
-template bool ObjReader::TryParse<uint32_t>(std::string &str, uint32_t &res);
-template bool ObjReader::TryParse<float>(std::string &str, float &res);
+template bool ObjReader::TryParse<uint32_t>(std::string& str, uint32_t& res);
+template bool ObjReader::TryParse<float>(std::string& str, float& res);
 
 template <size_t n, class T>
-Vec<n, T> ObjReader::Eject(std::vector<Vec<n, T>> &vector, size_t index)
+Vec<n, T> ObjReader::Eject(std::vector<Vec<n, T>>& vector, size_t index)
 {
     if (index == undefined)
     {
@@ -65,50 +64,50 @@ Vec<n, T> ObjReader::Eject(std::vector<Vec<n, T>> &vector, size_t index)
         res.Fill((T)(0));
         return res;
     }
-    return vector[index-1];
+    return vector[index - 1];
 }
 
-template Vec3f ObjReader::Eject(std::vector<Vec3f> &vector, size_t index);
-template Vec2f ObjReader::Eject(std::vector<Vec2f> &vector, size_t index);
-template Vec3i ObjReader::Eject(std::vector<Vec3i> &vector, size_t index);
-template Vec2i ObjReader::Eject(std::vector<Vec2i> &vector, size_t index);
+template Vec3f ObjReader::Eject(std::vector<Vec3f>& vector, size_t index);
+template Vec2f ObjReader::Eject(std::vector<Vec2f>& vector, size_t index);
+template Vec3i ObjReader::Eject(std::vector<Vec3i>& vector, size_t index);
+template Vec2i ObjReader::Eject(std::vector<Vec2i>& vector, size_t index);
 
-int ObjReader::ParseVLine(std::vector<std::string> &tokens)
+int ObjReader::ParseVLine(std::vector<std::string>& tokens)
 {
     if (tokens.size() != 4)
         return -1;
 
     Vec3f coord;
     for (size_t i = 0; i < 3; ++i)
-        if (!TryParse<float>(tokens[1+i], coord[i]))
+        if (!TryParse<float>(tokens[1 + i], coord[i]))
             return -1;
 
     verts.push_back(coord);
     return 0;
 }
 
-int ObjReader::ParseVtLine(std::vector<std::string> &tokens)
+int ObjReader::ParseVtLine(std::vector<std::string>& tokens)
 {
     if (tokens.size() != 3 && tokens.size() != 4)
         return -1;
 
     Vec2f tex;
     for (size_t i = 0; i < 2; ++i)
-        if (!TryParse<float>(tokens[1+i], tex[i]))
+        if (!TryParse<float>(tokens[1 + i], tex[i]))
             return -1;
 
     texs.push_back(tex);
     return 0;
 }
 
-int ObjReader::ParseVnLine(std::vector<std::string> &tokens)
+int ObjReader::ParseVnLine(std::vector<std::string>& tokens)
 {
     if (tokens.size() != 4)
         return -1;
 
     Vec3f norm;
     for (size_t i = 0; i < 3; ++i)
-        if (!TryParse<float>(tokens[1+i], norm[i]))
+        if (!TryParse<float>(tokens[1 + i], norm[i]))
             return -1;
 
     norms.push_back(norm);
@@ -122,59 +121,47 @@ inline Vec3f BuildNormal(Vec3f v1, Vec3f v2, Vec3f v3)
     return Normalize(Cross(d1, d2));
 }
 
-int ObjReader::ParseFLine(std::string &line, std::vector<std::string> &tokens, Model &model)
+int ObjReader::ParseFLine(std::string& line, std::vector<std::string>& tokens, Model& model)
 {
     uint32_t v1 = undefined, t1 = undefined, n1 = undefined;
     uint32_t v2 = undefined, t2 = undefined, n2 = undefined;
     uint32_t v3 = undefined, t3 = undefined, n3 = undefined;
 
     std::regex pattern1("\\s*f\\s+\\d+\\/\\d+\\s+\\d+\\/\\d+\\s+\\d+\\/\\d+\\s*");
-    std::regex pattern2("\\s*f\\s+\\d+\\/\\d+\\/\\d+\\s+\\d+\\/\\d+\\/\\d+\\s+\\d+\\/\\d+\\/\\d+\\s*");
+    std::regex pattern2(
+        "\\s*f\\s+\\d+\\/\\d+\\/\\d+\\s+\\d+\\/\\d+\\/\\d+\\s+\\d+\\/\\d+\\/\\d+\\s*");
     std::regex pattern3("\\s*f\\s+\\d+\\/\\/\\d+\\s+\\d+\\/\\/\\d+\\s+\\d+\\/\\/\\d+\\s*");
 
     if (regex_match(line, pattern1) && tokens.size() == 7)
     {
-        if (!TryParse<uint32_t>(tokens[1], v1) ||
-            !TryParse<uint32_t>(tokens[2], t1) ||
-            !TryParse<uint32_t>(tokens[3], v2) ||
-            !TryParse<uint32_t>(tokens[4], t2) ||
-            !TryParse<uint32_t>(tokens[5], v3) ||
-            !TryParse<uint32_t>(tokens[6], t3))
+        if (!TryParse<uint32_t>(tokens[1], v1) || !TryParse<uint32_t>(tokens[2], t1) ||
+            !TryParse<uint32_t>(tokens[3], v2) || !TryParse<uint32_t>(tokens[4], t2) ||
+            !TryParse<uint32_t>(tokens[5], v3) || !TryParse<uint32_t>(tokens[6], t3))
             return -1;
     }
     else if (regex_match(line, pattern2) && tokens.size() == 10)
     {
-        if (!TryParse<uint32_t>(tokens[1], v1) ||
-            !TryParse<uint32_t>(tokens[2], t1) ||
-            !TryParse<uint32_t>(tokens[3], n1) ||
-            !TryParse<uint32_t>(tokens[4], v2) ||
-            !TryParse<uint32_t>(tokens[5], t2) ||
-            !TryParse<uint32_t>(tokens[6], n2) ||
-            !TryParse<uint32_t>(tokens[7], v3) ||
-            !TryParse<uint32_t>(tokens[8], t3) ||
+        if (!TryParse<uint32_t>(tokens[1], v1) || !TryParse<uint32_t>(tokens[2], t1) ||
+            !TryParse<uint32_t>(tokens[3], n1) || !TryParse<uint32_t>(tokens[4], v2) ||
+            !TryParse<uint32_t>(tokens[5], t2) || !TryParse<uint32_t>(tokens[6], n2) ||
+            !TryParse<uint32_t>(tokens[7], v3) || !TryParse<uint32_t>(tokens[8], t3) ||
             !TryParse<uint32_t>(tokens[9], n3))
             return -1;
     }
     else if (regex_match(line, pattern3) && tokens.size() == 7)
     {
-        if (!TryParse<uint32_t>(tokens[1], v1) ||
-            !TryParse<uint32_t>(tokens[2], n1) ||
-            !TryParse<uint32_t>(tokens[3], v2) ||
-            !TryParse<uint32_t>(tokens[4], n2) ||
-            !TryParse<uint32_t>(tokens[5], v3) ||
-            !TryParse<uint32_t>(tokens[6], n3))
+        if (!TryParse<uint32_t>(tokens[1], v1) || !TryParse<uint32_t>(tokens[2], n1) ||
+            !TryParse<uint32_t>(tokens[3], v2) || !TryParse<uint32_t>(tokens[4], n2) ||
+            !TryParse<uint32_t>(tokens[5], v3) || !TryParse<uint32_t>(tokens[6], n3))
             return -1;
     }
     else
         return -1;
 
-    if ((v1-1) >= verts.size() || (v2-1) >= verts.size() || (v3-1) >= verts.size() ||
-        t1 != undefined && (t1-1) >= texs.size() ||
-        t2 != undefined && (t2-1) >= texs.size() ||
-        t3 != undefined && (t3-1) >= texs.size() ||
-        n1 != undefined && (n1-1) >= norms.size() ||
-        n2 != undefined && (n2-1) >= norms.size() ||
-        n3 != undefined && (n3-1) >= norms.size())
+    if ((v1 - 1) >= verts.size() || (v2 - 1) >= verts.size() || (v3 - 1) >= verts.size() ||
+        t1 != undefined && (t1 - 1) >= texs.size() || t2 != undefined && (t2 - 1) >= texs.size() ||
+        t3 != undefined && (t3 - 1) >= texs.size() || n1 != undefined && (n1 - 1) >= norms.size() ||
+        n2 != undefined && (n2 - 1) >= norms.size() || n3 != undefined && (n3 - 1) >= norms.size())
         return -2;
 
     Face face;
@@ -204,7 +191,7 @@ int ObjReader::ParseFLine(std::string &line, std::vector<std::string> &tokens, M
     return 0;
 }
 
-int ObjReader::ParseLine(std::string &line, Model &model)
+int ObjReader::ParseLine(std::string& line, Model& model)
 {
     std::vector<std::string> tokens = Split(line);
     if (tokens.empty())
@@ -229,7 +216,7 @@ void ObjReader::Clear()
     texs.clear();
 }
 
-int ObjReader::ReadModel(const char *filename, Model &model)
+int ObjReader::ReadModel(const char* filename, Model& model)
 {
     std::ifstream file(filename);
     if (!file.is_open())
@@ -253,7 +240,8 @@ int ObjReader::ReadModel(const char *filename, Model &model)
         }
         else if (status == -2)
         {
-            ERROR("Model is corrupted. Line %d has invalid indexes: %s\n", lineNumber, line.c_str());
+            ERROR("Model is corrupted. Line %d has invalid indexes: %s\n", lineNumber,
+                  line.c_str());
             break;
         }
         ++lineNumber;

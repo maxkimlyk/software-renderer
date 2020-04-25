@@ -7,8 +7,7 @@
 
 template <size_t n, class T> struct Mat;
 
-template <class T>
-struct Rect
+template <class T> struct Rect
 {
     T left;
     T right;
@@ -20,8 +19,7 @@ typedef Rect<float> Rectf;
 typedef Rect<double> Rectd;
 typedef Rect<int> Recti;
 
-template <class T>
-struct Box
+template <class T> struct Box
 {
     T xmin;
     T xmax;
@@ -35,48 +33,53 @@ typedef Box<float> Boxf;
 typedef Box<double> Boxd;
 typedef Box<int> Boxi;
 
-template <size_t n, class T>
-struct Vec_
+template <size_t n, class T> struct Vec_
 {
     T v[n];
 };
 
-template <class T>
-struct Vec_<2, T>
+template <class T> struct Vec_<2, T>
 {
     union
     {
         T v[2];
-        struct { T x, y; };
+        struct
+        {
+            T x, y;
+        };
     };
 };
 
-template <class T>
-struct Vec_<3, T>
+template <class T> struct Vec_<3, T>
 {
     union
     {
         T v[3];
-        struct { T x, y, z; };
+        struct
+        {
+            T x, y, z;
+        };
     };
 };
 
-template <class T>
-struct Vec_<4, T>
+template <class T> struct Vec_<4, T>
 {
     union
     {
         T v[4];
-        struct { T x, y, z, w; };
+        struct
+        {
+            T x, y, z, w;
+        };
     };
 };
 
-template <size_t n, class T>
-struct Vec : Vec_<n, T>
+template <size_t n, class T> struct Vec : Vec_<n, T>
 {
     using base = Vec_<n, T>;
 
-    Vec() {}
+    Vec()
+    {}
     Vec(std::initializer_list<T> list)
     {
         size_t i = 0;
@@ -84,18 +87,17 @@ struct Vec : Vec_<n, T>
             base::v[i] = *elem;
     }
 
-    T& operator[] (size_t index)
+    T& operator[](size_t index)
     {
         return base::v[index];
     }
 
-    const T& operator[] (size_t index) const
+    const T& operator[](size_t index) const
     {
         return base::v[index];
     }
 
-    template <class T2>
-    operator Vec<n, T2> ()
+    template <class T2> operator Vec<n, T2>()
     {
         Vec<n, T2> other;
         for (size_t i = 0; i < n; ++i)
@@ -111,12 +113,11 @@ struct Vec : Vec_<n, T>
 
     T Norm()
     {
-        return std::sqrt( (*this) * (*this) );
+        return std::sqrt((*this) * (*this));
     }
 };
 
-template <size_t n, class T>
-T operator* (const Vec<n, T> &lhs, const Vec<n, T> &rhs)
+template <size_t n, class T> T operator*(const Vec<n, T>& lhs, const Vec<n, T>& rhs)
 {
     T sum = 0;
     for (size_t i = 0; i < n; ++i)
@@ -124,45 +125,39 @@ T operator* (const Vec<n, T> &lhs, const Vec<n, T> &rhs)
     return sum;
 }
 
-template <size_t n, class T>
-Vec<n, T> operator* (Vec<n, T> lhs, T rhs)
+template <size_t n, class T> Vec<n, T> operator*(Vec<n, T> lhs, T rhs)
 {
     for (size_t i = 0; i < n; ++i)
         lhs[i] *= rhs;
     return lhs;
 }
 
-template <size_t n, class T>
-Vec<n, T> operator* (T lhs, const Vec<n, T> &rhs)
+template <size_t n, class T> Vec<n, T> operator*(T lhs, const Vec<n, T>& rhs)
 {
     return rhs * lhs;
 }
 
-template <size_t n, class T>
-Vec<n, T> operator/ (const Vec<n, T> &lhs, T rhs)
+template <size_t n, class T> Vec<n, T> operator/(const Vec<n, T>& lhs, T rhs)
 {
     T inv = T(1) / rhs;
     return lhs * inv;
 }
 
-template <size_t n, class T>
-Vec<n, T> operator+ (Vec<n, T> lhs, const Vec<n, T> &rhs)
+template <size_t n, class T> Vec<n, T> operator+(Vec<n, T> lhs, const Vec<n, T>& rhs)
 {
     for (size_t i = 0; i < n; ++i)
         lhs[i] += rhs[i];
     return lhs;
 }
 
-template <size_t n, class T>
-Vec<n, T> operator- (Vec<n, T> lhs, const Vec<n, T> &rhs)
+template <size_t n, class T> Vec<n, T> operator-(Vec<n, T> lhs, const Vec<n, T>& rhs)
 {
     for (size_t i = 0; i < n; ++i)
         lhs[i] -= rhs[i];
     return lhs;
 }
 
-template <size_t n, class T>
-bool operator== (const Vec<n, T> &lhs,  const Vec<n, T> &rhs)
+template <size_t n, class T> bool operator==(const Vec<n, T>& lhs, const Vec<n, T>& rhs)
 {
     for (size_t i = 0; i < n; ++i)
         if (lhs[i] != rhs[i])
@@ -170,8 +165,7 @@ bool operator== (const Vec<n, T> &lhs,  const Vec<n, T> &rhs)
     return true;
 }
 
-template <size_t n, class T>
-Vec<n, T> Normalize(Vec<n, T> vec)
+template <size_t n, class T> Vec<n, T> Normalize(Vec<n, T> vec)
 {
     T norm = vec.Norm();
     if (norm != 0)
@@ -180,28 +174,22 @@ Vec<n, T> Normalize(Vec<n, T> vec)
         return vec;
 }
 
-template <class T>
-Vec<3, T> Cross(const Vec<3, T> &lhs, const Vec<3, T> &rhs)
+template <class T> Vec<3, T> Cross(const Vec<3, T>& lhs, const Vec<3, T>& rhs)
 {
-    return Vec<3, T> {
-        lhs[1] * rhs[2] - lhs[2] * rhs[1],
-        lhs[2] * rhs[0] - lhs[0] * rhs[2],
-        lhs[0] * rhs[1] - lhs[1] * rhs[0]
-    };
+    return Vec<3, T>{lhs[1] * rhs[2] - lhs[2] * rhs[1], lhs[2] * rhs[0] - lhs[0] * rhs[2],
+                     lhs[0] * rhs[1] - lhs[1] * rhs[0]};
 }
 
-template <size_t n, class T>
-Vec<n, T> Embed(const Vec<n-1, T> &vec, T value = 1)
+template <size_t n, class T> Vec<n, T> Embed(const Vec<n - 1, T>& vec, T value = 1)
 {
     Vec<n, T> newVec;
-    for (size_t i = 0; i < n-1; ++i)
+    for (size_t i = 0; i < n - 1; ++i)
         newVec[i] = vec[i];
-    newVec[n-1] = value;
+    newVec[n - 1] = value;
     return newVec;
 }
 
-template <size_t n, class T>
-Vec<n, T> Project(const Vec<n+1, T> &vec)
+template <size_t n, class T> Vec<n, T> Project(const Vec<n + 1, T>& vec)
 {
     Vec<n, T> newVec;
     for (size_t i = 0; i < n; ++i)
@@ -209,13 +197,12 @@ Vec<n, T> Project(const Vec<n+1, T> &vec)
     return newVec;
 }
 
-template <size_t n, class T>
-std::ostream& operator<< (std::ostream &os, const Vec<n, T> &rhs)
+template <size_t n, class T> std::ostream& operator<<(std::ostream& os, const Vec<n, T>& rhs)
 {
     os << "(";
-    for (size_t i = 0; i < n-1; ++i)
+    for (size_t i = 0; i < n - 1; ++i)
         os << rhs[i] << ", ";
-    os << rhs[n-1] << ")";
+    os << rhs[n - 1] << ")";
     return os;
 }
 
@@ -229,16 +216,16 @@ typedef Vec<2, double> Vec2d;
 typedef Vec<3, double> Vec3d;
 typedef Vec<4, double> Vec4d;
 
-template <size_t n, class T>
-struct DetWrapper
+template <size_t n, class T> struct DetWrapper
 {
-    static T Det(const Mat<n, T> &mat)
+    static T Det(const Mat<n, T>& mat)
     {
         T sum = 0;
         for (int j = 0; j < n; ++j)
         {
-            Mat<n-1, T> minor = mat.CofactorMatrix(0, j);
-            T determ = DetWrapper<n-1, T>::Det(minor); // workaround for partial template function specialization
+            Mat<n - 1, T> minor = mat.CofactorMatrix(0, j);
+            T determ = DetWrapper<n - 1, T>::Det(
+                minor); // workaround for partial template function specialization
             T sign = j & 1 ? T(-1) : T(1);
             sum += sign * mat[0][j] * determ;
         }
@@ -246,21 +233,20 @@ struct DetWrapper
     }
 };
 
-template <class T>
-struct DetWrapper<1, T>
+template <class T> struct DetWrapper<1, T>
 {
-    static T Det(const Mat<1, T> &mat)
+    static T Det(const Mat<1, T>& mat)
     {
         return mat[0][0];
     }
 };
 
-template<size_t n, class T>
-struct Mat
+template <size_t n, class T> struct Mat
 {
     Vec<n, T> rows[n];
 
-    Mat() {}
+    Mat()
+    {}
 
     Mat(std::initializer_list<Vec<n, T>> list)
     {
@@ -269,8 +255,7 @@ struct Mat
             rows[i] = *elem;
     }
 
-    template <class T2>
-    operator Mat<n, T2> ()
+    template <class T2> operator Mat<n, T2>()
     {
         Mat<n, T2> other;
         for (size_t i = 0; i < n; ++i)
@@ -278,12 +263,12 @@ struct Mat
         return other;
     }
 
-    Vec<n, T>& operator[] (size_t row)
+    Vec<n, T>& operator[](size_t row)
     {
         return rows[row];
     }
 
-    const Vec<n, T>& operator[] (size_t row) const
+    const Vec<n, T>& operator[](size_t row) const
     {
         return rows[row];
     }
@@ -301,17 +286,17 @@ struct Mat
         return res;
     }
 
-    Mat<n-1, T> CofactorMatrix(size_t row, size_t col) const
+    Mat<n - 1, T> CofactorMatrix(size_t row, size_t col) const
     {
-        Mat<n-1, T> minor;
+        Mat<n - 1, T> minor;
 
         size_t srcI = row == 0 ? 1 : 0;
 
-        for (int dstI = 0; dstI < n-1; ++dstI)
+        for (int dstI = 0; dstI < n - 1; ++dstI)
         {
             size_t srcJ = col == 0 ? 1 : 0;
 
-            for (int dstJ = 0; dstJ < n-1; ++dstJ)
+            for (int dstJ = 0; dstJ < n - 1; ++dstJ)
             {
                 minor[dstI][dstJ] = rows[srcI][srcJ];
 
@@ -358,8 +343,7 @@ typedef Mat<4, float> Mat4f;
 typedef Mat<3, double> Mat3d;
 typedef Mat<4, double> Mat4d;
 
-template<size_t n, class T>
-Mat<n, T> Transpose(const Mat<n, T> &mat)
+template <size_t n, class T> Mat<n, T> Transpose(const Mat<n, T>& mat)
 {
     Mat<n, T> res;
     for (size_t i = 0; i < n; ++i)
@@ -368,8 +352,7 @@ Mat<n, T> Transpose(const Mat<n, T> &mat)
     return res;
 }
 
-template<size_t n, class T>
-Mat<n, T> Inverse(const Mat<n, T> &mat)
+template <size_t n, class T> Mat<n, T> Inverse(const Mat<n, T>& mat)
 {
     Mat<n, T> res;
     T det = mat.Determ();
@@ -384,8 +367,7 @@ Mat<n, T> Inverse(const Mat<n, T> &mat)
     return res;
 }
 
-template<size_t n, class T>
-Mat<n, T> Reduce(const Mat<n+1, T> &mat)
+template <size_t n, class T> Mat<n, T> Reduce(const Mat<n + 1, T>& mat)
 {
     Mat<n, T> reduced;
     for (size_t i = 0; i < n; ++i)
@@ -394,8 +376,7 @@ Mat<n, T> Reduce(const Mat<n+1, T> &mat)
     return reduced;
 }
 
-template<size_t n, class T>
-Mat<n, T> operator* (const Mat<n, T> &lhs, const Mat<n, T> &rhs)
+template <size_t n, class T> Mat<n, T> operator*(const Mat<n, T>& lhs, const Mat<n, T>& rhs)
 {
     Mat<n, T> res;
     for (size_t i = 0; i < n; ++i)
@@ -404,8 +385,7 @@ Mat<n, T> operator* (const Mat<n, T> &lhs, const Mat<n, T> &rhs)
     return res;
 }
 
-template<size_t n, class T>
-Vec<n, T> operator* (const Mat<n, T> &lhs, const Vec<n, T> &rhs)
+template <size_t n, class T> Vec<n, T> operator*(const Mat<n, T>& lhs, const Vec<n, T>& rhs)
 {
     Vec<n, T> res;
     for (size_t i = 0; i < n; ++i)
@@ -413,8 +393,7 @@ Vec<n, T> operator* (const Mat<n, T> &lhs, const Vec<n, T> &rhs)
     return res;
 }
 
-template<size_t n, class T>
-Vec<n, T> operator* (Mat<n, T> lhs, T rhs)
+template <size_t n, class T> Vec<n, T> operator*(Mat<n, T> lhs, T rhs)
 {
     for (size_t i = 0; i < n; ++i)
         for (size_t j = 0; j < n; ++j)
@@ -422,14 +401,12 @@ Vec<n, T> operator* (Mat<n, T> lhs, T rhs)
     return lhs;
 }
 
-template<size_t n, class T>
-Vec<n, T> operator* (T lhs, const Mat<n, T> &rhs)
+template <size_t n, class T> Vec<n, T> operator*(T lhs, const Mat<n, T>& rhs)
 {
     return rhs * lhs;
 }
 
-template<size_t n, class T>
-Mat<n, T> operator+ (Mat<n, T> lhs, const Mat<n, T> &rhs)
+template <size_t n, class T> Mat<n, T> operator+(Mat<n, T> lhs, const Mat<n, T>& rhs)
 {
     for (size_t i = 0; i < n; ++i)
         for (size_t j = 0; j < n; ++j)
@@ -437,8 +414,7 @@ Mat<n, T> operator+ (Mat<n, T> lhs, const Mat<n, T> &rhs)
     return lhs;
 }
 
-template<size_t n, class T>
-Mat<n, T> operator- (Mat<n, T> lhs, const Mat<n, T> &rhs)
+template <size_t n, class T> Mat<n, T> operator-(Mat<n, T> lhs, const Mat<n, T>& rhs)
 {
     for (size_t i = 0; i < n; ++i)
         for (size_t j = 0; j < n; ++j)
@@ -446,8 +422,7 @@ Mat<n, T> operator- (Mat<n, T> lhs, const Mat<n, T> &rhs)
     return lhs;
 }
 
-template<size_t n, class T>
-bool operator== (const Mat<n, T> &lhs, const Mat<n, T> &rhs)
+template <size_t n, class T> bool operator==(const Mat<n, T>& lhs, const Mat<n, T>& rhs)
 {
     for (size_t i = 0; i < n; ++i)
         for (size_t j = 0; j < n; ++j)
@@ -456,8 +431,7 @@ bool operator== (const Mat<n, T> &lhs, const Mat<n, T> &rhs)
     return true;
 }
 
-template <size_t n, class T>
-std::ostream& operator<< (std::ostream &os, Mat<n, T> &rhs)
+template <size_t n, class T> std::ostream& operator<<(std::ostream& os, Mat<n, T>& rhs)
 {
     for (size_t i = 0; i < n; ++i)
         os << rhs[i] << std::endl;

@@ -8,7 +8,7 @@ class Input
     bool keys[256];
     bool active;
 
-public:
+  public:
     Input()
     {
         memset(keys, 0, sizeof(keys));

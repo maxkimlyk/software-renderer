@@ -2,6 +2,7 @@
 
 #include <windows.h>
 
-uint32_t GetTimeMs() {
-  return timeGetTime();
+uint32_t GetTimeMs()
+{
+    return timeGetTime();
 }

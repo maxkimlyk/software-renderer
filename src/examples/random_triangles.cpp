@@ -25,11 +25,12 @@ inline int randSize()
     return rand() % ELEMENT_SIZE_FACTOR - ELEMENT_SIZE_FACTOR / 2;
 }
 
-void Process(sr::Renderer &renderer, Input &input)
+void Process(sr::Renderer& renderer, Input& input)
 {
     for (auto elem = Elements.begin(); elem != Elements.end();)
     {
-        if (elem->color.r < MIN_INTENSITY || elem->color.g < MIN_INTENSITY || elem->color.b < MIN_INTENSITY)
+        if (elem->color.r < MIN_INTENSITY || elem->color.g < MIN_INTENSITY ||
+            elem->color.b < MIN_INTENSITY)
         {
             elem = Elements.erase(elem);
         }
@@ -45,15 +46,16 @@ void Process(sr::Renderer &renderer, Input &input)
     if (Elements.size() < ELEMENTS_AMOUNT && rand() % CHANCE_FACTOR == 0)
     {
         Element newElem;
-        newElem.verts[0] = Vec2i {static_cast<int>(rand() % WIDTH), static_cast<int>(rand() % HEIGHT)};
-        newElem.verts[1] = newElem.verts[0] + Vec2i {randSize(), randSize()};
-        newElem.verts[2] = newElem.verts[0] + Vec2i {randSize(), randSize()};
+        newElem.verts[0] =
+            Vec2i{static_cast<int>(rand() % WIDTH), static_cast<int>(rand() % HEIGHT)};
+        newElem.verts[1] = newElem.verts[0] + Vec2i{randSize(), randSize()};
+        newElem.verts[2] = newElem.verts[0] + Vec2i{randSize(), randSize()};
         newElem.color = Color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
         Elements.push_back(newElem);
     }
 }
 
-void Draw(sr::Renderer &renderer)
+void Draw(sr::Renderer& renderer)
 {
     renderer.Clear();
     for (auto elem = Elements.begin(); elem != Elements.end(); ++elem)

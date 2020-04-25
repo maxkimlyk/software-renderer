@@ -10,7 +10,7 @@ const int size = 100;
 
 Color color(0);
 
-void Process(sr::Renderer &renderer, Input &input)
+void Process(sr::Renderer& renderer, Input& input)
 {
     const float PI = 3.141592f;
     angle += PI / 100;
@@ -18,24 +18,20 @@ void Process(sr::Renderer &renderer, Input &input)
     if (angle > 2 * PI)
         angle -= 2 * PI;
 
-    color = Color(
-        uint8_t( 255 * (0.5 + 0.5 * cos(2*angle + 0.1 * PI)) ),
-        uint8_t( 255 * (0.5 + 0.5 * cos(4*angle + 0.3 * PI)) ),
-        uint8_t( 255 * (0.5 + 0.5 * cos(6*angle + 0.7 * PI)) )
-    );
+    color = Color(uint8_t(255 * (0.5 + 0.5 * cos(2 * angle + 0.1 * PI))),
+                  uint8_t(255 * (0.5 + 0.5 * cos(4 * angle + 0.3 * PI))),
+                  uint8_t(255 * (0.5 + 0.5 * cos(6 * angle + 0.7 * PI))));
 }
 
-void Draw(sr::Renderer &renderer)
+void Draw(sr::Renderer& renderer)
 {
     renderer.Clear();
     Vec2i center = {WIDTH / 2, HEIGHT / 2};
 
-    Vec2i points[] = {
-        {center[0] - size, center[1] - size},
-        {center[0] - size, center[1] + size},
-        {center[0] + size, center[1] + size},
-        {center[0] + size, center[1] - size}
-    };
+    Vec2i points[] = {{center[0] - size, center[1] - size},
+                      {center[0] - size, center[1] + size},
+                      {center[0] + size, center[1] + size},
+                      {center[0] + size, center[1] - size}};
 
     renderer.Line(points[0], points[1], color);
     renderer.Line(points[1], points[2], color);

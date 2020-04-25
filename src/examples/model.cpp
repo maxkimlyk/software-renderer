@@ -1,6 +1,6 @@
-#include "../renderer/program.h"
 #include "../renderer/model.h"
 #include "../renderer/camera.h"
+#include "../renderer/program.h"
 #include <cmath>
 #include <list>
 
@@ -8,7 +8,7 @@ const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Model";
 
-const char *MODEL_NAME = "palm.obj";
+const char* MODEL_NAME = "palm.obj";
 
 Model model;
 Color color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
@@ -17,11 +17,10 @@ float angle = 0.0f;
 float angleSpeed = 0.01f;
 const float maxViewpoint = 3.0f;
 
-void Init(sr::Renderer &renderer)
-{
-}
+void Init(sr::Renderer& renderer)
+{}
 
-void Process(sr::Renderer &renderer, Input &input)
+void Process(sr::Renderer& renderer, Input& input)
 {
     static const float PI = 3.14159265f;
     angle += angleSpeed;
@@ -29,17 +28,14 @@ void Process(sr::Renderer &renderer, Input &input)
         angle -= 2 * PI;
 }
 
-void Draw(sr::Renderer &renderer)
+void Draw(sr::Renderer& renderer)
 {
     static Camera camera;
 
     float x = 0.5f * sin(2.0f * angle) * maxViewpoint;
     float y = 0.5f * cos(2.0f * angle) * maxViewpoint;
 
-    camera.LookAt(
-        Vec3f {0.0f, 0.5f, 0.0f},
-        Vec3f {x, 1.0f, y}
-    );
+    camera.LookAt(Vec3f{0.0f, 0.5f, 0.0f}, Vec3f{x, 1.0f, y});
 
     renderer.viewMatrix = camera.ViewMatrix();
     renderer.UpdateMatrices();

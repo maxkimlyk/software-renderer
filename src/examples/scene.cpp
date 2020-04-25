@@ -1,31 +1,28 @@
-#include "../renderer/program.h"
-#include "../renderer/model.h"
 #include "../renderer/camera.h"
+#include "../renderer/model.h"
+#include "../renderer/program.h"
 
 #include <cmath>
 
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Scene";
-const char *MODEL_NAME = "head.obj";
-const char *TEXTURE_FILE = "head_diffuse.tga";
+const char* MODEL_NAME = "head.obj";
+const char* TEXTURE_FILE = "head_diffuse.tga";
 
 Model model;
 Image texture;
 
-Vec3f lightDirection = Normalize(Vec3f {0, -0.2f, 3.0f});
+Vec3f lightDirection = Normalize(Vec3f{0, -0.2f, 3.0f});
 
 Camera camera;
 
-void Init(sr::Renderer &renderer)
+void Init(sr::Renderer& renderer)
 {
-    camera.LookAt(
-        Vec3f {0.0f, 0.0f, 0.0f},
-        Vec3f {0.0f, 1.0f, 3.0f}
-    );
+    camera.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 1.0f, 3.0f});
 }
 
-void Process(sr::Renderer &renderer, Input &input)
+void Process(sr::Renderer& renderer, Input& input)
 {
     const float walkDistance = 0.01f;
     const float rotateAngle = 0.05f;
@@ -51,7 +48,7 @@ void Process(sr::Renderer &renderer, Input &input)
     renderer.UpdateMatrices();
 }
 
-void Draw(sr::Renderer &renderer)
+void Draw(sr::Renderer& renderer)
 {
     renderer.Clear();
     for (auto face = model.faces.begin(); face != model.faces.end(); ++face)

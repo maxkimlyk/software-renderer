@@ -1,6 +1,6 @@
 #include "canvas.h"
 
-int LoadTGA(const char *path, Image &result)
+int LoadTGA(const char* path, Image& result)
 {
     TGA::Canvas tga;
 

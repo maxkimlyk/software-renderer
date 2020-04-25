@@ -4,8 +4,8 @@
 #include <sstream>
 
 #include "../platform/platform_dependent.h"
-#include "renderer.h"
 #include "input.h"
+#include "renderer.h"
 #include "window.h"
 
 namespace sr

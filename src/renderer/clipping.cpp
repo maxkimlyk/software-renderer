@@ -29,11 +29,11 @@ static uint8_t PositionCode(Vec3f p1, Boxf box)
         code |= FRONT;
     return code;
 }
-}
+} // namespace
 
 namespace Clipping
 {
-bool ClipLine(Vec3f p1, Vec3f p2, Boxf box, Vec3f &res1, Vec3f &res2)
+bool ClipLine(Vec3f p1, Vec3f p2, Boxf box, Vec3f& res1, Vec3f& res2)
 {
     uint8_t code1 = PositionCode(p1, box);
     uint8_t code2 = PositionCode(p2, box);
@@ -52,8 +52,8 @@ bool ClipLine(Vec3f p1, Vec3f p2, Boxf box, Vec3f &res1, Vec3f &res2)
         }
         else
         {
-            Vec3f &point = code1 != 0 ? p1 : p2;
-            uint8_t &code = code1 != 0 ? code1 : code2;
+            Vec3f& point = code1 != 0 ? p1 : p2;
+            uint8_t& code = code1 != 0 ? code1 : code2;
             if (code & LEFT)
             {
                 float coef = (box.xmin - p1.x) / (p2.x - p1.x);
@@ -101,8 +101,8 @@ bool ClipLine(Vec3f p1, Vec3f p2, Boxf box, Vec3f &res1, Vec3f &res2)
     }
 }
 
-bool TriangleClip(Vec3f p1, Vec3f p2, Vec3f p3, Boxf box,
-                            Vec3f &res11, Vec3f &res12, Vec3f &res21, Vec3f &res22, Vec3f &res31, Vec3f &res32)
+bool TriangleClip(Vec3f p1, Vec3f p2, Vec3f p3, Boxf box, Vec3f& res11, Vec3f& res12, Vec3f& res21,
+                  Vec3f& res22, Vec3f& res31, Vec3f& res32)
 {
     bool inside1 = ClipLine(p1, p2, box, res11, res12);
     bool inside2 = ClipLine(p2, p3, box, res21, res22);
@@ -110,7 +110,7 @@ bool TriangleClip(Vec3f p1, Vec3f p2, Vec3f p3, Boxf box,
     return inside1 | inside2 | inside3;
 }
 
-bool TriangleClipRect(Vec3f p1, Vec3f p2, Vec3f p3, Boxf box, Rectf &result)
+bool TriangleClipRect(Vec3f p1, Vec3f p2, Vec3f p3, Boxf box, Rectf& result)
 {
     Vec3f* first[] = {&p1, &p2, &p3};
     Vec3f* second[] = {&p2, &p3, &p1};
@@ -151,4 +151,4 @@ bool TriangleClipRect(Vec3f p1, Vec3f p2, Vec3f p3, Boxf box, Rectf &result)
 
     return rectInitialized;
 }
-}
+} // namespace Clipping

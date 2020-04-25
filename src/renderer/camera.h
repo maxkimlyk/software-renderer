@@ -11,12 +11,12 @@ class Camera
     Vec3f upDirection;
     Vec3f rightDirection;
 
-public:
+  public:
     Camera()
     {
-        position = Vec3f {0.0f, 0.0f, 0.0f};
-        direction = Vec3f {0.0f, 0.0f, 1.0f};
-        upDirection = Vec3f {0.0f, 1.0f, 0.0f};
+        position = Vec3f{0.0f, 0.0f, 0.0f};
+        direction = Vec3f{0.0f, 0.0f, 1.0f};
+        upDirection = Vec3f{0.0f, 1.0f, 0.0f};
         rightDirection = Cross(direction, upDirection);
     }
 
@@ -29,14 +29,14 @@ public:
 
     void Yaw(float angle)
     {
-        Mat3f transform = Reduce<3, float>( Transform::RotateY(angle) );
+        Mat3f transform = Reduce<3, float>(Transform::RotateY(angle));
         direction = transform * direction;
         rightDirection = transform * rightDirection;
     }
 
     void Pitch(float angle)
     {
-        Mat3f transform = Reduce<3, float>( Transform::Rotate(angle, rightDirection) );
+        Mat3f transform = Reduce<3, float>(Transform::Rotate(angle, rightDirection));
         direction = transform * direction;
         rightDirection = transform * rightDirection;
     }

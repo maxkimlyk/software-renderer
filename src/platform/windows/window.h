@@ -1,35 +1,35 @@
 #ifndef _WINDOWS_WINDOW_H_
 #define _WINDOWS_WINDOW_H_
 
-#include <windows.h>
 #include <string>
+#include <windows.h>
 
 #include "../../renderer/canvas.h"
-#include "../../renderer/renderer.h"
 #include "../../renderer/input.h"
+#include "../../renderer/renderer.h"
 
-static const char *WINDOW_CLASS_NAME = "rendererwindowclass";
+static const char* WINDOW_CLASS_NAME = "rendererwindowclass";
 static const DWORD BPP = 32;
-static const size_t STR_SIZE =32;
+static const size_t STR_SIZE = 32;
 
 class Window
 {
     HINSTANCE hInstance;
     HWND hWnd;
 
-    sr::Renderer *renderer;
-    Input *input;
+    sr::Renderer* renderer;
+    Input* input;
 
-public:
+  public:
     bool closed;
 
-    Window(sr::Renderer *renderer /*, Input *input */)
+    Window(sr::Renderer* renderer /*, Input *input */)
     {
         this->renderer = renderer;
         // this->input = input;
     }
 
-    int Create(size_t width, size_t height, const std::string &caption)
+    int Create(size_t width, size_t height, const std::string& caption)
     {
         hInstance = GetModuleHandle(NULL);
 
@@ -51,12 +51,11 @@ public:
 
         AdjustWindowRectEx(&windowRect, dwStyle, false, dwExStyle);
 
-        hWnd = CreateWindowEx(dwExStyle, WINDOW_CLASS_NAME,
-                              caption.c_str(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle,
-                              100, 100,
-                              windowRect.right - windowRect.left,
-                              windowRect.bottom - windowRect.top,
-                              NULL, NULL, hInstance, (LPVOID)(this));
+        hWnd =
+            CreateWindowEx(dwExStyle, WINDOW_CLASS_NAME, caption.c_str(),
+                           WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, 100, 100,
+                           windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
+                           NULL, NULL, hInstance, (LPVOID)(this));
         if (!hWnd)
         {
             printf("Could not create window\n");
@@ -95,12 +94,12 @@ public:
         RedrawWindow(hWnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE);
     }
 
-    void SetCaption(std::string &text)
+    void SetCaption(std::string& text)
     {
         SetWindowText(hWnd, text.c_str());
     }
 
-private:
+  private:
     int RegisterWindowClass()
     {
         WNDCLASS wc;
@@ -127,7 +126,7 @@ private:
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         static HDC hCompatibleDC = 0;
-        static Window *thisptr = NULL;
+        static Window* thisptr = NULL;
 
         switch (uMsg)
         {
@@ -141,7 +140,7 @@ private:
 
             ReleaseDC(hWnd, hdc);
 
-            CREATESTRUCT *cs = (CREATESTRUCT*)lParam;
+            CREATESTRUCT* cs = (CREATESTRUCT*)lParam;
             thisptr = (Window*)(cs->lpCreateParams);
 
             break;
@@ -175,10 +174,11 @@ private:
             bmi.bmiHeader.biClrUsed = 0;
             bmi.bmiHeader.biClrImportant = 0;
 
-            uint32_t *bitPointer;
+            uint32_t* bitPointer;
             size_t bufferSize = bmi.bmiHeader.biSizeImage;
 
-            HBITMAP hBitmap = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)(&bitPointer), NULL, NULL);
+            HBITMAP hBitmap =
+                CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)(&bitPointer), NULL, NULL);
             if (!hBitmap)
             {
                 WARNING("Could not create DIB section\n");
@@ -186,7 +186,7 @@ private:
                 return -1;
             }
 
-            Canvas<uint32_t> *canvas = thisptr->renderer->canvas;
+            Canvas<uint32_t>* canvas = thisptr->renderer->canvas;
             canvas->CopyTo((uint32_t*)bitPointer, bufferSize);
 
             HGDIOBJ hOldObj = SelectObject(hCompatibleDC, hBitmap);
@@ -204,20 +204,20 @@ private:
             PostQuitMessage(0);
             return 0;
 
-        // case WM_KEYDOWN:
-        //     thisptr->input->OnKeyDown(wParam);
-        //     return 0;
+            // case WM_KEYDOWN:
+            //     thisptr->input->OnKeyDown(wParam);
+            //     return 0;
 
-        // case WM_KEYUP:
-        //     thisptr->input->OnKeyUp(wParam);
-        //     return 0;
+            // case WM_KEYUP:
+            //     thisptr->input->OnKeyUp(wParam);
+            //     return 0;
 
-        // case WM_ACTIVATE:
-        //     if (HIWORD(wParam) == 0)
-        //         thisptr->input->OnFocus();
-        //     else
-        //         thisptr->input->OnFocusLost();
-        //     return 0;
+            // case WM_ACTIVATE:
+            //     if (HIWORD(wParam) == 0)
+            //         thisptr->input->OnFocus();
+            //     else
+            //         thisptr->input->OnFocusLost();
+            //     return 0;
         }
 
         return DefWindowProc(hWnd, uMsg, wParam, lParam);
