@@ -15,11 +15,18 @@ const size_t WINDOW_BORDER_WIDTH = 5;
 namespace sr
 {
 
-Window::Window(GetFrameFunc get_frame) : get_frame_(get_frame)
+Window::Window(GetFrameFunc get_frame) : get_frame_(get_frame), closed_(true)
 {}
+
+bool Window::IsClosed() const
+{
+    return closed_;
+}
 
 int Window::Create(size_t width, size_t height, const std::string& caption)
 {
+    closed_ = false;
+
     display_ = XOpenDisplay(NULL);
     visual_ = DefaultVisual(display_, 0);
     const int depth = DefaultDepth(display_, 0);
@@ -37,6 +44,8 @@ int Window::Create(size_t width, size_t height, const std::string& caption)
 
     const int screen_num = DefaultScreen(display_);
     gc_ = DefaultGC(display_, screen_num);
+
+    SubscribeToWindowClosing();
 
     CreateImageBuffer(width, height);
 
@@ -59,12 +68,18 @@ void Window::CreateImageBuffer(size_t width, size_t height)
 void Window::PreventResizing() const
 {
     XSizeHints* sh = XAllocSizeHints();
-    sh->flags =  PMinSize | PMaxSize;
+    sh->flags = PMinSize | PMaxSize;
     sh->min_width = width_;
     sh->min_height = height_;
     sh->max_width = width_;
     sh->max_height = height_;
     XSetWMNormalHints(display_, window_, sh);
+}
+
+void Window::SubscribeToWindowClosing()
+{
+    wm_delete_message_ = XInternAtom(display_, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(display_, window_, &wm_delete_message_, 1);
 }
 
 void Window::SetCaption(const std::string& string)
@@ -90,18 +105,30 @@ void Window::MainLoopRoutine()
     while (true)
     {
         XEvent event;
-        bool is_new_event =
-            XCheckWindowEvent(display_, window_, ExposureMask | StructureNotifyMask, &event);
-        if (!is_new_event)
+
+        // Note: feels like with this way of checking new messages we had more FPS
+        // ===============================
+        // bool is_new_event = XCheckWindowEvent(display_, window_, ExposureMask, &event);
+        // if (!is_new_event)
+        //     return;
+        // ===============================
+
+        int num_new_events = XPending(display_);
+        if (!num_new_events)
             return;
+
+        XNextEvent(display_, &event);
 
         switch (event.type)
         {
         case Expose:
-        {
             HandleExpose();
             break;
-        }
+
+        case ClientMessage:
+            if (event.xclient.data.l[0] == wm_delete_message_)
+                closed_ = true;
+            break;
         }
     }
 }

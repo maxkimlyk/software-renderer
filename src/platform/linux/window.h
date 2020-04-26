@@ -2,8 +2,8 @@
 #define _LINUX_WINDOW_H_
 
 #include <functional>
-#include <string>
 #include <memory>
+#include <string>
 
 #include <X11/Xlib.h>
 
@@ -24,17 +24,20 @@ class Window
     void MainLoopRoutine();
     void Redraw();
 
-    bool closed = false; // TODO
+    bool IsClosed() const;
 
   private:
-    void HandleExpose() const ;
+    void HandleExpose() const;
     void CreateImageBuffer(size_t width, size_t height);
     void PreventResizing() const;
+    void SubscribeToWindowClosing();
 
+    bool closed_;
     ::Display* display_;
     ::Visual* visual_;
     ::Window window_;
     ::GC gc_;
+    ::Atom wm_delete_message_;
     std::unique_ptr<uint8_t[]> image_buffer_;
     size_t width_;
     size_t height_;

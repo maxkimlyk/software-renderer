@@ -83,7 +83,7 @@ class Program
         while (isRunning)
         {
             window->MainLoopRoutine();
-            if (window->closed)
+            if (window->IsClosed())
             {
                 isRunning = false;
                 break;
