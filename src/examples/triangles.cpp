@@ -1,4 +1,4 @@
-#include "../renderer/program.h"
+#include "../common/program.h"
 #include <cmath>
 #include <vector>
 
@@ -27,9 +27,9 @@ void Init(sr::Renderer& renderer)
 
 void Process(sr::Renderer& renderer, Input& input)
 {
-    if (input.IsDown(0x26))
+    if (input.IsHolding(0x26))
         z += 0.1f;
-    if (input.IsDown(0x28))
+    if (input.IsHolding(0x28))
         z -= 0.1f;
 }
 

@@ -1,4 +1,4 @@
-#include "../renderer/program.h"
+#include "../common/program.h"
 
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;

@@ -5,7 +5,7 @@
 
 #include "../platform/platform_dependent.h"
 #include "input.h"
-#include "renderer.h"
+#include "../renderer/renderer.h"
 #include "window.h"
 
 namespace sr
@@ -50,10 +50,9 @@ class Program
         canvas = new Canvas<uint32_t>(windowWidth, windowHeight);
         renderer = new Renderer(canvas);
         input = new Input();
-        // window = new Window(renderer, input);
 
         const auto get_frame = [this]() -> Canvas<uint32_t>& { return *renderer->canvas; };
-        window = new Window(get_frame);
+        window = new Window(get_frame, *input);
 
         int status = window->Create(windowWidth, windowHeight, windowCaption);
         if (status != 0)

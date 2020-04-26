@@ -1,4 +1,4 @@
-#include "../renderer/program.h"
+#include "../common/program.h"
 #include <cmath>
 
 const size_t WIDTH = 800;

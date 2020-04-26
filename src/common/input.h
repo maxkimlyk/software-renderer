@@ -1,7 +1,7 @@
 #ifndef _INPUT_H_
 #define _INPUT_H_
 
-#include "../platform/platform_dependent.h"
+#include <string.h>
 
 class Input
 {
@@ -22,7 +22,7 @@ class Input
         return state;
     }
 
-    bool IsDown(uint32_t key)
+    bool IsHolding(uint32_t key)
     {
         return keys[key];
     }

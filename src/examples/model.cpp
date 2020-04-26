@@ -1,6 +1,6 @@
 #include "../renderer/model.h"
 #include "../renderer/camera.h"
-#include "../renderer/program.h"
+#include "../common/program.h"
 #include <cmath>
 #include <list>
 

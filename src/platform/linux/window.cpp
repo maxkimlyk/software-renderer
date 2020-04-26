@@ -15,7 +15,8 @@ const size_t WINDOW_BORDER_WIDTH = 5;
 namespace sr
 {
 
-Window::Window(GetFrameFunc get_frame) : get_frame_(get_frame), closed_(true)
+Window::Window(GetFrameFunc get_frame, Input& input)
+    : closed_(true), get_frame_(get_frame), input_(input)
 {}
 
 bool Window::IsClosed() const
@@ -40,7 +41,7 @@ int Window::Create(size_t width, size_t height, const std::string& caption)
 
     SetCaption(caption);
 
-    XSelectInput(display_, window_, ExposureMask | StructureNotifyMask);
+    XSelectInput(display_, window_, ExposureMask | KeyPressMask | KeyReleaseMask | FocusChangeMask);
 
     const int screen_num = DefaultScreen(display_);
     gc_ = DefaultGC(display_, screen_num);
@@ -106,7 +107,7 @@ void Window::MainLoopRoutine()
     {
         XEvent event;
 
-        // Note: feels like with this way of checking new messages we had more FPS
+        // Note: feels like with this way of checking new events we had a bit more FPS
         // ===============================
         // bool is_new_event = XCheckWindowEvent(display_, window_, ExposureMask, &event);
         // if (!is_new_event)
@@ -128,6 +129,28 @@ void Window::MainLoopRoutine()
         case ClientMessage:
             if (event.xclient.data.l[0] == wm_delete_message_)
                 closed_ = true;
+            break;
+
+        case KeyPress:
+        {
+            unsigned long key = XLookupKeysym(&event.xkey, 0);
+            input_.OnKeyUp(key);
+        }
+        break;
+
+        case KeyRelease:
+        {
+            unsigned long key = XLookupKeysym(&event.xkey, 0);
+            input_.OnKeyDown(key);
+        }
+        break;
+
+        case FocusIn:
+            input_.OnFocus();
+            break;
+
+        case FocusOut:
+            input_.OnFocusLost();
             break;
         }
     }

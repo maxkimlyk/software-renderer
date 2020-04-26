@@ -1,6 +1,8 @@
+#include <X11/keysymdef.h>
+
+#include "../common/program.h"
 #include "../renderer/camera.h"
 #include "../renderer/model.h"
-#include "../renderer/program.h"
 
 #include <cmath>
 
@@ -27,21 +29,31 @@ void Process(sr::Renderer& renderer, Input& input)
     const float walkDistance = 0.01f;
     const float rotateAngle = 0.05f;
 
-    if (input.IsDown('W'))
+    if (input.IsHolding('W'))
         camera.Walk(walkDistance);
-    if (input.IsDown('S'))
+    if (input.IsHolding('S'))
         camera.Walk(-walkDistance);
-    if (input.IsDown('A'))
+    if (input.IsHolding('A'))
         camera.WalkRight(-walkDistance);
-    if (input.IsDown('D'))
+    if (input.IsHolding('D'))
         camera.WalkRight(walkDistance);
-    // if (input.IsDown(VK_LEFT))
+        
+    // if (input.IsHolding(VK_LEFT))
     //     camera.Yaw(rotateAngle);
-    // if (input.IsDown(VK_RIGHT))
+    // if (input.IsHolding(VK_RIGHT))
     //     camera.Yaw(-rotateAngle);
-    // if (input.IsDown(VK_UP))
+    // if (input.IsHolding(VK_UP))
     //     camera.Pitch(rotateAngle);
-    // if (input.IsDown(VK_DOWN))
+    // if (input.IsHolding(VK_DOWN))
+    //     camera.Pitch(-rotateAngle);
+
+    // if (input.IsHolding(XK_Left))
+    //     camera.Yaw(rotateAngle);
+    // if (input.IsHolding(XK_Right))
+    //     camera.Yaw(-rotateAngle);
+    // if (input.IsHolding(XK_Up))
+    //     camera.Pitch(rotateAngle);
+    // if (input.IsHolding(XK_Down))
     //     camera.Pitch(-rotateAngle);
 
     renderer.viewMatrix = camera.ViewMatrix();

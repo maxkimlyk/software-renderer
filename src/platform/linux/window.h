@@ -8,6 +8,7 @@
 #include <X11/Xlib.h>
 
 #include "../../renderer/canvas.h" // TODO: move Image to common code
+#include "../../common/input.h"
 
 namespace sr
 {
@@ -17,7 +18,7 @@ class Window
   public:
     using GetFrameFunc = std::function<Image&(void)>;
 
-    Window(GetFrameFunc get_frame);
+    Window(GetFrameFunc get_frame, Input& input);
 
     int Create(size_t width, size_t height, const std::string& caption);
     void SetCaption(const std::string& caption);
@@ -42,7 +43,9 @@ class Window
     size_t width_;
     size_t height_;
     size_t stride_;
+
     GetFrameFunc get_frame_;
+    Input& input_;
 };
 
 } // namespace sr
