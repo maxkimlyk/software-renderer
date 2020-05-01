@@ -1,7 +1,7 @@
 #ifndef _RASTERIZER_H_
 #define _RASTERIZER_H_
 
-#include "canvas.h"
+#include "../common/canvas.h"
 #include "geometry.h"
 #include "shader.h"
 

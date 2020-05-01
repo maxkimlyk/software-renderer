@@ -66,9 +66,6 @@ void Draw(sr::Renderer& renderer)
 
 int main()
 {
-    sr::Program program;
-    program.InitCallback = Init;
-    program.ProcessCallback = Process;
-    program.DrawCallback = Draw;
+    sr::Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }

@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "../external/tgaimage/tgaimage.h"
-#include "utils.h"
+#include "logging.h"
 
 union Color
 {

@@ -2,7 +2,7 @@
 #define _MODEL_H_
 
 #include "geometry.h"
-#include "utils.h"
+#include "../common/logging.h"
 #include <fstream>
 #include <limits>
 #include <regex>

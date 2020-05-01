@@ -1,4 +1,4 @@
-#include "../platform_dependent.h"
+#include "../platform.h"
 
 #include <windows.h>
 

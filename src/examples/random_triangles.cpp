@@ -20,6 +20,9 @@ struct Element
 
 std::list<Element> Elements;
 
+void Init(sr::Renderer& renderer)
+{}
+
 inline int randSize()
 {
     return rand() % ELEMENT_SIZE_FACTOR - ELEMENT_SIZE_FACTOR / 2;
@@ -64,8 +67,6 @@ void Draw(sr::Renderer& renderer)
 
 int main()
 {
-    sr::Program program;
-    program.ProcessCallback = Process;
-    program.DrawCallback = Draw;
+    sr::Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }

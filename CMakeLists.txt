@@ -17,7 +17,7 @@ if (UNIX)
     file(GLOB PLATFORM_SRC src/platform/linux/*)
 endif (UNIX)
 
-file(GLOB RENDERER_SRC src/renderer/*)
+file(GLOB RENDERER_SRC src/renderer/* src/common/*)
 add_library(renderer ${RENDERER_SRC} ${PLATFORM_SRC})
 
 add_library(tgaimage src/external/tgaimage/tgaimage.cpp)

@@ -1,7 +1,7 @@
 #ifndef _SHADER_H_
 #define _SHADER_H_
 
-#include "canvas.h"
+#include "../common/canvas.h"
 #include "geometry.h"
 
 class Shader

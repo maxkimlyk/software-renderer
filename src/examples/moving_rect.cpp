@@ -14,6 +14,9 @@ int y = HEIGHT / 2;
 
 Color color(0);
 
+void Init(sr::Renderer& renderer)
+{}
+
 void Process(sr::Renderer& renderer, Input& input)
 {
     const float PI = 3.141592f;
@@ -38,8 +41,6 @@ void Draw(sr::Renderer& renderer)
 
 int main()
 {
-    sr::Program program;
-    program.ProcessCallback = Process;
-    program.DrawCallback = Draw;
+    sr::Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }

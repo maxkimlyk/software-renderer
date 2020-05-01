@@ -1,7 +1,7 @@
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
 
-#include "canvas.h"
+#include "../common/canvas.h"
 #include "clipping.h"
 #include "rasterizer.h"
 #include "transforms.h"
@@ -47,20 +47,19 @@ class Renderer
     }
 
   public:
-    Image* canvas;
+    Image& canvas_;
 
     Mat4f viewMatrix;
     Mat4f projectionMatrix;
 
     Shader& shader;
 
-    Renderer(Image* canvas)
-        : zbuffer(canvas->width, canvas->height), shader(DefaultShaders::flatShader)
+    Renderer(Image& canvas)
+        : canvas_(canvas), zbuffer(canvas.width, canvas.height), shader(DefaultShaders::flatShader)
     {
-        this->canvas = canvas;
-        SetViewport(0.0, (float)(canvas->width), 0.0, (float)(canvas->height), 0.0, 255.0);
+        SetViewport(0.0, (float)(canvas.width), 0.0, (float)(canvas.height), 0.0, 255.0);
         projectionMatrix = Projection::Perspective(
-            45.0f, (float)(canvas->width) / (float)(canvas->height), 0.01f, 10.0f);
+            45.0f, (float)(canvas.width) / (float)(canvas.height), 0.01f, 10.0f);
         viewMatrix = Mat4f::Identity();
         UpdateMatrices();
     }
@@ -78,42 +77,42 @@ class Renderer
 
     size_t Width()
     {
-        return canvas->width;
+        return canvas_.width;
     }
     size_t Height()
     {
-        return canvas->height;
+        return canvas_.height;
     }
 
     void Clear(Color color = Color(0))
     {
-        canvas->Clear(color);
+        canvas_.Clear(color);
         zbuffer.Clear(UINT8_MAX);
     }
 
     void SetPixel(uint32_t x, uint32_t y, Color color)
     {
-        canvas->SetPixel(x, y, color);
+        canvas_.SetPixel(x, y, color);
     }
 
     void DrawRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
     {
-        Rasterizer::Rectangle(*canvas, x1, y1, x2, y2, color);
+        Rasterizer::Rectangle(canvas_, x1, y1, x2, y2, color);
     }
 
     void DrawSolidRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
     {
-        Rasterizer::SolidRect(*canvas, x1, y1, x2, y2, color);
+        Rasterizer::SolidRect(canvas_, x1, y1, x2, y2, color);
     }
 
     void Line(Vec2i p1, Vec2i p2, Color color)
     {
-        Rasterizer::Line(*canvas, p1, p2, color);
+        Rasterizer::Line(canvas_, p1, p2, color);
     }
 
     void Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
     {
-        Rasterizer::Triangle(*canvas, p1, p2, p3, color);
+        Rasterizer::Triangle(canvas_, p1, p2, p3, color);
     }
 
     void TriangleMesh(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
@@ -124,15 +123,15 @@ class Renderer
 
         Vec3f clipped1, clipped2;
         if (Clipping::ClipLine(screen1, screen2, viewportBox, clipped1, clipped2))
-            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2),
+            Rasterizer::Line(canvas_, Project<2, float>(clipped1), Project<2, float>(clipped2),
                              color);
 
         if (Clipping::ClipLine(screen2, screen3, viewportBox, clipped1, clipped2))
-            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2),
+            Rasterizer::Line(canvas_, Project<2, float>(clipped1), Project<2, float>(clipped2),
                              color);
 
         if (Clipping::ClipLine(screen3, screen1, viewportBox, clipped1, clipped2))
-            Rasterizer::Line(*canvas, Project<2, float>(clipped1), Project<2, float>(clipped2),
+            Rasterizer::Line(canvas_, Project<2, float>(clipped1), Project<2, float>(clipped2),
                              color);
     }
 
@@ -144,7 +143,7 @@ class Renderer
         Vec3f screen2 = ProjectVertex(p2);
         Vec3f screen3 = ProjectVertex(p3);
 
-        Rasterizer::Triangle(*canvas, zbuffer, viewportBox.zmax, screen1, screen2, screen3,
+        Rasterizer::Triangle(canvas_, zbuffer, viewportBox.zmax, screen1, screen2, screen3,
                              solidColorShader);
     }
 
@@ -156,7 +155,7 @@ class Renderer
         Vec3f screen2 = ProjectVertex(p2);
         Vec3f screen3 = ProjectVertex(p3);
 
-        Rasterizer::Triangle(*canvas, zbuffer, viewportBox.zmax, screen1, screen2, screen3, shader);
+        Rasterizer::Triangle(canvas_, zbuffer, viewportBox.zmax, screen1, screen2, screen3, shader);
     }
 };
 

@@ -7,7 +7,7 @@
 namespace sr
 {
 
-std::map<int, KeyCodes> Table = {
+const std::map<int, KeyCodes> Table = {
     {XK_BackSpace, KEY_BACKSPACE},
     {XK_Tab, KEY_TAB},
 
