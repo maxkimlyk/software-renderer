@@ -29,32 +29,23 @@ void Process(sr::Renderer& renderer, Input& input)
     const float walkDistance = 0.01f;
     const float rotateAngle = 0.05f;
 
-    if (input.IsHolding('W'))
+    if (input.IsHolding(sr::KEY_W))
         camera.Walk(walkDistance);
-    if (input.IsHolding('S'))
+    if (input.IsHolding(sr::KEY_S))
         camera.Walk(-walkDistance);
-    if (input.IsHolding('A'))
+    if (input.IsHolding(sr::KEY_A))
         camera.WalkRight(-walkDistance);
-    if (input.IsHolding('D'))
+    if (input.IsHolding(sr::KEY_D))
         camera.WalkRight(walkDistance);
-        
-    // if (input.IsHolding(VK_LEFT))
-    //     camera.Yaw(rotateAngle);
-    // if (input.IsHolding(VK_RIGHT))
-    //     camera.Yaw(-rotateAngle);
-    // if (input.IsHolding(VK_UP))
-    //     camera.Pitch(rotateAngle);
-    // if (input.IsHolding(VK_DOWN))
-    //     camera.Pitch(-rotateAngle);
 
-    // if (input.IsHolding(XK_Left))
-    //     camera.Yaw(rotateAngle);
-    // if (input.IsHolding(XK_Right))
-    //     camera.Yaw(-rotateAngle);
-    // if (input.IsHolding(XK_Up))
-    //     camera.Pitch(rotateAngle);
-    // if (input.IsHolding(XK_Down))
-    //     camera.Pitch(-rotateAngle);
+    if (input.IsHolding(sr::KEY_LEFT))
+        camera.Yaw(rotateAngle);
+    if (input.IsHolding(sr::KEY_RIGHT))
+        camera.Yaw(-rotateAngle);
+    if (input.IsHolding(sr::KEY_UP))
+        camera.Pitch(rotateAngle);
+    if (input.IsHolding(sr::KEY_DOWN))
+        camera.Pitch(-rotateAngle);
 
     renderer.viewMatrix = camera.ViewMatrix();
     renderer.UpdateMatrices();

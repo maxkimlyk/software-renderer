@@ -3,6 +3,8 @@
 
 #include <string.h>
 
+#include "key_codes.h"
+
 class Input
 {
     bool keys[256];

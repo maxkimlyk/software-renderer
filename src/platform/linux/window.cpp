@@ -5,6 +5,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "convert_key.h"
+
 namespace
 {
 const size_t BYTES_PER_PIXEL = 3;
@@ -134,14 +136,15 @@ void Window::MainLoopRoutine()
         case KeyPress:
         {
             unsigned long key = XLookupKeysym(&event.xkey, 0);
-            input_.OnKeyUp(key);
+            LOG("Pressed %x\n", key);
+            input_.OnKeyDown(ConvertKey(key));
         }
         break;
 
         case KeyRelease:
         {
             unsigned long key = XLookupKeysym(&event.xkey, 0);
-            input_.OnKeyDown(key);
+            input_.OnKeyUp(ConvertKey(key));
         }
         break;
 
