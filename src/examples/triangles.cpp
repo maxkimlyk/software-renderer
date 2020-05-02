@@ -2,6 +2,8 @@
 #include <cmath>
 #include <vector>
 
+using namespace sr;
+
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Triangles";
@@ -66,6 +68,6 @@ void Draw(sr::Renderer& renderer)
 
 int main()
 {
-    sr::Program program(Init, Process, Draw);
+    Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }

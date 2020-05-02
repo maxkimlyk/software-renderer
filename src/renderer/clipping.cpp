@@ -1,5 +1,8 @@
 #include "clipping.h"
 
+namespace sr
+{
+
 namespace
 {
 enum
@@ -31,8 +34,6 @@ static uint8_t PositionCode(Vec3f p1, Boxf box)
 }
 } // namespace
 
-namespace Clipping
-{
 bool ClipLine(Vec3f p1, Vec3f p2, Boxf box, Vec3f& res1, Vec3f& res2)
 {
     uint8_t code1 = PositionCode(p1, box);
@@ -151,4 +152,4 @@ bool TriangleClipRect(Vec3f p1, Vec3f p2, Vec3f p3, Boxf box, Rectf& result)
 
     return rectInitialized;
 }
-} // namespace Clipping
+} // namespace sr

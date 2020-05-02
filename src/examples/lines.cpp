@@ -1,6 +1,8 @@
 #include "../common/program.h"
 #include <cmath>
 
+using namespace sr;
+
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Lines";
@@ -10,10 +12,10 @@ const int size = 100;
 
 Color color(0);
 
-void Init(sr::Renderer& renderer)
+void Init(Renderer& renderer)
 {}
 
-void Process(sr::Renderer& renderer, Input& input)
+void Process(Renderer& renderer, Input& input)
 {
     const float PI = 3.141592f;
     angle += PI / 100;
@@ -26,7 +28,7 @@ void Process(sr::Renderer& renderer, Input& input)
                   uint8_t(255 * (0.5 + 0.5 * cos(6 * angle + 0.7 * PI))));
 }
 
-void Draw(sr::Renderer& renderer)
+void Draw(Renderer& renderer)
 {
     renderer.Clear();
     Vec2i center = {WIDTH / 2, HEIGHT / 2};
@@ -46,6 +48,6 @@ void Draw(sr::Renderer& renderer)
 
 int main()
 {
-    sr::Program program(Init, Process, Draw);
+    Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }

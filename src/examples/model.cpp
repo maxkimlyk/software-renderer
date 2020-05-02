@@ -4,6 +4,8 @@
 #include <cmath>
 #include <list>
 
+using namespace sr;
+
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Model";
@@ -17,10 +19,10 @@ float angle = 0.0f;
 float angleSpeed = 0.01f;
 const float maxViewpoint = 3.0f;
 
-void Init(sr::Renderer& renderer)
+void Init(Renderer& renderer)
 {}
 
-void Process(sr::Renderer& renderer, Input& input)
+void Process(Renderer& renderer, Input& input)
 {
     static const float PI = 3.14159265f;
     angle += angleSpeed;
@@ -28,7 +30,7 @@ void Process(sr::Renderer& renderer, Input& input)
         angle -= 2 * PI;
 }
 
-void Draw(sr::Renderer& renderer)
+void Draw(Renderer& renderer)
 {
     static Camera camera;
 
@@ -59,6 +61,6 @@ int main()
 
     model.Normalize();
 
-    sr::Program program(Init, Process, Draw);
+    Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }

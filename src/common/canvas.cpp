@@ -1,5 +1,8 @@
 #include "canvas.h"
 
+namespace sr
+{
+
 int LoadTGA(const char* path, Image& result)
 {
     TGA::Canvas tga;
@@ -27,3 +30,5 @@ int LoadTGA(const char* path, Image& result)
 
     return 0;
 }
+
+} // namespace sr

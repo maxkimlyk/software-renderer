@@ -4,57 +4,62 @@
 #include "geometry.h"
 #include "transforms.h"
 
+namespace sr
+{
+
 class Camera
 {
-    Vec3f position;
-    Vec3f direction;
-    Vec3f upDirection;
-    Vec3f rightDirection;
+    Vec3f position_;
+    Vec3f direction_;
+    Vec3f upDirection_;
+    Vec3f rightDirection_;
 
   public:
     Camera()
     {
-        position = Vec3f{0.0f, 0.0f, 0.0f};
-        direction = Vec3f{0.0f, 0.0f, 1.0f};
-        upDirection = Vec3f{0.0f, 1.0f, 0.0f};
-        rightDirection = Cross(direction, upDirection);
+        position_ = Vec3f{0.0f, 0.0f, 0.0f};
+        direction_ = Vec3f{0.0f, 0.0f, 1.0f};
+        upDirection_ = Vec3f{0.0f, 1.0f, 0.0f};
+        rightDirection_ = Cross(direction_, upDirection_);
     }
 
     void LookAt(Vec3f eye, Vec3f position)
     {
-        this->direction = eye - position;
-        this->rightDirection = Cross(direction, upDirection);
-        this->position = position;
+        this->direction_ = eye - position_;
+        this->rightDirection_ = Cross(direction_, upDirection_);
+        this->position_ = position_;
     }
 
     void Yaw(float angle)
     {
         Mat3f transform = Reduce<3, float>(Transform::RotateY(angle));
-        direction = transform * direction;
-        rightDirection = transform * rightDirection;
+        direction_ = transform * direction_;
+        rightDirection_ = transform * rightDirection_;
     }
 
     void Pitch(float angle)
     {
-        Mat3f transform = Reduce<3, float>(Transform::Rotate(angle, rightDirection));
-        direction = transform * direction;
-        rightDirection = transform * rightDirection;
+        Mat3f transform = Reduce<3, float>(Transform::Rotate(angle, rightDirection_));
+        direction_ = transform * direction_;
+        rightDirection_ = transform * rightDirection_;
     }
 
     void Walk(float dist)
     {
-        position = position + dist * direction;
+        position_ = position_ + dist * direction_;
     }
 
     void WalkRight(float dist)
     {
-        position = position + dist * rightDirection;
+        position_ = position_ + dist * rightDirection_;
     }
 
     Mat4f ViewMatrix()
     {
-        return Transform::LookAt(position + direction, position, upDirection);
+        return Transform::LookAt(position_ + direction_, position_, upDirection_);
     }
 };
+
+} // namespace sr
 
 #endif

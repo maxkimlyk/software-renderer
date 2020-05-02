@@ -13,6 +13,11 @@
 
 #endif
 
+namespace sr
+{
+
 uint32_t GetTimeMs();
+
+}
 
 #endif

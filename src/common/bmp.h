@@ -4,16 +4,21 @@
 #include "canvas.h"
 #include <fstream>
 
+namespace sr
+{
+
 class Bmp
 {
     std::fstream stream;
 
-    template <class T> void WritePixel(T pixel)
+    template <class T>
+    void WritePixel(T pixel)
     {
         stream.write((const char*)(&pixel), sizeof(pixel));
     }
 
-    template <> void WritePixel<uint8_t>(uint8_t pixel)
+    template <>
+    void WritePixel<uint8_t>(uint8_t pixel)
     {
         // staying in RBG-like format even if we have grayscale image
         stream.write((const char*)(&pixel), sizeof(pixel));
@@ -21,18 +26,21 @@ class Bmp
         stream.write((const char*)(&pixel), sizeof(pixel));
     }
 
-    template <class T> uint16_t BppFor()
+    template <class T>
+    uint16_t BppFor()
     {
         // using unsupported type
         return 0;
     }
 
-    template <> uint16_t BppFor<uint8_t>()
+    template <>
+    uint16_t BppFor<uint8_t>()
     {
         return 24;
     }
 
-    template <> uint16_t BppFor<uint32_t>()
+    template <>
+    uint16_t BppFor<uint32_t>()
     {
         return 32;
     }
@@ -46,7 +54,8 @@ class Bmp
         return stream.is_open();
     }
 
-    template <class T> int WriteFromCanvas(Canvas<T>& canvas)
+    template <class T>
+    int WriteFromCanvas(Canvas<T>& canvas)
     {
         if (!stream)
             return -1;
@@ -93,5 +102,7 @@ class Bmp
         return 0;
     }
 };
+
+} // namespace sr
 
 #endif

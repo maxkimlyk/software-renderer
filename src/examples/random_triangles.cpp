@@ -2,6 +2,8 @@
 #include <cmath>
 #include <list>
 
+using namespace sr;
+
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Random Triangles";
@@ -20,7 +22,7 @@ struct Element
 
 std::list<Element> Elements;
 
-void Init(sr::Renderer& renderer)
+void Init(Renderer& renderer)
 {}
 
 inline int randSize()
@@ -28,7 +30,7 @@ inline int randSize()
     return rand() % ELEMENT_SIZE_FACTOR - ELEMENT_SIZE_FACTOR / 2;
 }
 
-void Process(sr::Renderer& renderer, Input& input)
+void Process(Renderer& renderer, Input& input)
 {
     for (auto elem = Elements.begin(); elem != Elements.end();)
     {
@@ -58,7 +60,7 @@ void Process(sr::Renderer& renderer, Input& input)
     }
 }
 
-void Draw(sr::Renderer& renderer)
+void Draw(Renderer& renderer)
 {
     renderer.Clear();
     for (auto elem = Elements.begin(); elem != Elements.end(); ++elem)
@@ -67,6 +69,6 @@ void Draw(sr::Renderer& renderer)
 
 int main()
 {
-    sr::Program program(Init, Process, Draw);
+    Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }

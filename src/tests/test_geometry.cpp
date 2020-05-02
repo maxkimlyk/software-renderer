@@ -3,6 +3,8 @@
 #include "../renderer/transforms.h"
 #include <catch2/catch.hpp>
 
+using namespace sr;
+
 TEST_CASE("Vector", "[Vec]")
 {
     Vec3f vec1 = {0.0f, 1.0f, 2.0f};

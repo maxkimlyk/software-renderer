@@ -1,12 +1,15 @@
 #ifndef _MODEL_H_
 #define _MODEL_H_
 
-#include "geometry.h"
 #include "../common/logging.h"
+#include "geometry.h"
 #include <fstream>
 #include <limits>
 #include <regex>
 #include <sstream>
+
+namespace sr
+{
 
 struct Vertex
 {
@@ -29,17 +32,19 @@ struct Model
 
 class ObjReader
 {
-    std::vector<Vec3f> verts;
-    std::vector<Vec3f> norms;
-    std::vector<Vec2f> texs;
+    std::vector<Vec3f> verts_;
+    std::vector<Vec3f> norms_;
+    std::vector<Vec2f> texs_;
 
     static const uint32_t undefined = 0;
 
     std::vector<std::string> Split(std::string& string);
 
-    template <class T> bool TryParse(std::string& str, T& res);
+    template <class T>
+    bool TryParse(std::string& str, T& res);
 
-    template <size_t n, class T> Vec<n, T> Eject(std::vector<Vec<n, T>>& vector, size_t index);
+    template <size_t n, class T>
+    Vec<n, T> Eject(std::vector<Vec<n, T>>& vector, size_t index);
 
     int ParseVLine(std::vector<std::string>& tokens);
 
@@ -55,5 +60,7 @@ class ObjReader
   public:
     int ReadModel(const char* filename, Model& model);
 };
+
+} // namespace sr
 
 #endif

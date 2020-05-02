@@ -1,10 +1,11 @@
 #include "rasterizer.h"
 #include "shader.h"
 
-namespace Rasterizer
+namespace sr
 {
 
-template <class T> static inline void MinMax(T a, T b, T c, T& min, T& max)
+template <class T>
+static void MinMax(T a, T b, T c, T& min, T& max)
 {
     if (a > b)
         std::swap(a, b);
@@ -16,7 +17,8 @@ template <class T> static inline void MinMax(T a, T b, T c, T& min, T& max)
     max = c;
 }
 
-template <size_t n, class T> static Rect<T> BoundingBox(Vec<n, T> p1, Vec<n, T> p2, Vec<n, T> p3)
+template <size_t n, class T>
+static Rect<T> BoundingBox(Vec<n, T> p1, Vec<n, T> p2, Vec<n, T> p3)
 {
     Rect<T> rect;
     MinMax(p1[0], p2[0], p3[0], rect.left, rect.right);
@@ -24,7 +26,7 @@ template <size_t n, class T> static Rect<T> BoundingBox(Vec<n, T> p1, Vec<n, T> 
     return rect;
 }
 
-void Rectangle(Image& canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
+void RasterizeRectangle(Image& canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
 {
     int inc = x2 > x1 ? 1 : -1;
     for (int i = x1; i != x2; i += inc)
@@ -41,7 +43,7 @@ void Rectangle(Image& canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Co
     }
 }
 
-void SolidRect(Image& canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
+void RasterizeSolidRect(Image& canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
 {
     int xinc = x2 > x1 ? 1 : -1;
     int yinc = y2 > y1 ? 1 : -1;
@@ -52,7 +54,7 @@ void SolidRect(Image& canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Co
         }
 }
 
-void Line(Image& canvas, Vec2i p1, Vec2i p2, Color color)
+void RasterizeLine(Image& canvas, Vec2i p1, Vec2i p2, Color color)
 {
     bool transformed = false;
 
@@ -87,7 +89,7 @@ void Line(Image& canvas, Vec2i p1, Vec2i p2, Color color)
     }
 }
 
-inline void PutPixel(Image& canvas, Canvas<float>& zBuffer, int x, int y, float z, Color color)
+void PutPixel(Image& canvas, Canvas<float>& zBuffer, int x, int y, float z, Color color)
 {
     if (z >= 0 && z < zBuffer.At(x, y))
     {
@@ -96,8 +98,8 @@ inline void PutPixel(Image& canvas, Canvas<float>& zBuffer, int x, int y, float 
     }
 }
 
-inline void PutShaderedPixel(Image& canvas, Canvas<float>& zBuffer, int x, int y, float z,
-                             Vec3f bar, Shader& shader)
+void PutShaderedPixel(Image& canvas, Canvas<float>& zBuffer, int x, int y, float z, Vec3f bar,
+                      Shader& shader)
 {
     Color color;
 
@@ -108,8 +110,8 @@ inline void PutShaderedPixel(Image& canvas, Canvas<float>& zBuffer, int x, int y
     }
 }
 
-inline void HorizontalDegenerateTriangle(Image& canvas, Canvas<float>& zBuffer, Vec3f p1, Vec3f p2,
-                                         Vec3f p3, Shader& shader)
+void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& zBuffer, Vec3f p1,
+                                           Vec3f p2, Vec3f p3, Shader& shader)
 {
     // TODO: test this code
 
@@ -168,7 +170,8 @@ inline void HorizontalDegenerateTriangle(Image& canvas, Canvas<float>& zBuffer, 
     }
 }
 
-template <class T> inline void minmax(T v1, T v2, T v3, T& min, T& max)
+template <class T>
+void minmax(T v1, T v2, T v3, T& min, T& max)
 {
     if (v1 < v2)
     {
@@ -187,8 +190,8 @@ template <class T> inline void minmax(T v1, T v2, T v3, T& min, T& max)
         max = v3;
 }
 
-void Triangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vec3f p1, Vec3f p2, Vec3f p3,
-              Shader& shader)
+void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vec3f p1, Vec3f p2,
+                       Vec3f p3, Shader& shader)
 {
     // remove this later
     Vec3f zs = {p1.z, p2.z, p3.z};
@@ -224,7 +227,7 @@ void Triangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vec3f p1, Vec3f
 
     if (i1.y == i3.y)
     {
-        HorizontalDegenerateTriangle(canvas, zBuffer, p1, p2, p3, shader);
+        RasterizeHorizontalDegenerateTriangle(canvas, zBuffer, p1, p2, p3, shader);
         return;
     }
 
@@ -285,7 +288,7 @@ void Triangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vec3f p1, Vec3f
     }
 }
 
-void Triangle(Image& canvas, Vec2f p1, Vec2f p2, Vec2f p3, Color color)
+void RasterizeTriangle(Image& canvas, Vec2f p1, Vec2f p2, Vec2f p3, Color color)
 {
     Vec3f v1 = {p2.x - p1.x, p3.x - p1.x, 1.0f};
     Vec3f v2 = {p2.y - p1.y, p3.y - p1.y, 1.0f};
@@ -306,4 +309,4 @@ void Triangle(Image& canvas, Vec2f p1, Vec2f p2, Vec2f p3, Color color)
         }
 }
 
-} // namespace Rasterizer
+} // namespace sr

@@ -18,4 +18,5 @@ BraceWrapping:
   BeforeCatch: true
   BeforeElse: true
   SplitEmptyFunction: false
+AlwaysBreakTemplateDeclarations: true
 

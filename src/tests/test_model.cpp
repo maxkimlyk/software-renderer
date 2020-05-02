@@ -2,7 +2,7 @@
 
 int main()
 {
-    Model model;
-    ObjReader reader;
+    sr::Model model;
+    sr::ObjReader reader;
     return reader.ReadModel("palm.obj", model);
 }

@@ -1,5 +1,8 @@
 #include "transforms.h"
 
+namespace sr
+{
+
 namespace Transform
 {
 Mat4f RotateX(float angle)
@@ -124,3 +127,5 @@ Mat4f Viewport(float x0, float width, float y0, float height, float z0, float de
     return mat;
 }
 }; // namespace Projection
+
+} // namespace sr

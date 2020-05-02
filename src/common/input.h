@@ -5,6 +5,9 @@
 
 #include "key_codes.h"
 
+namespace sr
+{
+
 class Input
 {
     bool keys[256];
@@ -50,5 +53,7 @@ class Input
         active = false;
     }
 };
+
+} // namespace sr
 
 #endif

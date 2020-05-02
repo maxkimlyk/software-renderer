@@ -6,6 +6,9 @@
 #include "../external/tgaimage/tgaimage.h"
 #include "logging.h"
 
+namespace sr
+{
+
 union Color
 {
     struct
@@ -39,7 +42,8 @@ union Color
     }
 };
 
-template <class T> class Canvas
+template <class T>
+class Canvas
 {
     T* ptr;
 
@@ -123,5 +127,7 @@ template <class T> class Canvas
 typedef Canvas<uint32_t> Image;
 
 int LoadTGA(const char* path, Image& result);
+
+} // namespace sr
 
 #endif

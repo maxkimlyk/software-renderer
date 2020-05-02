@@ -4,6 +4,9 @@
 #include "../common/canvas.h"
 #include "geometry.h"
 
+namespace sr
+{
+
 class Shader
 {
   public:
@@ -57,5 +60,7 @@ class SolidColor : public Shader
     {}
 };
 } // namespace DefaultShaders
+
+} // namespace sr
 
 #endif

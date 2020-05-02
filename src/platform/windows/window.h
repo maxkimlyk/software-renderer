@@ -8,6 +8,9 @@
 #include "../../renderer/input.h"
 #include "../../renderer/renderer.h"
 
+namespace sr
+{
+
 static const char* WINDOW_CLASS_NAME = "rendererwindowclass";
 static const DWORD BPP = 32;
 static const size_t STR_SIZE = 32;
@@ -223,5 +226,7 @@ class Window
         return DefWindowProc(hWnd, uMsg, wParam, lParam);
     }
 };
+
+} // namespace sr
 
 #endif

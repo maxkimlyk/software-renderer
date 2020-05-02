@@ -3,6 +3,9 @@
 
 #include "geometry.h"
 
+namespace sr
+{
+
 namespace Transform
 {
 Mat4f RotateX(float angle);
@@ -22,5 +25,7 @@ Mat4f Frustum(float left, float right, float bottom, float top, float znear, flo
 Mat4f Perspective(float fovyInDegrees, float aspectRatio, float znear, float zfar);
 Mat4f Viewport(float x0, float width, float y0, float height, float z0 = 0, float depth = 255);
 }; // namespace Projection
+
+} // namespace sr
 
 #endif

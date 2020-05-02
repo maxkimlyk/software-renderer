@@ -7,8 +7,8 @@
 
 #include <X11/Xlib.h>
 
-#include "../../common/input.h"
 #include "../../common/canvas.h" // TODO: move Image to common code
+#include "../../common/input.h"
 
 namespace sr
 {

@@ -1,5 +1,8 @@
 #include "model.h"
 
+namespace sr
+{
+
 void Model::Normalize()
 {
     float maxNorm = 0;
@@ -46,7 +49,8 @@ std::vector<std::string> ObjReader::Split(std::string& string)
     return parts;
 }
 
-template <class T> bool ObjReader::TryParse(std::string& str, T& res)
+template <class T>
+bool ObjReader::TryParse(std::string& str, T& res)
 {
     std::istringstream stream(str);
     return bool(stream >> res);
@@ -82,7 +86,7 @@ int ObjReader::ParseVLine(std::vector<std::string>& tokens)
         if (!TryParse<float>(tokens[1 + i], coord[i]))
             return -1;
 
-    verts.push_back(coord);
+    verts_.push_back(coord);
     return 0;
 }
 
@@ -96,7 +100,7 @@ int ObjReader::ParseVtLine(std::vector<std::string>& tokens)
         if (!TryParse<float>(tokens[1 + i], tex[i]))
             return -1;
 
-    texs.push_back(tex);
+    texs_.push_back(tex);
     return 0;
 }
 
@@ -110,7 +114,7 @@ int ObjReader::ParseVnLine(std::vector<std::string>& tokens)
         if (!TryParse<float>(tokens[1 + i], norm[i]))
             return -1;
 
-    norms.push_back(norm);
+    norms_.push_back(norm);
     return 0;
 }
 
@@ -158,25 +162,25 @@ int ObjReader::ParseFLine(std::string& line, std::vector<std::string>& tokens, M
     else
         return -1;
 
-    if ((v1 - 1) >= verts.size() || (v2 - 1) >= verts.size() || (v3 - 1) >= verts.size() ||
-        t1 != undefined && (t1 - 1) >= texs.size() || t2 != undefined && (t2 - 1) >= texs.size() ||
-        t3 != undefined && (t3 - 1) >= texs.size() || n1 != undefined && (n1 - 1) >= norms.size() ||
-        n2 != undefined && (n2 - 1) >= norms.size() || n3 != undefined && (n3 - 1) >= norms.size())
+    if ((v1 - 1) >= verts_.size() || (v2 - 1) >= verts_.size() || (v3 - 1) >= verts_.size() ||
+        t1 != undefined && (t1 - 1) >= texs_.size() || t2 != undefined && (t2 - 1) >= texs_.size() ||
+        t3 != undefined && (t3 - 1) >= texs_.size() || n1 != undefined && (n1 - 1) >= norms_.size() ||
+        n2 != undefined && (n2 - 1) >= norms_.size() || n3 != undefined && (n3 - 1) >= norms_.size())
         return -2;
 
     Face face;
-    face.v[0].coord = Eject(verts, v1);
-    face.v[1].coord = Eject(verts, v2);
-    face.v[2].coord = Eject(verts, v3);
-    face.v[0].tex = Eject(texs, t1);
-    face.v[1].tex = Eject(texs, t2);
-    face.v[2].tex = Eject(texs, t3);
+    face.v[0].coord = Eject(verts_, v1);
+    face.v[1].coord = Eject(verts_, v2);
+    face.v[2].coord = Eject(verts_, v3);
+    face.v[0].tex = Eject(texs_, t1);
+    face.v[1].tex = Eject(texs_, t2);
+    face.v[2].tex = Eject(texs_, t3);
 
     if (n1 != undefined && n2 != undefined && n3 != undefined)
     {
-        face.v[0].norm = Eject(norms, n1);
-        face.v[1].norm = Eject(norms, n2);
-        face.v[2].norm = Eject(norms, n3);
+        face.v[0].norm = Eject(norms_, n1);
+        face.v[1].norm = Eject(norms_, n2);
+        face.v[2].norm = Eject(norms_, n3);
     }
     else
     {
@@ -211,9 +215,9 @@ int ObjReader::ParseLine(std::string& line, Model& model)
 
 void ObjReader::Clear()
 {
-    verts.clear();
-    norms.clear();
-    texs.clear();
+    verts_.clear();
+    norms_.clear();
+    texs_.clear();
 }
 
 int ObjReader::ReadModel(const char* filename, Model& model)
@@ -250,3 +254,5 @@ int ObjReader::ReadModel(const char* filename, Model& model)
     Clear();
     return status;
 }
+
+} // namespace sr

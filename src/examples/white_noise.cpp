@@ -1,16 +1,18 @@
 #include "../common/program.h"
 
+using namespace sr;
+
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "White Noise";
 
-void Init(sr::Renderer& renderer)
+void Init(Renderer& renderer)
 {}
 
-void Process(sr::Renderer& renderer, Input& input)
+void Process(Renderer& renderer, Input& input)
 {}
 
-void Draw(sr::Renderer& renderer)
+void Draw(Renderer& renderer)
 {
     for (size_t y = 0; y < renderer.Height(); ++y)
         for (size_t x = 0; x < renderer.Width(); ++x)
@@ -21,6 +23,6 @@ void Draw(sr::Renderer& renderer)
 
 int main()
 {
-    sr::Program program(Init, Process, Draw);
+    Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }

@@ -6,6 +6,8 @@
 
 #include <cmath>
 
+using namespace sr;
+
 const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Scene";
@@ -19,39 +21,39 @@ Vec3f lightDirection = Normalize(Vec3f{0, -0.2f, 3.0f});
 
 Camera camera;
 
-void Init(sr::Renderer& renderer)
+void Init(Renderer& renderer)
 {
     camera.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 1.0f, 3.0f});
 }
 
-void Process(sr::Renderer& renderer, Input& input)
+void Process(Renderer& renderer, Input& input)
 {
     const float walkDistance = 0.01f;
     const float rotateAngle = 0.05f;
 
-    if (input.IsHolding(sr::KEY_W))
+    if (input.IsHolding(KEY_W))
         camera.Walk(walkDistance);
-    if (input.IsHolding(sr::KEY_S))
+    if (input.IsHolding(KEY_S))
         camera.Walk(-walkDistance);
-    if (input.IsHolding(sr::KEY_A))
+    if (input.IsHolding(KEY_A))
         camera.WalkRight(-walkDistance);
-    if (input.IsHolding(sr::KEY_D))
+    if (input.IsHolding(KEY_D))
         camera.WalkRight(walkDistance);
 
-    if (input.IsHolding(sr::KEY_LEFT))
+    if (input.IsHolding(KEY_LEFT))
         camera.Yaw(rotateAngle);
-    if (input.IsHolding(sr::KEY_RIGHT))
+    if (input.IsHolding(KEY_RIGHT))
         camera.Yaw(-rotateAngle);
-    if (input.IsHolding(sr::KEY_UP))
+    if (input.IsHolding(KEY_UP))
         camera.Pitch(rotateAngle);
-    if (input.IsHolding(sr::KEY_DOWN))
+    if (input.IsHolding(KEY_DOWN))
         camera.Pitch(-rotateAngle);
 
     renderer.viewMatrix = camera.ViewMatrix();
     renderer.UpdateMatrices();
 }
 
-void Draw(sr::Renderer& renderer)
+void Draw(Renderer& renderer)
 {
     renderer.Clear();
     for (auto face = model.faces.begin(); face != model.faces.end(); ++face)
@@ -77,6 +79,6 @@ int main()
 
     model.Normalize();
 
-    sr::Program program(Init, Process, Draw);
+    Program program(Init, Process, Draw);
     return program.Run(WIDTH, HEIGHT, CAPTION);
 }
