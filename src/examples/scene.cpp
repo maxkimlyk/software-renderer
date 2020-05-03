@@ -37,6 +37,10 @@ void Process(Renderer& renderer, Input& input)
         camera.WalkRight(-walkDistance);
     if (input.IsHolding(KEY_D))
         camera.WalkRight(walkDistance);
+    if (input.IsHolding(KEY_E))
+        camera.RiseUp(walkDistance);
+    if (input.IsHolding(KEY_Q))
+        camera.RiseUp(-walkDistance);
 
     if (input.IsHolding(KEY_LEFT))
         camera.Yaw(rotateAngle);
@@ -47,8 +51,7 @@ void Process(Renderer& renderer, Input& input)
     if (input.IsHolding(KEY_DOWN))
         camera.Pitch(-rotateAngle);
 
-    renderer.viewMatrix = camera.ViewMatrix();
-    renderer.UpdateMatrices();
+    renderer.SetViewMatrix(camera.ViewMatrix());
 }
 
 void Draw(Renderer& renderer)

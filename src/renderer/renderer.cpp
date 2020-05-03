@@ -5,8 +5,8 @@ namespace sr
 
 Vec3f Renderer::ProjectVertex(Vec3f vertex)
 {
-    Vec4f cs = viewMatrix * Embed<4, float>(vertex);
-    Vec4f tmp = projectionMatrix * cs;
+    Vec4f cs = view_matrix_ * Embed<4, float>(vertex);
+    Vec4f tmp = projection_matrix_ * cs;
 
     if (tmp.w == 0.0f)
         tmp.w = 0.0001f;
@@ -34,9 +34,9 @@ Renderer::Renderer(Image& frame)
     : frame_(frame), zbuffer_(frame.width, frame.height), shader(DefaultShaders::flatShader)
 {
     SetViewport(0.0, (float)(frame.width), 0.0, (float)(frame.height), 0.0, 255.0);
-    projectionMatrix =
+    projection_matrix_ =
         Projection::Perspective(45.0f, (float)(frame.width) / (float)(frame.height), 0.01f, 10.0f);
-    viewMatrix = Mat4f::Identity();
+    view_matrix_ = Mat4f::Identity();
     UpdateMatrices();
 }
 
@@ -46,9 +46,21 @@ Renderer::Renderer(Image& frame)
 //     return bmp.WriteFromCanvas(zbuffer_);
 // }
 
+void Renderer::SetViewMatrix(const Mat4f& mat)
+{
+    view_matrix_ = mat;
+    UpdateMatrices();
+}
+
+void Renderer::SetProjMatrix(const Mat4f& mat)
+{
+    projection_matrix_ = mat;
+    UpdateMatrices();
+}
+
 void Renderer::UpdateMatrices()
 {
-    view_proj_matrix_ = projectionMatrix * viewMatrix;
+    view_proj_matrix_ = projection_matrix_ * view_matrix_;
 }
 
 size_t Renderer::Width()
@@ -91,7 +103,7 @@ void Renderer::Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
     RasterizeTriangle(frame_, p1, p2, p3, color);
 }
 
-void Renderer::TriangleMesh(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
+void Renderer::TriangleFrame(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
 {
     Vec3f screen1 = ProjectVertex(p1);
     Vec3f screen2 = ProjectVertex(p2);

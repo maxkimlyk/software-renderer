@@ -123,7 +123,7 @@ struct Vec : Vec_<n, T>
             base::v[i] = val;
     }
 
-    T Norm()
+    T Norm() const
     {
         return std::sqrt((*this) * (*this));
     }
@@ -249,8 +249,7 @@ struct DetWrapper
         for (int j = 0; j < n; ++j)
         {
             Mat<n - 1, T> minor = mat.CofactorMatrix(0, j);
-            T determ = DetWrapper<n - 1, T>::Det(
-                minor); // workaround for partial template function specialization
+            T determ = DetWrapper<n - 1, T>::Det(minor);
             T sign = j & 1 ? T(-1) : T(1);
             sum += sign * mat[0][j] * determ;
         }
@@ -301,7 +300,12 @@ struct Mat
         return rows[row];
     }
 
-    Vec<n, T> Row(size_t i)
+    Vec<n, T>& Row(size_t i)
+    {
+        return rows[i];
+    }
+
+    const Vec<n, T>& Row(size_t i) const
     {
         return rows[i];
     }

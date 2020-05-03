@@ -14,8 +14,8 @@ namespace sr
 class Renderer
 {
   public:
-    Mat4f viewMatrix;
-    Mat4f projectionMatrix;
+    Mat4f view_matrix_;
+    Mat4f projection_matrix_;
 
     Shader& shader;
 
@@ -23,7 +23,6 @@ class Renderer
 
     int SnapshotZBuffer(const char* file);
 
-    void UpdateMatrices();
 
     size_t Width();
     size_t Height();
@@ -35,9 +34,12 @@ class Renderer
     void DrawSolidRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color);
     void Line(Vec2i p1, Vec2i p2, Color color);
     void Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color);
-    void TriangleMesh(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
+    void TriangleFrame(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3);
+
+    void SetViewMatrix(const Mat4f& mat);
+    void SetProjMatrix(const Mat4f& mat);
 
   private:
     Mat4f view_proj_matrix_;
@@ -49,6 +51,7 @@ class Renderer
 
     Vec3f ProjectVertex(Vec3f vertex);
     void SetViewport(float x0, float width, float y0, float height, float z0, float depth);
+    void UpdateMatrices();
 };
 
 } // namespace sr

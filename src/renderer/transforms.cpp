@@ -29,7 +29,7 @@ Mat4f RotateZ(float angle)
                  {0, 0, 0, 1}};
 }
 
-Mat4f NewBasis(Vec3f newx, Vec3f newy, Vec3f newz)
+Mat4f NewBasis(const Vec3f& newx, const Vec3f& newy, const Vec3f& newz)
 {
     Mat4f mat = Mat4f::Identity();
     mat[0][0] = newx.x;
@@ -44,7 +44,7 @@ Mat4f NewBasis(Vec3f newx, Vec3f newy, Vec3f newz)
     return mat;
 }
 
-Mat4f NewBasis(Vec3f newx, Vec3f newy, Vec3f newz, Vec3f origin)
+Mat4f NewBasis(const Vec3f& newx, const Vec3f& newy, const Vec3f& newz, const Vec3f& origin)
 {
     Mat4f translation = Mat4f::Identity();
     translation[0][3] = -origin.x;
@@ -53,20 +53,21 @@ Mat4f NewBasis(Vec3f newx, Vec3f newy, Vec3f newz, Vec3f origin)
     return NewBasis(newx, newy, newz) * translation;
 }
 
-Mat4f Rotate(float angle, Vec3f axis)
+Mat4f Rotate(float angle, const Vec3f& axis)
 {
     if (axis.x == 0.0f && axis.y == 0.0f) // rotation around z axis
         return RotateZ(angle);
 
     float norm = axis.Norm();
+    Vec3f naxis = axis;
     if (norm != 1.0f && norm != 0.0f)
-        axis = axis / norm;
+        naxis = axis / norm;
 
     Vec3f ortogonal = Normalize(
-        Vec3f{axis.y, -axis.x, 0}); // orthogonal * axis == 0 && ortogonal != Vec3f {0, 0, 0}
-    Vec3f third = Normalize(Cross(axis, ortogonal));
+        Vec3f{naxis.y, -naxis.x, 0}); // orthogonal * naxis == 0 && ortogonal != Vec3f {0, 0, 0}
+    Vec3f third = Normalize(Cross(naxis, ortogonal));
 
-    Mat4f toNewBasis = NewBasis(axis, ortogonal, third);
+    Mat4f toNewBasis = NewBasis(naxis, ortogonal, third);
     Mat4f rotate = RotateX(angle);
     Mat4f toOldBasis = Transpose(toNewBasis); // toNewBasis is orthogonal matrix
 
@@ -83,11 +84,11 @@ Mat4f Translate(float x, float y, float z)
     return Mat4f{{1, 0, 0, x}, {0, 1, 0, y}, {0, 0, 1, z}, {0, 0, 0, 1}};
 }
 
-Mat4f LookAt(Vec3f eye, Vec3f center, Vec3f up)
+Mat4f LookAt(const Vec3f& eye, const Vec3f& center, const Vec3f& up)
 {
-    Vec3f e3 = Normalize(center - eye);
-    Vec3f e1 = Normalize(Cross(up, e3));
-    Vec3f e2 = Normalize(Cross(e3, e1));
+    const Vec3f e3 = Normalize(center - eye);
+    const Vec3f e1 = Normalize(Cross(up, e3));
+    const Vec3f e2 = Normalize(Cross(e3, e1));
     return NewBasis(e1, e2, e3, center);
 }
 }; // namespace Transform

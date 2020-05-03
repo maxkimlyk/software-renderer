@@ -9,7 +9,7 @@ const size_t HEIGHT = 600;
 const std::string CAPTION = "Random Triangles";
 
 const size_t ELEMENTS_AMOUNT = 100;
-const uint32_t CHANCE_FACTOR = 8;
+const uint32_t CHANCE_FACTOR = 3;
 const uint32_t ELEMENT_SIZE_FACTOR = 150;
 const uint8_t MIN_INTENSITY = 10;
 const uint8_t FADE_SPEED = 3;
