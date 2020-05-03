@@ -2,7 +2,8 @@
 
 #include <time.h>
 
-namespace sr {
+namespace sr
+{
 
 uint32_t GetTimeMs()
 {
@@ -10,4 +11,4 @@ uint32_t GetTimeMs()
     return (uint32_t)(clock() / CLOCKS_PER_MS);
 }
 
-}
+} // namespace sr

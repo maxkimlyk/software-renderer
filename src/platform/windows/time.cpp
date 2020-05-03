@@ -2,11 +2,12 @@
 
 #include <windows.h>
 
-namespace sr {
+namespace sr
+{
 
 uint32_t GetTimeMs()
 {
     return timeGetTime();
 }
 
-}
+} // namespace sr

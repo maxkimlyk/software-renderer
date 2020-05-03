@@ -32,7 +32,6 @@ const std::map<int, KeyCodes> Table = {
     {XK_Down, KEY_DOWN},
     {XK_Select, KEY_SELECT},
     {XK_Print, KEY_PRINT},
-    {XK_Execute, KEY_EXECUTE},
     {XK_Sys_Req, KEY_PRINTSCREEN},
     {XK_Insert, KEY_INSERT},
     {XK_Delete, KEY_DELETE},

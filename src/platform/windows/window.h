@@ -1,8 +1,8 @@
 #ifndef _WINDOWS_WINDOW_H_
 #define _WINDOWS_WINDOW_H_
 
-#include <string>
 #include <functional>
+#include <string>
 
 #include <windows.h>
 
@@ -29,13 +29,13 @@ class Window
     GetFrameFunc get_frame_;
     bool closed_;
 
-   public:
-
-    Window(GetFrameFunc get_frame, Input& input):
-        get_frame_(get_frame), input_(input), closed_(true)
+  public:
+    Window(GetFrameFunc get_frame, Input& input)
+        : get_frame_(get_frame), input_(input), closed_(true)
     {}
 
-    bool IsClosed() const {
+    bool IsClosed() const
+    {
         return closed_;
     }
 
@@ -214,20 +214,20 @@ class Window
             PostQuitMessage(0);
             return 0;
 
-            case WM_KEYDOWN:
-                thisptr->input_.OnKeyDown(wParam);
-                return 0;
+        case WM_KEYDOWN:
+            thisptr->input_.OnKeyDown(wParam);
+            return 0;
 
-            case WM_KEYUP:
-                thisptr->input_.OnKeyUp(wParam);
-                return 0;
+        case WM_KEYUP:
+            thisptr->input_.OnKeyUp(wParam);
+            return 0;
 
-            case WM_ACTIVATE:
-                if (HIWORD(wParam) == 0)
-                    thisptr->input_.OnFocus();
-                else
-                    thisptr->input_.OnFocusLost();
-                return 0;
+        case WM_ACTIVATE:
+            if (HIWORD(wParam) == 0)
+                thisptr->input_.OnFocus();
+            else
+                thisptr->input_.OnFocusLost();
+            return 0;
         }
 
         return DefWindowProc(hwnd_, uMsg, wParam, lParam);

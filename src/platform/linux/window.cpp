@@ -109,13 +109,6 @@ void Window::MainLoopRoutine()
     {
         XEvent event;
 
-        // Note: feels like with this way of checking new events we had a bit more FPS
-        // ===============================
-        // bool is_new_event = XCheckWindowEvent(display_, window_, ExposureMask, &event);
-        // if (!is_new_event)
-        //     return;
-        // ===============================
-
         int num_new_events = XPending(display_);
         if (!num_new_events)
             return;
@@ -136,7 +129,6 @@ void Window::MainLoopRoutine()
         case KeyPress:
         {
             unsigned long key = XLookupKeysym(&event.xkey, 0);
-            LOG("Pressed %x\n", key);
             input_.OnKeyDown(ConvertKey(key));
         }
         break;
