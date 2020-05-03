@@ -1,5 +1,3 @@
-#include <X11/keysymdef.h>
-
 #include "../common/program.h"
 #include "../renderer/camera.h"
 #include "../renderer/model.h"
@@ -61,7 +59,6 @@ void Draw(Renderer& renderer)
         Vec3f v1 = face->v[0].coord;
         Vec3f v2 = face->v[1].coord;
         Vec3f v3 = face->v[2].coord;
-
         renderer.Triangle(v1, v2, v3);
     }
 }

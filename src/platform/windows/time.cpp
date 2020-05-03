@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-namespace {
+namespace sr {
 
 uint32_t GetTimeMs()
 {

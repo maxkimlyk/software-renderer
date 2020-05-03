@@ -49,7 +49,7 @@ enum KeyCodes
     KEY_DOWN = 40,
     KEY_SELECT = 41,
     KEY_PRINT = 42,
-    KEY_EXECUTE = 43,
+    // KEY_EXECUTE = 43,
     KEY_PRINTSCREEN = 44,
     KEY_INSERT = 45,
     KEY_DELETE = 46,
