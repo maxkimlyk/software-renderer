@@ -25,9 +25,9 @@ class Camera
 
     void LookAt(Vec3f eye, Vec3f position)
     {
-        this->direction_ = eye - position_;
+        this->direction_ = eye - position;
         this->rightDirection_ = Cross(direction_, upDirection_);
-        this->position_ = position_;
+        this->position_ = position;
     }
 
     void Yaw(float angle)
