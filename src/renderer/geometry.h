@@ -91,6 +91,9 @@ struct Vec : Vec_<n, T>
 
     Vec()
     {}
+
+    Vec(const Vec<n, T>& other) = default;
+
     Vec(std::initializer_list<T> list)
     {
         size_t i = 0;

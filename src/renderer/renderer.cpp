@@ -31,7 +31,7 @@ void Renderer::SetViewport(float x0, float width, float y0, float height, float 
 }
 
 Renderer::Renderer(Image& frame)
-    : frame_(frame), zbuffer_(frame.width, frame.height), shader(DefaultShaders::flatShader)
+    : frame_(frame), zbuffer_(frame.width, frame.height), shader_(&DefaultShaders::flatShader)
 {
     SetViewport(0.0, (float)(frame.width), 0.0, (float)(frame.height), 0.0, 255.0);
     projection_matrix_ =
@@ -128,19 +128,42 @@ void Renderer::Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
     Vec3f screen2 = ProjectVertex(p2);
     Vec3f screen3 = ProjectVertex(p3);
 
-    RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, screen1, screen2, screen3,
-                      solidColorShader);
+    Vertex v1 = screen1;
+    Vertex v2 = screen2;
+    Vertex v3 = screen3;
+
+    RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, v1, v2, v3, solidColorShader);
 }
 
-void Renderer::Triangle(Vec3f p1, Vec3f p2, Vec3f p3)
+void Renderer::Triangle(Vec3f v1, Vec3f v2, Vec3f v3)
 {
-    shader.vertex(p1, p2, p3);
+    // shader_.vertex(v1, v2, v3);
 
-    Vec3f screen1 = ProjectVertex(p1);
-    Vec3f screen2 = ProjectVertex(p2);
-    Vec3f screen3 = ProjectVertex(p3);
+    Vec3f screen1 = ProjectVertex(v1);
+    Vec3f screen2 = ProjectVertex(v2);
+    Vec3f screen3 = ProjectVertex(v3);
 
-    RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, screen1, screen2, screen3, shader);
+    Vertex ver1 = screen1;
+    Vertex ver2 = screen2;
+    Vertex ver3 = screen3;
+
+    RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, ver1, ver2, ver3, *shader_);
+}
+
+void Renderer::Triangle(Vertex v1, Vertex v2, Vertex v3)
+{
+    shader_->vertex(v1, v2, v3);
+
+    v1.coord = ProjectVertex(v1.coord);
+    v2.coord = ProjectVertex(v2.coord);
+    v3.coord = ProjectVertex(v3.coord);
+
+    RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, v1, v2, v3, *shader_);
+}
+
+void Renderer::SetShader(Shader& shader)
+{
+    shader_ = &shader;
 }
 
 } // namespace sr

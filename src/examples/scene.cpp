@@ -56,12 +56,14 @@ void Process(Renderer& renderer, Input& input)
 
 void Draw(Renderer& renderer)
 {
+    // renderer.SetShader(DefaultShaders::flatShader);
+    renderer.SetShader(DefaultShaders::phongShader);
     renderer.Clear();
     for (auto face = model.faces.begin(); face != model.faces.end(); ++face)
     {
-        Vec3f v1 = face->v[0].coord;
-        Vec3f v2 = face->v[1].coord;
-        Vec3f v3 = face->v[2].coord;
+        const Vertex& v1 = face->v[0];
+        const Vertex& v2 = face->v[1];
+        const Vertex& v3 = face->v[2];
         renderer.Triangle(v1, v2, v3);
     }
 }

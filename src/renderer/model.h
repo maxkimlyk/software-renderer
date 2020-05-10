@@ -8,15 +8,10 @@
 #include <regex>
 #include <sstream>
 
+#include "vertex.h"
+
 namespace sr
 {
-
-struct Vertex
-{
-    Vec3f coord;
-    Vec3f norm;
-    Vec2f tex;
-};
 
 struct Face
 {

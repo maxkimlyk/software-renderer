@@ -17,7 +17,7 @@ class Renderer
     Mat4f view_matrix_;
     Mat4f projection_matrix_;
 
-    Shader& shader;
+    Shader* shader_;
 
     Renderer(Image& frame);
 
@@ -37,9 +37,12 @@ class Renderer
     void TriangleFrame(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3);
+    void Triangle(Vertex v1, Vertex v2, Vertex v3);
 
     void SetViewMatrix(const Mat4f& mat);
     void SetProjMatrix(const Mat4f& mat);
+
+    void SetShader (Shader& shader);
 
   private:
     Mat4f view_proj_matrix_;
