@@ -23,9 +23,9 @@ class Camera
         right_direction_ = Cross(direction_, up_direction_);
     }
 
-    void LookAt(const Vec3f& eye, const Vec3f& position)
+    void LookAt(const Vec3f& at, const Vec3f& position)
     {
-        this->direction_ = Normalize(eye - position);
+        this->direction_ = Normalize(at - position);
         this->right_direction_ = Normalize(Cross(direction_, up_direction_));
         this->position_ = position;
     }
