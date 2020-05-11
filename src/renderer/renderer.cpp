@@ -5,7 +5,7 @@ namespace sr
 
 Vec3f Renderer::ProjectVertex(Vec3f vertex)
 {
-    Vec4f cs = view_matrix_ * Embed<4, float>(vertex);
+    Vec4f cs = model_view_matrix_ * Embed<4, float>(vertex);
     Vec4f tmp = projection_matrix_ * cs;
 
     if (tmp.w == 0.0f)
@@ -37,6 +37,7 @@ Renderer::Renderer(Image& frame)
     projection_matrix_ =
         Projection::Perspective(45.0f, (float)(frame.width) / (float)(frame.height), 0.01f, 10.0f);
     view_matrix_ = Mat4f::Identity();
+    model_matrix_ = Mat4f::Identity();
     UpdateMatrices();
 }
 
@@ -45,6 +46,12 @@ Renderer::Renderer(Image& frame)
 //     Bmp bmp(file);
 //     return bmp.WriteFromCanvas(zbuffer_);
 // }
+
+void Renderer::SetModelMatrix(const Mat4f& mat)
+{
+    model_matrix_ = mat;
+    UpdateMatrices();
+}
 
 void Renderer::SetViewMatrix(const Mat4f& mat)
 {
@@ -60,7 +67,8 @@ void Renderer::SetProjMatrix(const Mat4f& mat)
 
 void Renderer::UpdateMatrices()
 {
-    view_proj_matrix_ = projection_matrix_ * view_matrix_;
+    model_view_matrix_ = view_matrix_ * model_matrix_;
+    view_proj_matrix_ = projection_matrix_ * model_view_matrix_;
 }
 
 size_t Renderer::Width()

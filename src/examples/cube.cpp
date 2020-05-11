@@ -10,6 +10,8 @@ const size_t WIDTH = 800;
 const size_t HEIGHT = 600;
 const std::string CAPTION = "Scene";
 
+float angle = 0.0f;
+
 Camera camera;
 
 void AddQuad(std::vector<Face>& result, const Vec3f& bl, const Vec3f& br, const Vec3f& tr,
@@ -60,18 +62,20 @@ void Init(Renderer& renderer)
 
 void Process(Renderer& renderer, Input& input)
 {
-
+    angle += M_PI / 200.0f;
+    Mat4f model_mat = Transform::RotateY(angle);
+    renderer.SetModelMatrix(model_mat);
+    renderer.SetViewMatrix(camera.ViewMatrix());
 }
 
 void Draw(Renderer& renderer)
 {
-    renderer.SetViewMatrix(camera.ViewMatrix());
     // DefaultShaders::TextureShader texture_shader(texture);
     // renderer.SetShader();
     renderer.Clear();
     for (const auto& face : Cube)
     {
-        renderer.TriangleFrame(face.v[0].coord, face.v[1].coord, face.v[2].coord, Color(255, 255, 255));
+        renderer.Triangle(face.v[0].coord, face.v[1].coord, face.v[2].coord, Color(255, 255, 255));
     }
 }
 

@@ -14,7 +14,9 @@ namespace sr
 class Renderer
 {
   public:
+    Mat4f model_matrix_;
     Mat4f view_matrix_;
+    Mat4f model_view_matrix_;
     Mat4f projection_matrix_;
 
     Shader* shader_;
@@ -22,7 +24,6 @@ class Renderer
     Renderer(Image& frame);
 
     int SnapshotZBuffer(const char* file);
-
 
     size_t Width();
     size_t Height();
@@ -39,6 +40,7 @@ class Renderer
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3);
     void Triangle(Vertex v1, Vertex v2, Vertex v3);
 
+    void SetModelMatrix(const Mat4f& mat);
     void SetViewMatrix(const Mat4f& mat);
     void SetProjMatrix(const Mat4f& mat);
 
