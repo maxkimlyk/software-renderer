@@ -130,6 +130,13 @@ struct Vec : Vec_<n, T>
     {
         return std::sqrt((*this) * (*this));
     }
+
+    T Sum() const {
+        T sum = 0;
+        for (size_t i = 0; i < n; ++i)
+            sum += base::v[i];
+        return sum;
+    }
 };
 
 template <size_t n, class T>

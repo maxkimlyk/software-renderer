@@ -287,9 +287,6 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vertex
         int x1 = (int)(i1.x + t * (i3.x - i1.x));
         int x2 = (int)(upperSegment ? i2.x + u * (i3.x - i2.x) : i1.x + u * (i2.x - i1.x));
 
-        // if (x1 > x2)
-        //     std::swap(x1, x2);
-
         auto [startX, endX] = minmax(x1, x2);
 
         if (x2 < 0 || x1 > width - 1)
@@ -324,7 +321,11 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vertex
                     std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f - b2 - b3, b2, b3);
                 }
 
-                PutShaderedPixel(canvas, zBuffer, x, y, bar * zs, bar, shader);
+                Vec3f corrected_bar =
+                    Vec3f{bar[0] / v1.coord.z, bar[1] / v2.coord.z, bar[2] / v3.coord.z};
+                corrected_bar = corrected_bar / corrected_bar.Sum();
+
+                PutShaderedPixel(canvas, zBuffer, x, y, bar * zs, corrected_bar, shader);
             }
         }
     }
