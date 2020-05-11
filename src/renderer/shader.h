@@ -49,7 +49,9 @@ class FlatShader : public Shader
     Color color = Color(255, 255, 255);
 
   public:
-    Vec3f lightDirection = Vec3f{0.0f, 0.0f, 1.0f};
+    float ambient_light_intensity = 0.1f;
+    Vec3f light_direction = Vec3f{0.0f, 0.0f, -1.0f};
+    Mat4f corr_matrix = Mat4f::Identity();
 
     virtual bool pixel(Vec3f bar, Color& resultColor) override
     {
@@ -59,16 +61,45 @@ class FlatShader : public Shader
 
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
     {
-        Vec3f norm = Normalize(Cross(v3.coord - v1.coord, v3.coord - v2.coord));
-        float cross = lightDirection * norm;
-        float lightIntensity = cross > 0 ? cross : 0;
-        color.r = (uint8_t)(255.0f * lightIntensity);
-        color.g = (uint8_t)(255.0f * lightIntensity);
-        color.b = (uint8_t)(255.0f * lightIntensity);
+        const Vec3f norm = Normalize(Cross(v3.coord - v1.coord, v2.coord - v1.coord));
+        const Vec4f norm4 = Embed<4>(norm, 0.0f);
+        const Vec4f corr_norm4 = corr_matrix * norm4;
+        const Vec3f corr_norm = Normalize(Project<3>(corr_norm4));
+        const float cross = light_direction * corr_norm;
+        const float lightIntensity = cross > 0 ? cross : 0;
+        const float value =
+            255.0f * (ambient_light_intensity + (1.0f - ambient_light_intensity) * lightIntensity);
+        color = Color(value, value, value);
     }
 };
 
 extern FlatShader flatShader;
+
+class FlatTexture : public Shader
+{
+    Vec3f us;
+    Vec3f vs;
+    const Image& texture;
+
+  public:
+    FlatTexture(const Image& texture) : texture(texture)
+    {}
+
+    virtual bool pixel(Vec3f bar, Color& resultColor) override
+    {
+        const float u = bar * us;
+        const float v = bar * vs;
+        resultColor = texture.AtSafe(std::round(u * (texture.width - 1)),
+                                     std::round(v * (texture.height - 1)));
+        return true;
+    }
+
+    virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
+    {
+        us = Vec3f{v1.tex.x, v2.tex.x, v3.tex.x};
+        vs = Vec3f{v1.tex.y, v2.tex.y, v3.tex.y};
+    }
+};
 
 class SolidColor : public Shader
 {

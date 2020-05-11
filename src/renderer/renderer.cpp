@@ -65,6 +65,11 @@ void Renderer::SetProjMatrix(const Mat4f& mat)
     UpdateMatrices();
 }
 
+const Mat4f& Renderer::GetModelViewMatrix() const
+{
+    return model_view_matrix_;
+}
+
 void Renderer::UpdateMatrices()
 {
     model_view_matrix_ = view_matrix_ * model_matrix_;

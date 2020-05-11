@@ -43,6 +43,7 @@ class Renderer
     void SetModelMatrix(const Mat4f& mat);
     void SetViewMatrix(const Mat4f& mat);
     void SetProjMatrix(const Mat4f& mat);
+    const Mat4f& GetModelViewMatrix() const;
 
     void SetShader (Shader& shader);
 

@@ -68,12 +68,26 @@ class Canvas
         return ptr[x + (height - 1 - y) * width];
     }
 
+    T& At(size_t x, size_t y) const
+    {
+        return ptr[x + (height - 1 - y) * width];
+    }
+
     T& AtSafe(size_t x, size_t y)
     {
         if ((uint32_t)(x) < width && (uint32_t)(y) < height)
             return At(x, y);
 
         static T stub = 0;
+        return stub;
+    }
+
+    T& AtSafe(size_t x, size_t y) const
+    {
+        if ((uint32_t)(x) < width && (uint32_t)(y) < height)
+            return At(x, y);
+
+        static T stub = static_cast<T>(0x00ff00ff);
         return stub;
     }
 

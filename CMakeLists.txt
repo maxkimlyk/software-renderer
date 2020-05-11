@@ -48,6 +48,7 @@ add_custom_target(data_files
 
 add_dependencies(model data_files)
 add_dependencies(scene data_files)
+add_dependencies(cube data_files)
 
 # Clang format
 set(EXTERNAL_SRC_DIR src/external)

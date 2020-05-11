@@ -213,6 +213,14 @@ std::pair<T, T> minmax(T v1, T v2, T v3)
     return std::make_pair(min, max);
 }
 
+template <class T>
+std::pair<T, T> minmax(T v1, T v2)
+{
+    if (v1 <= v2)
+        return std::make_pair(v1, v2);
+    return std::make_pair(v2, v1);
+}
+
 void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vertex v1, Vertex v2,
                        Vertex v3, Shader& shader)
 {
@@ -271,7 +279,7 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vertex
 
     for (int y = startY; y <= endY; ++y)
     {
-        bool upperSegment = y > i2.y;
+        bool upperSegment = y >= i2.y;
         float t = (y - i1.y) / triangle_height;
         float u =
             upperSegment ? (y - i2.y) / (float)(i3.y - i2.y) : (y - i1.y) / (float)(i2.y - i1.y);
@@ -279,8 +287,10 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vertex
         int x1 = (int)(i1.x + t * (i3.x - i1.x));
         int x2 = (int)(upperSegment ? i2.x + u * (i3.x - i2.x) : i1.x + u * (i2.x - i1.x));
 
-        if (x1 > x2)
-            std::swap(x1, x2);
+        // if (x1 > x2)
+        //     std::swap(x1, x2);
+
+        auto [startX, endX] = minmax(x1, x2);
 
         if (x2 < 0 || x1 > width - 1)
             continue;
@@ -293,8 +303,8 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vertex
         }
         else
         {
-            int startX = x1 < 0 ? 0 : x1;
-            int endX = x2 >= width ? width - 1 : x2;
+            startX = startX < 0 ? 0 : startX;
+            endX = endX >= width ? width - 1 : endX;
 
             float invXLength = 1.0f / (x2 - x1);
             for (int x = startX; x <= endX; ++x)
@@ -303,17 +313,15 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vertex
 
                 if (upperSegment)
                 {
-                    float b2 = (1.0f - s) * u;
-                    float b3 = s * t;
-                    // bar = Vec3f{1.0f - b2 - b3, b2, b3};
-                    std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f - b2 - b3, b2, b3);
+                    float b1 = (1.0f - t) * (1.0f - s);
+                    float b2 = (1.0f - u) * s;
+                    std::tie(*bar1, *bar2, *bar3) = std::make_tuple(b1, b2, 1.0f - b1 - b2);
                 }
                 else
                 {
-                    float b1 = s * (1.0f - t);
-                    float b2 = (1.0f - s) * (1.0f - u);
-                    // bar = Vec3f{b1, b2, 1.0f - b1 - b2};
-                    std::tie(*bar1, *bar2, *bar3) = std::make_tuple(b1, b2, 1.0f - b1 - b2);
+                    float b3 = t * (1.0f - s);
+                    float b2 = u * s;
+                    std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f - b2 - b3, b2, b3);
                 }
 
                 PutShaderedPixel(canvas, zBuffer, x, y, bar * zs, bar, shader);
