@@ -28,6 +28,15 @@ TEST_CASE("Vector", "[Vec]")
     CHECK(vec2.z == 0.0f);
 }
 
+TEST_CASE("VecView", "[Vec]")
+{
+    Vec3f v1 = {0.0f, 0.0f, 0.0f};
+    VecView view(v1);
+    std::swap(view[0], view[1]);
+    view = Vec3f{1.0f, 2.0f, 3.0f};
+    CHECK(v1 == Vec3f{2.0f, 1.0f, 3.0f});
+}
+
 TEST_CASE("Matrix", "[Mat]")
 {
     Mat3f mat1 = {{0.0f, 1.0f, 2.0f}, {0.0f, 1.0f, 2.0f}, {3.0f, 4.0f, 5.0f}};

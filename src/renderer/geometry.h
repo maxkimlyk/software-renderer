@@ -2,6 +2,7 @@
 #define _GEOMETRY_H_
 
 #include "definitions.h"
+
 #include <initializer_list>
 #include <iostream>
 
@@ -131,7 +132,8 @@ struct Vec : Vec_<n, T>
         return std::sqrt((*this) * (*this));
     }
 
-    T Sum() const {
+    T Sum() const
+    {
         T sum = 0;
         for (size_t i = 0; i < n; ++i)
             sum += base::v[i];
@@ -249,6 +251,38 @@ typedef Vec<4, float> Vec4f;
 typedef Vec<2, double> Vec2d;
 typedef Vec<3, double> Vec3d;
 typedef Vec<4, double> Vec4d;
+
+template <size_t n, class T>
+class VecView
+{
+  public:
+    using Ptr = T*;
+
+    Ptr ref[n];
+
+    VecView(Vec<n, T>& vec)
+    {
+        for (size_t i = 0; i < n; ++i)
+            ref[i] = &vec[i];
+    }
+
+    void operator=(const Vec<n, T>& vec)
+    {
+        for (size_t i = 0; i < n; ++i)
+            *ref[i] = vec[i];
+    }
+
+    Ptr& operator[](size_t i)
+    {
+        return ref[i];
+    }
+};
+
+// deduction guide
+template <size_t n, class T>
+VecView(Vec<n, T>&)->VecView<n, T>;
+
+typedef Vec<3, float> RefVec3f;
 
 template <size_t n, class T>
 struct DetWrapper

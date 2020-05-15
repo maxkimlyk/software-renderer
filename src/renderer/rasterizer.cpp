@@ -83,9 +83,7 @@ void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& z_buffe
     const Vec3f zs = {screen1.z, screen2.z, screen3.z};
 
     Vec3f bar;
-    float* bar1 = &bar[0];
-    float* bar2 = &bar[1];
-    float* bar3 = &bar[2];
+    VecView bar_view(bar);
 
     const int y = Round(screen1.y);
 
@@ -96,30 +94,27 @@ void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& z_buffe
     if (x1 > x2)
     {
         std::swap(x1, x2);
-        std::swap(bar1, bar2);
+        std::swap(bar_view[0], bar_view[1]);
     }
     if (x2 > x3)
     {
         std::swap(x2, x3);
-        std::swap(bar2, bar3);
+        std::swap(bar_view[1], bar_view[2]);
     }
     if (x1 > x2)
     {
         std::swap(x1, x2);
-        std::swap(bar1, bar2);
+        std::swap(bar_view[0], bar_view[1]);
     }
 
     if (x1 == x3)
     {
-        std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f, 0.0f, 0.0f);
-        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar,
-                         DoBarPerspectiveCorrection(bar, bar_corr), shader);
-        std::tie(*bar1, *bar2, *bar3) = std::make_tuple(0.0f, 1.0f, 0.0f);
-        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar,
-                         DoBarPerspectiveCorrection(bar, bar_corr), shader);
-        std::tie(*bar1, *bar2, *bar3) = std::make_tuple(0.0f, 0.0f, 1.0f);
-        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar,
-                         DoBarPerspectiveCorrection(bar, bar_corr), shader);
+        bar_view = Vec3f{1.0f, 0.0f, 0.0f};
+        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar, bar, shader);
+        bar_view = Vec3f{0.0f, 1.0f, 0.0f};
+        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar, bar, shader);
+        bar_view = Vec3f{0.0f, 0.0f, 1.0f};
+        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar, bar, shader);
         return;
     }
 
@@ -135,19 +130,18 @@ void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& z_buffe
         const float u = rightSegment ? (x - x2) * invRightLength : (x - x1) * invLeftLength;
 
         // first side
-        // Vec3f bar = {(1.0f - t), 0.0f, t};
-        std::tie(*bar1, *bar2, *bar3) = std::make_tuple((1.0f - t), 0.0f, t);
-        PutShaderedPixel(canvas, z_buffer, x, y, zs * bar, bar, shader);
+        bar_view = Vec3f{(1.0f - t), 0.0f, t};
+        Vec3f corrected_bar = DoBarPerspectiveCorrection(bar, bar_corr);
+        PutShaderedPixel(canvas, z_buffer, x, y, zs * corrected_bar, corrected_bar, shader);
 
         // sedond side
         if (rightSegment)
-            // bar = Vec3f{0.0f, (1.0f - u), u};
-            std::tie(*bar1, *bar2, *bar3) = std::make_tuple(0.0f, (1.0f - u), u);
+            bar_view = Vec3f{0.0f, (1.0f - u), u};
         else
-            // bar = Vec3f{(1.0f - u), u, 0.0f};
-            std::tie(*bar1, *bar2, *bar3) = std::make_tuple((1.0f - u), u, 0.0f);
+            bar_view = Vec3f{(1.0f - u), u, 0.0f};
 
-        PutShaderedPixel(canvas, z_buffer, x, y, zs * bar, bar, shader);
+        corrected_bar = DoBarPerspectiveCorrection(bar, bar_corr);
+        PutShaderedPixel(canvas, z_buffer, x, y, zs * corrected_bar, corrected_bar, shader);
     }
 }
 
@@ -236,9 +230,7 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4
     const Vec3f bar_corr = {1.0f / screen1.w, 1.0f / screen2.w, 1.0f / screen3.w};
 
     Vec3f bar;
-    float* bar1 = &bar[0];
-    float* bar2 = &bar[1];
-    float* bar3 = &bar[2];
+    VecView bar_view(bar);
 
     Vec2i i1 = {Round(screen1.x), Round(screen1.y)};
     Vec2i i2 = {Round(screen2.x), Round(screen2.y)};
@@ -247,17 +239,17 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4
     if (i1.y > i2.y)
     {
         std::swap(i1, i2);
-        std::swap(bar1, bar2);
+        std::swap(bar_view[0], bar_view[1]);
     }
     if (i2.y > i3.y)
     {
         std::swap(i2, i3);
-        std::swap(bar2, bar3);
+        std::swap(bar_view[1], bar_view[2]);
     }
     if (i1.y > i2.y)
     {
         std::swap(i1, i2);
-        std::swap(bar1, bar2);
+        std::swap(bar_view[0], bar_view[1]);
     }
 
     if (i1.y >= height || i3.y < 0)
@@ -300,8 +292,9 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4
 
         if (x1 == x2)
         {
-            std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f - t, 0.0f, t);
-            PutShaderedPixel(canvas, z_buffer, x1, y, bar * zs, bar, shader);
+            bar_view = Vec3f{1.0f - t, 0.0f, t};
+            const Vec3f corrected_bar = DoBarPerspectiveCorrection(bar, bar_corr);
+            PutShaderedPixel(canvas, z_buffer, x1, y, corrected_bar * zs, corrected_bar, shader);
         }
         else
         {
@@ -317,41 +310,20 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4
                 {
                     const float b1 = (1.0f - t) * (1.0f - s);
                     const float b2 = (1.0f - u) * s;
-                    std::tie(*bar1, *bar2, *bar3) = std::make_tuple(b1, b2, 1.0f - b1 - b2);
+                    bar_view = Vec3f{b1, b2, 1.0f - b1 - b2};
                 }
                 else
                 {
                     const float b3 = t * (1.0f - s);
                     const float b2 = u * s;
-                    std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f - b2 - b3, b2, b3);
+                    bar_view = Vec3f{1.0f - b2 - b3, b2, b3};
                 }
 
                 const Vec3f corrected_bar = DoBarPerspectiveCorrection(bar, bar_corr);
-                PutShaderedPixel(canvas, z_buffer, x, y, bar * zs, corrected_bar, shader);
+                PutShaderedPixel(canvas, z_buffer, x, y, corrected_bar * zs, corrected_bar, shader);
             }
         }
     }
 }
-
-// void RasterizeTriangle(Image& canvas, Vec2f p1, Vec2f p2, Vec2f p3, Color color)
-// {
-//     Vec3f v1 = {p2.x - p1.x, p3.x - p1.x, 1.0f};
-//     Vec3f v2 = {p2.y - p1.y, p3.y - p1.y, 1.0f};
-
-//     Rect<float> rect = BoundingBox(p1, p2, p3);
-//     for (float y = rect.bottom; y <= rect.top; ++y)
-//         for (float x = rect.left; x <= rect.right; ++x)
-//         {
-//             v1.z = p1.x - x;
-//             v2.z = p1.y - y;
-//             Vec3f tmp = Cross(v1, v2);
-//             tmp.x = tmp.x / tmp.z;
-//             tmp.y = tmp.y / tmp.z;
-//             Vec3f bar = Vec3f{1 - tmp.x - tmp.y, tmp.x, tmp.y};
-
-//             if (bar.x >= 0.0f && bar.y >= 0.0f && bar.z >= 0.0f)
-//                 canvas.SetPixel(x, y, color);
-//         }
-// }
 
 } // namespace sr
