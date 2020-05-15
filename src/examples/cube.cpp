@@ -11,7 +11,12 @@ const size_t HEIGHT = 600;
 const std::string CAPTION = "Scene";
 const std::string TEXTURE_PATH = "box.tga";
 
+const float ROTATE_SPEED = M_PI / 200.0f;
+const float ANGLE_CHANGE_SPEED = 0.05f;
+
 float angle = 0.0f;
+float x_angle = 0.0f;
+float z_angle = 0.0f;
 
 Camera camera;
 Image texture;
@@ -64,8 +69,17 @@ void Init(Renderer& renderer)
 
 void Process(Renderer& renderer, Input& input)
 {
-    angle += M_PI / 200.0f;
-    Mat4f model_mat = Transform::RotateY(angle);
+    if (input.IsHolding(KEY_UP))
+        x_angle += ANGLE_CHANGE_SPEED;
+    if (input.IsHolding(KEY_DOWN))
+        x_angle -= ANGLE_CHANGE_SPEED;
+    if (input.IsHolding(KEY_LEFT))
+        z_angle += ANGLE_CHANGE_SPEED;
+    if (input.IsHolding(KEY_RIGHT))
+        z_angle -= ANGLE_CHANGE_SPEED;
+
+    angle += ROTATE_SPEED;
+    Mat4f model_mat = Transform::RotateY(angle) * Transform::RotateX(x_angle) * Transform::RotateZ(z_angle);
     renderer.SetModelMatrix(model_mat);
     renderer.SetViewMatrix(camera.ViewMatrix());
 }
