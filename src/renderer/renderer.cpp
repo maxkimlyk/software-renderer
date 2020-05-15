@@ -112,10 +112,10 @@ void Renderer::Line(Vec2i p1, Vec2i p2, Color color)
     RasterizeLine(frame_, p1, p2, color);
 }
 
-void Renderer::Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
-{
-    RasterizeTriangle(frame_, p1, p2, p3, color);
-}
+// void Renderer::Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
+// {
+//     RasterizeTriangle(frame_, p1, p2, p3, color);
+// }
 
 void Renderer::TriangleFrame(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
 {
