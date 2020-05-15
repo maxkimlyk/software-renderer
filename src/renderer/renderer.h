@@ -38,14 +38,14 @@ class Renderer
     void TriangleFrame(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3);
-    void Triangle(Vertex v1, Vertex v2, Vertex v3);
+    void Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3);
 
     void SetModelMatrix(const Mat4f& mat);
     void SetViewMatrix(const Mat4f& mat);
     void SetProjMatrix(const Mat4f& mat);
     const Mat4f& GetModelViewMatrix() const;
 
-    void SetShader (Shader& shader);
+    void SetShader(Shader& shader);
 
   private:
     Mat4f view_proj_matrix_;
@@ -55,7 +55,7 @@ class Renderer
     Canvas<float> zbuffer_;
     Image& frame_;
 
-    Vec3f ProjectVertex(Vec3f vertex);
+    Vec4f ProjectVertex(Vec3f vertex);
     void SetViewport(float x0, float width, float y0, float height, float z0, float depth);
     void UpdateMatrices();
 };

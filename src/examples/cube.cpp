@@ -26,13 +26,6 @@ void AddQuad(std::vector<Face>& result, const Vec3f& bl, const Vec3f& br, const 
     result.push_back({Vertex(bl, norm, Vec2f{0.0f, 0.0f}),
                       Vertex(tr, norm, Vec2f{1.0f, 1.0f}),
                       Vertex(tl, norm, Vec2f{0.0f, 1.0f})});
-
-    // result.push_back({Vertex(br, norm, Vec2f{1.0f, 0.0f}),
-    //                   Vertex(bl, norm, Vec2f{0.0f, 0.0f}),
-    //                   Vertex(tl, norm, Vec2f{0.0f, 1.0f})});
-    // result.push_back({Vertex(br, norm, Vec2f{1.0f, 0.0f}),
-    //                   Vertex(tl, norm, Vec2f{0.0f, 1.0f}),
-    //                   Vertex(tr, norm, Vec2f{1.0f, 1.0f})});
     // clang-format on
 }
 
@@ -79,19 +72,12 @@ void Process(Renderer& renderer, Input& input)
 
 void Draw(Renderer& renderer)
 {
-    // DefaultShaders::TextureShader texture_shader(texture);
-    // DefaultShaders::FlatShader shader;
-    // shader.corr_matrix = renderer.GetModelViewMatrix();
-    // shader.light_direction = Normalize(Vec3f{-1.0f, -1.0f, -1.0f});
-    // renderer.SetShader(shader);
-
     DefaultShaders::FlatTexture shader(texture);
     renderer.SetShader(shader);
 
     renderer.Clear();
     for (const auto& face : Cube)
     {
-        // renderer.Triangle(face.v[0].coord, face.v[1].coord, face.v[2].coord, Color(255, 255, 255));
         renderer.Triangle(face.v[0], face.v[1], face.v[2]);
     }
 }

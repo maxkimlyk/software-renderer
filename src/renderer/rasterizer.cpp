@@ -91,28 +91,28 @@ void RasterizeLine(Image& canvas, Vec2i p1, Vec2i p2, Color color)
     }
 }
 
-void PutPixel(Image& canvas, Canvas<float>& zBuffer, int x, int y, float z, Color color)
+void PutPixel(Image& canvas, Canvas<float>& z_buffer, int x, int y, float z, Color color)
 {
-    if (z >= 0 && z < zBuffer.At(x, y))
+    if (z >= 0 && z < z_buffer.At(x, y))
     {
-        zBuffer.SetPixel(x, y, z);
+        z_buffer.SetPixel(x, y, z);
         canvas.SetPixel(x, y, color);
     }
 }
 
-void PutShaderedPixel(Image& canvas, Canvas<float>& zBuffer, int x, int y, float z, Vec3f bar,
+void PutShaderedPixel(Image& canvas, Canvas<float>& z_buffer, int x, int y, float z, Vec3f bar,
                       Shader& shader)
 {
     Color color;
 
-    if (z >= 0 && z < zBuffer.At(x, y) && shader.pixel(bar, color))
+    if (z >= 0 && z < z_buffer.At(x, y) && shader.pixel(bar, color))
     {
-        zBuffer.SetPixel(x, y, z);
+        z_buffer.SetPixel(x, y, z);
         canvas.SetPixel(x, y, color);
     }
 }
 
-void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& zBuffer, Vertex v1,
+void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& z_buffer, Vertex v1,
                                            Vertex v2, Vertex v3, Shader& shader)
 {
     const Vec3f zs = {v1.coord.z, v2.coord.z, v3.coord.z};
@@ -151,11 +151,11 @@ void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& zBuffer
     {
         int x = (int)v1.coord.x;
         std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f, 0.0f, 0.0f);
-        PutShaderedPixel(canvas, zBuffer, x, y, v1.coord.z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x, y, v1.coord.z, bar, shader);
         std::tie(*bar1, *bar2, *bar3) = std::make_tuple(0.0f, 1.0f, 0.0f);
-        PutShaderedPixel(canvas, zBuffer, x, y, v2.coord.z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x, y, v2.coord.z, bar, shader);
         std::tie(*bar1, *bar2, *bar3) = std::make_tuple(0.0f, 0.0f, 1.0f);
-        PutShaderedPixel(canvas, zBuffer, x, y, v3.coord.z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x, y, v3.coord.z, bar, shader);
         return;
     }
 
@@ -174,7 +174,7 @@ void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& zBuffer
         // Vec3f bar = {(1.0f - t), 0.0f, t};
         std::tie(*bar1, *bar2, *bar3) = std::make_tuple((1.0f - t), 0.0f, t);
         float z = zs * bar;
-        PutShaderedPixel(canvas, zBuffer, x, y, z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x, y, z, bar, shader);
 
         // sedond side
         if (rightSegment)
@@ -185,7 +185,7 @@ void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& zBuffer
             std::tie(*bar1, *bar2, *bar3) = std::make_tuple((1.0f - u), u, 0.0f);
 
         z = zs * bar;
-        PutShaderedPixel(canvas, zBuffer, x, y, z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x, y, z, bar, shader);
     }
 }
 
@@ -221,111 +221,119 @@ std::pair<T, T> minmax(T v1, T v2)
     return std::make_pair(v2, v1);
 }
 
-void RasterizeTriangle(Image& canvas, Canvas<float>& zBuffer, float farZ, Vertex v1, Vertex v2,
-                       Vertex v3, Shader& shader)
+Vec3f DoBarPerspectiveCorrection(const Vec3f& bar, const Vec3f& corr)
 {
-    float width = (float)canvas.width;
-    float height = (float)canvas.height;
+    const Vec3f corrected_bar = Vec3f{bar[0] * corr[0], bar[1] * corr[1], bar[2] * corr[2]};
+    return corrected_bar / corrected_bar.Sum();
+}
 
-    const Vec3f zs = {v1.coord.z, v2.coord.z, v3.coord.z};
+int Round(float val)
+{
+    return (int)(val + 0.5f);
+}
+
+void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4f screen1,
+                       Vec4f screen2, Vec4f screen3, const Vertex& v1, const Vertex& v2,
+                       const Vertex& v3, Shader& shader)
+{
+    const float width = (float)canvas.width;
+    const float height = (float)canvas.height;
+
+    const Vec3f zs = {screen1.z, screen2.z, screen3.z};
+    const Vec3f bar_corr = {1.0f / screen1.w, 1.0f / screen2.w, 1.0f / screen3.w};
 
     Vec3f bar;
     float* bar1 = &bar[0];
     float* bar2 = &bar[1];
     float* bar3 = &bar[2];
 
-    // TODO: we don't actualy need to swap entire Vertex. (x,y) should be enough.
-    if (v1.coord.y > v2.coord.y)
+    Vec2i i1 = {Round(screen1.x), Round(screen1.y)};
+    Vec2i i2 = {Round(screen2.x), Round(screen2.y)};
+    Vec2i i3 = {Round(screen3.x), Round(screen3.y)};
+
+    if (i1.y > i2.y)
     {
-        std::swap(v1, v2);
+        std::swap(i1, i2);
         std::swap(bar1, bar2);
     }
-    if (v2.coord.y > v3.coord.y)
+    if (i2.y > i3.y)
     {
-        std::swap(v2, v3);
+        std::swap(i2, i3);
         std::swap(bar2, bar3);
     }
-    if (v1.coord.y > v2.coord.y)
+    if (i1.y > i2.y)
     {
-        std::swap(v1, v2);
+        std::swap(i1, i2);
         std::swap(bar1, bar2);
     }
-
-    Vec2i i1 = {(int)(v1.coord.x), (int)(v1.coord.y)};
-    Vec2i i2 = {(int)(v2.coord.x), (int)(v2.coord.y)};
-    Vec2i i3 = {(int)(v3.coord.x), (int)(v3.coord.y)};
 
     if (i1.y >= height || i3.y < 0)
         return;
 
-    auto [minX, maxX] = minmax(i1.x, i2.x, i3.x);
-    if (maxX < 0 || minX >= width)
+    const auto [min_x, max_x] = minmax(i1.x, i2.x, i3.x);
+    if (max_x < 0 || min_x >= width)
         return;
 
-    auto [minZ, maxZ] = minmax(v1.coord.z, v2.coord.z, v3.coord.z);
-    if (minZ < 0 || maxZ >= farZ)
+    const auto [min_z, max_z] = minmax(screen1.z, screen2.z, screen3.z);
+    if (min_z < 0 || max_z >= far_z)
         return;
 
     if (i1.y == i3.y)
     {
-        RasterizeHorizontalDegenerateTriangle(canvas, zBuffer, v1, v2, v3, shader);
+        RasterizeHorizontalDegenerateTriangle(canvas, z_buffer, v1, v2, v3, shader);
         return;
     }
 
-    int startY = std::max(0, i1.y);
-    int endY = std::min(static_cast<int>(height - 1), i3.y);
+    const int start_y = std::max(0, i1.y);
+    const int end_y = std::min(static_cast<int>(height - 1), i3.y);
 
-    float triangle_height = (float)(i3.y - i1.y);
+    const float triangle_height = (float)(i3.y - i1.y);
 
-    for (int y = startY; y <= endY; ++y)
+    for (int y = start_y; y <= end_y; ++y)
     {
-        bool upperSegment = y >= i2.y;
-        float t = (y - i1.y) / triangle_height;
-        float u =
-            upperSegment ? (y - i2.y) / (float)(i3.y - i2.y) : (y - i1.y) / (float)(i2.y - i1.y);
+        const bool upper_segment = y >= i2.y;
+        const float t = (y - i1.y) / triangle_height;
+        const float u =
+            upper_segment ? (y - i2.y) / (float)(i3.y - i2.y) : (y - i1.y) / (float)(i2.y - i1.y);
 
-        int x1 = (int)(i1.x + t * (i3.x - i1.x));
-        int x2 = (int)(upperSegment ? i2.x + u * (i3.x - i2.x) : i1.x + u * (i2.x - i1.x));
+        const int x1 = (int)(i1.x + t * (i3.x - i1.x));
+        const int x2 = (int)(upper_segment ? i2.x + u * (i3.x - i2.x) : i1.x + u * (i2.x - i1.x));
 
-        auto [startX, endX] = minmax(x1, x2);
+        auto [start_x, end_x] = minmax(x1, x2);
 
         if (x2 < 0 || x1 > width - 1)
             continue;
 
         if (x1 == x2)
         {
-            // Vec3f bar = {1.0f - t, 0.0f, t};
             std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f - t, 0.0f, t);
-            PutShaderedPixel(canvas, zBuffer, x1, y, bar * zs, bar, shader);
+            PutShaderedPixel(canvas, z_buffer, x1, y, bar * zs, bar, shader);
         }
         else
         {
-            startX = startX < 0 ? 0 : startX;
-            endX = endX >= width ? width - 1 : endX;
+            start_x = start_x < 0 ? 0 : start_x;
+            end_x = end_x >= width ? width - 1 : end_x;
 
-            float invXLength = 1.0f / (x2 - x1);
-            for (int x = startX; x <= endX; ++x)
+            const float inv_x_length = 1.0f / (x2 - x1);
+            for (int x = start_x; x <= end_x; ++x)
             {
-                float s = (x - x1) * invXLength;
+                const float s = (x - x1) * inv_x_length;
 
-                if (upperSegment)
+                if (upper_segment)
                 {
-                    float b1 = (1.0f - t) * (1.0f - s);
-                    float b2 = (1.0f - u) * s;
+                    const float b1 = (1.0f - t) * (1.0f - s);
+                    const float b2 = (1.0f - u) * s;
                     std::tie(*bar1, *bar2, *bar3) = std::make_tuple(b1, b2, 1.0f - b1 - b2);
                 }
                 else
                 {
-                    float b3 = t * (1.0f - s);
-                    float b2 = u * s;
+                    const float b3 = t * (1.0f - s);
+                    const float b2 = u * s;
                     std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f - b2 - b3, b2, b3);
                 }
 
-                Vec3f corrected_bar =
-                    Vec3f{bar[0] / v1.coord.z, bar[1] / v2.coord.z, bar[2] / v3.coord.z};
-                corrected_bar = corrected_bar / corrected_bar.Sum();
-
-                PutShaderedPixel(canvas, zBuffer, x, y, bar * zs, corrected_bar, shader);
+                const Vec3f corrected_bar = DoBarPerspectiveCorrection(bar, bar_corr);
+                PutShaderedPixel(canvas, z_buffer, x, y, bar * zs, corrected_bar, shader);
             }
         }
     }
