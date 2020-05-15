@@ -14,8 +14,6 @@ namespace sr
 class Renderer
 {
   public:
-    Shader* shader_;
-
     Renderer(Image& frame);
 
     int SnapshotZBuffer(const char* file);
@@ -52,6 +50,9 @@ class Renderer
 
     Canvas<float> zbuffer_;
     Image& frame_;
+
+    DefaultShaders::FlatShader default_shader_;
+    Shader* shader_;
 
     Vec4f ProjectVertex(Vec3f vertex);
     void SetViewport(float x0, float width, float y0, float height, float z0, float depth);

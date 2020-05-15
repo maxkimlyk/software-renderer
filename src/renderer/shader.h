@@ -42,8 +42,6 @@ class PhongShader : public Shader
     }
 };
 
-extern PhongShader phongShader;
-
 class FlatShader : public Shader
 {
     Color color = Color(255, 255, 255);
@@ -72,8 +70,6 @@ class FlatShader : public Shader
         color = Color(value, value, value);
     }
 };
-
-extern FlatShader flatShader;
 
 class FlatTexture : public Shader
 {

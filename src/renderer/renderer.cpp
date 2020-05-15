@@ -32,7 +32,7 @@ void Renderer::SetViewport(float x0, float width, float y0, float height, float 
 }
 
 Renderer::Renderer(Image& frame)
-    : frame_(frame), zbuffer_(frame.width, frame.height), shader_(&DefaultShaders::flatShader)
+    : frame_(frame), zbuffer_(frame.width, frame.height), shader_(&default_shader_)
 {
     SetViewport(0.0, (float)(frame.width), 0.0, (float)(frame.height), 0.0, 255.0);
     projection_matrix_ =

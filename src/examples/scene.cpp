@@ -56,8 +56,8 @@ void Process(Renderer& renderer, Input& input)
 
 void Draw(Renderer& renderer)
 {
-    // renderer.SetShader(DefaultShaders::flatShader);
-    renderer.SetShader(DefaultShaders::phongShader);
+    DefaultShaders::PhongShader shader;
+    renderer.SetShader(shader);
     renderer.Clear();
     for (auto face = model.faces.begin(); face != model.faces.end(); ++face)
     {

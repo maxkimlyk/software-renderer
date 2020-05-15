@@ -134,7 +134,7 @@ void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& z_buffe
         Vec3f corrected_bar = DoBarPerspectiveCorrection(bar, bar_corr);
         PutShaderedPixel(canvas, z_buffer, x, y, zs * corrected_bar, corrected_bar, shader);
 
-        // sedond side
+        // second side
         if (rightSegment)
             bar_view = Vec3f{0.0f, (1.0f - u), u};
         else
