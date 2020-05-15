@@ -37,7 +37,6 @@ class Renderer
     void Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color);
     void TriangleFrame(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
-    void Triangle(Vec3f p1, Vec3f p2, Vec3f p3);
     void Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3);
 
     void SetModelMatrix(const Mat4f& mat);

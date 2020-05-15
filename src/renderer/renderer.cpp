@@ -119,58 +119,40 @@ void Renderer::Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color)
 
 void Renderer::TriangleFrame(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
 {
-    // Vec3f screen1 = ProjectVertex(p1);
-    // Vec3f screen2 = ProjectVertex(p2);
-    // Vec3f screen3 = ProjectVertex(p3);
+    const Vec3f screen1 = Project<3, float>(ProjectVertex(p1));
+    const Vec3f screen2 = Project<3, float>(ProjectVertex(p2));
+    const Vec3f screen3 = Project<3, float>(ProjectVertex(p3));
 
-    // Vec3f clipped1, clipped2;
-    // if (ClipLine(screen1, screen2, viewport_box_, clipped1, clipped2))
-    //     RasterizeLine(frame_, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
+    Vec3f clipped1, clipped2;
+    if (ClipLine(screen1, screen2, viewport_box_, clipped1, clipped2))
+        RasterizeLine(frame_, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
 
-    // if (ClipLine(screen2, screen3, viewport_box_, clipped1, clipped2))
-    //     RasterizeLine(frame_, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
+    if (ClipLine(screen2, screen3, viewport_box_, clipped1, clipped2))
+        RasterizeLine(frame_, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
 
-    // if (ClipLine(screen3, screen1, viewport_box_, clipped1, clipped2))
-    //     RasterizeLine(frame_, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
+    if (ClipLine(screen3, screen1, viewport_box_, clipped1, clipped2))
+        RasterizeLine(frame_, Project<2, float>(clipped1), Project<2, float>(clipped2), color);
 }
 
 void Renderer::Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color)
 {
-    // DefaultShaders::SolidColor solidColorShader(color);
+    DefaultShaders::SolidColor solidColorShader(color);
 
-    // Vec3f screen1 = ProjectVertex(p1);
-    // Vec3f screen2 = ProjectVertex(p2);
-    // Vec3f screen3 = ProjectVertex(p3);
+    const Vec4f screen1 = ProjectVertex(p1);
+    const Vec4f screen2 = ProjectVertex(p2);
+    const Vec4f screen3 = ProjectVertex(p3);
 
-    // Vertex v1 = screen1;
-    // Vertex v2 = screen2;
-    // Vertex v3 = screen3;
+    const Vertex v1 = p1;
+    const Vertex v2 = p2;
+    const Vertex v3 = p3;
 
-    // RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, v1, v2, v3, solidColorShader);
-}
-
-void Renderer::Triangle(Vec3f v1, Vec3f v2, Vec3f v3)
-{
-    // shader_.vertex(v1, v2, v3);
-
-    // Vec3f screen1 = ProjectVertex(v1);
-    // Vec3f screen2 = ProjectVertex(v2);
-    // Vec3f screen3 = ProjectVertex(v3);
-
-    // Vertex ver1 = screen1;
-    // Vertex ver2 = screen2;
-    // Vertex ver3 = screen3;
-
-    // RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, ver1, ver2, ver3, *shader_);
+    RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, screen1, screen2, screen3, v1, v2, v3,
+                      solidColorShader);
 }
 
 void Renderer::Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
     shader_->vertex(v1, v2, v3);
-
-    // v1.coord = ProjectVertex(v1.coord);
-    // v2.coord = ProjectVertex(v2.coord);
-    // v3.coord = ProjectVertex(v3.coord);
 
     const auto s1 = ProjectVertex(v1.coord);
     const auto s2 = ProjectVertex(v2.coord);

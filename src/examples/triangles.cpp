@@ -9,7 +9,7 @@ const size_t HEIGHT = 600;
 const std::string CAPTION = "Triangles";
 
 const size_t POINTS_AMOUNT = 100;
-const float VARIANCE = 4.0f;
+const float VARIANCE = 2.0f;
 
 float z = -5.0f;
 std::vector<Vec3f> points;
@@ -52,18 +52,19 @@ void Draw(sr::Renderer& renderer)
         renderer.Triangle(v, v, v, white);
     }
 
+    // Triangles
     renderer.Triangle(Vec3f{0, 0, z}, Vec3f{0, 0.5, z}, Vec3f{0.5, 0, z}, yellow);
     renderer.Triangle(Vec3f{1, 0, z}, Vec3f{1.4f, 1, z}, Vec3f{1.6f, -0.6f, z}, green);
     renderer.Triangle(Vec3f{-1, 0, z}, Vec3f{-1.5f, 1, z}, Vec3f{-0.8f, 1, z}, red);
     renderer.Triangle(Vec3f{0, 1.3f, z}, Vec3f{-1.5f, 1.3f, z}, Vec3f{-0.8f, 1.8f, z}, margenta);
 
-    renderer.Triangle(Vec3f{-2, 1.5, z}, Vec3f{-2, 2, z}, Vec3f{-2, -1, z}, cyan);
-    renderer.Triangle(Vec3f{2, 2, z}, Vec3f{2, 2, z}, Vec3f{2, -1, z}, cyan);
-    renderer.Triangle(Vec3f{2, 2, z}, Vec3f{2, 2, z}, Vec3f{-2, 2, z}, cyan);
-    renderer.Triangle(Vec3f{2, -1, z}, Vec3f{1.1f, -1, z}, Vec3f{-2, -1, z}, cyan);
-
-    renderer.Triangle(Vec3f{-2.0, 2.0, z}, Vec3f{-2.0, 2.0, z}, Vec3f{2.0, -1.0, z}, cyan);
-    renderer.Triangle(Vec3f{2.0, 2.0, z}, Vec3f{2.0, 2.0, z}, Vec3f{-2.0, -1.0, z}, cyan);
+    // Frame
+    renderer.Triangle(Vec3f{-2, 1.5, z - 1}, Vec3f{-2, 2, z - 1}, Vec3f{-2, -2, z - 1}, cyan);
+    renderer.Triangle(Vec3f{2, 2, z - 1}, Vec3f{2, 2, z - 1}, Vec3f{2, -2, z - 1}, cyan);
+    renderer.Triangle(Vec3f{2, 2, z - 1}, Vec3f{2, 2, z - 1}, Vec3f{-2, 2, z - 1}, cyan);
+    renderer.Triangle(Vec3f{2, -2, z - 1}, Vec3f{1.1f, -2, z - 1}, Vec3f{-2, -2, z - 1}, cyan);
+    renderer.Triangle(Vec3f{-2, 2, z - 1}, Vec3f{-2, 2, z - 1}, Vec3f{2, -2, z - 1}, cyan);
+    renderer.Triangle(Vec3f{2, 2, z - 1}, Vec3f{2, 2, z - 1}, Vec3f{-2, -2, z - 1}, cyan);
 }
 
 int main()

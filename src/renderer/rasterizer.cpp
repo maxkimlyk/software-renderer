@@ -6,6 +6,8 @@
 namespace sr
 {
 
+namespace
+{
 template <class T>
 static void MinMax(T a, T b, T c, T& min, T& max)
 {
@@ -27,6 +29,79 @@ static Rect<T> BoundingBox(Vec<n, T> p1, Vec<n, T> p2, Vec<n, T> p3)
     MinMax(p1[1], p2[1], p3[1], rect.bottom, rect.top);
     return rect;
 }
+
+class RefVec3f
+{
+  public:
+    using Value = float;
+    using Ptr = Value*;
+    static const size_t Size = 3;
+
+    RefVec3f(Vec<Size, Value>& vec)
+    {
+        for (size_t i = 0; i < Size; ++i)
+            rv_[i] = &vec[i];
+    }
+
+    void operator=(Vec3f vec)
+    {
+        for (size_t i = 0; i < Size; ++i)
+            *rv_[i] = vec[i];
+    }
+
+    Ptr& operator[](size_t i)
+    {
+        return rv_[i];
+    }
+
+  private:
+    Ptr rv_[Size];
+};
+
+template <class T>
+std::pair<T, T> minmax(T v1, T v2, T v3)
+{
+    T min, max;
+
+    if (v1 < v2)
+    {
+        min = v1;
+        max = v2;
+    }
+    else
+    {
+        min = v2;
+        max = v1;
+    }
+
+    if (v3 < min)
+        min = v3;
+    else if (v3 > max)
+        max = v3;
+
+    return std::make_pair(min, max);
+}
+
+template <class T>
+std::pair<T, T> minmax(T v1, T v2)
+{
+    if (v1 <= v2)
+        return std::make_pair(v1, v2);
+    return std::make_pair(v2, v1);
+}
+
+Vec3f DoBarPerspectiveCorrection(const Vec3f& bar, const Vec3f& corr)
+{
+    const Vec3f corrected_bar = Vec3f{bar[0] * corr[0], bar[1] * corr[1], bar[2] * corr[2]};
+    return corrected_bar / corrected_bar.Sum();
+}
+
+int Round(float val)
+{
+    return (int)(val + 0.5f);
+}
+
+} // namespace
 
 void RasterizeRectangle(Image& canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color)
 {
@@ -112,69 +187,71 @@ void PutShaderedPixel(Image& canvas, Canvas<float>& z_buffer, int x, int y, floa
     }
 }
 
-void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& z_buffer, Vertex v1,
+void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& z_buffer, Vec4f screen1,
+                                           Vec4f screen2, Vec4f screen3, Vec3f bar_corr, Vertex v1,
                                            Vertex v2, Vertex v3, Shader& shader)
 {
-    const Vec3f zs = {v1.coord.z, v2.coord.z, v3.coord.z};
-
     const float width = (float)canvas.width;
     const float height = (float)canvas.height;
+
+    const Vec3f zs = {screen1.z, screen2.z, screen3.z};
 
     Vec3f bar;
     float* bar1 = &bar[0];
     float* bar2 = &bar[1];
     float* bar3 = &bar[2];
 
-    if (v1.coord.x > v2.coord.x)
+    const int y = Round(screen1.y);
+
+    int x1 = Round(screen1.x);
+    int x2 = Round(screen2.x);
+    int x3 = Round(screen3.x);
+
+    if (x1 > x2)
     {
-        std::swap(v1, v2);
+        std::swap(x1, x2);
         std::swap(bar1, bar2);
     }
-    if (v2.coord.x > v3.coord.x)
+    if (x2 > x3)
     {
-        std::swap(v2, v3);
+        std::swap(x2, x3);
         std::swap(bar2, bar3);
     }
-    if (v1.coord.x > v2.coord.x)
+    if (x1 > x2)
     {
-        std::swap(v1, v2);
+        std::swap(x1, x2);
         std::swap(bar1, bar2);
     }
-
-    float x1 = (float)((int)v1.coord.x);
-    float x2 = (float)((int)v2.coord.x);
-    float x3 = (float)((int)v3.coord.x);
-
-    int y = (int)v1.coord.y;
 
     if (x1 == x3)
     {
-        int x = (int)v1.coord.x;
         std::tie(*bar1, *bar2, *bar3) = std::make_tuple(1.0f, 0.0f, 0.0f);
-        PutShaderedPixel(canvas, z_buffer, x, y, v1.coord.z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar,
+                         DoBarPerspectiveCorrection(bar, bar_corr), shader);
         std::tie(*bar1, *bar2, *bar3) = std::make_tuple(0.0f, 1.0f, 0.0f);
-        PutShaderedPixel(canvas, z_buffer, x, y, v2.coord.z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar,
+                         DoBarPerspectiveCorrection(bar, bar_corr), shader);
         std::tie(*bar1, *bar2, *bar3) = std::make_tuple(0.0f, 0.0f, 1.0f);
-        PutShaderedPixel(canvas, z_buffer, x, y, v3.coord.z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x1, y, zs * bar,
+                         DoBarPerspectiveCorrection(bar, bar_corr), shader);
         return;
     }
 
-    float invLength = 1.0f / (x3 - x1);
-    float invRightLength = x3 - x2 != 0 ? 1.0f / (x3 - x2) : 0.0f;
-    float invLeftLength = x2 - x1 != 0 ? 1.0f / (x2 - x1) : 0.0f;
+    const float invLength = 1.0f / (x3 - x1);
+    const float invRightLength = x3 - x2 != 0 ? 1.0f / (x3 - x2) : 0.0f;
+    const float invLeftLength = x2 - x1 != 0 ? 1.0f / (x2 - x1) : 0.0f;
 
     for (int x = x1; x <= x3; ++x)
     {
-        bool rightSegment = x >= x2;
+        const bool rightSegment = x >= x2;
 
-        float t = (x - x1) * invLength;
-        float u = rightSegment ? (x - x2) * invRightLength : (x - x1) * invLeftLength;
+        const float t = (x - x1) * invLength;
+        const float u = rightSegment ? (x - x2) * invRightLength : (x - x1) * invLeftLength;
 
         // first side
         // Vec3f bar = {(1.0f - t), 0.0f, t};
         std::tie(*bar1, *bar2, *bar3) = std::make_tuple((1.0f - t), 0.0f, t);
-        float z = zs * bar;
-        PutShaderedPixel(canvas, z_buffer, x, y, z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x, y, zs * bar, bar, shader);
 
         // sedond side
         if (rightSegment)
@@ -184,52 +261,8 @@ void RasterizeHorizontalDegenerateTriangle(Image& canvas, Canvas<float>& z_buffe
             // bar = Vec3f{(1.0f - u), u, 0.0f};
             std::tie(*bar1, *bar2, *bar3) = std::make_tuple((1.0f - u), u, 0.0f);
 
-        z = zs * bar;
-        PutShaderedPixel(canvas, z_buffer, x, y, z, bar, shader);
+        PutShaderedPixel(canvas, z_buffer, x, y, zs * bar, bar, shader);
     }
-}
-
-template <class T>
-std::pair<T, T> minmax(T v1, T v2, T v3)
-{
-    T min, max;
-
-    if (v1 < v2)
-    {
-        min = v1;
-        max = v2;
-    }
-    else
-    {
-        min = v2;
-        max = v1;
-    }
-
-    if (v3 < min)
-        min = v3;
-    else if (v3 > max)
-        max = v3;
-
-    return std::make_pair(min, max);
-}
-
-template <class T>
-std::pair<T, T> minmax(T v1, T v2)
-{
-    if (v1 <= v2)
-        return std::make_pair(v1, v2);
-    return std::make_pair(v2, v1);
-}
-
-Vec3f DoBarPerspectiveCorrection(const Vec3f& bar, const Vec3f& corr)
-{
-    const Vec3f corrected_bar = Vec3f{bar[0] * corr[0], bar[1] * corr[1], bar[2] * corr[2]};
-    return corrected_bar / corrected_bar.Sum();
-}
-
-int Round(float val)
-{
-    return (int)(val + 0.5f);
 }
 
 void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4f screen1,
@@ -280,7 +313,8 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4
 
     if (i1.y == i3.y)
     {
-        RasterizeHorizontalDegenerateTriangle(canvas, z_buffer, v1, v2, v3, shader);
+        RasterizeHorizontalDegenerateTriangle(canvas, z_buffer, screen1, screen2, screen3, bar_corr,
+                                              v1, v2, v3, shader);
         return;
     }
 
