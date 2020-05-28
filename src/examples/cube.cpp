@@ -46,7 +46,6 @@ std::vector<Face> GenCube(float sz)
     const Vec3f g = {-sz, sz, -sz};
     const Vec3f h = {sz, sz, -sz};
 
-    // clang-format off
     std::vector<Face> cube;
     cube.reserve(12);
     AddQuad(cube, c, d, a, b, Vec3f{0.0f, -1.0f, 0.0f});
@@ -55,7 +54,6 @@ std::vector<Face> GenCube(float sz)
     AddQuad(cube, a, d, h, e, Vec3f{1.0f, 0.0f, 0.0f});
     AddQuad(cube, d, c, g, h, Vec3f{0.0f, 0.0f, -1.0f});
     AddQuad(cube, f, e, h, g, Vec3f{0.0f, 1.0f, 0.0f});
-    //clang-format on
 
     return cube;
 }
@@ -79,7 +77,8 @@ void Process(Renderer& renderer, Input& input)
         z_angle -= ANGLE_CHANGE_SPEED;
 
     angle += ROTATE_SPEED;
-    Mat4f model_mat = Transform::RotateY(angle) * Transform::RotateX(x_angle) * Transform::RotateZ(z_angle);
+    Mat4f model_mat =
+        Transform::RotateY(angle) * Transform::RotateX(x_angle) * Transform::RotateZ(z_angle);
     renderer.SetModelMatrix(model_mat);
     renderer.SetViewMatrix(camera.ViewMatrix());
 }
@@ -99,9 +98,10 @@ void Draw(Renderer& renderer)
 int main()
 {
     int status = LoadTGA(TEXTURE_PATH.c_str(), texture);
-    if (status != 0) {
-      ERROR("Could not load texture");
-      return -1;
+    if (status != 0)
+    {
+        ERROR("Could not load texture");
+        return -1;
     }
 
     Program program(Init, Process, Draw);

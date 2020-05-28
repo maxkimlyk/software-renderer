@@ -26,7 +26,6 @@ class PhongShader : public Shader
 
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
     {
-        // TODO: correct by model view
         norm1 = v1.norm;
         norm2 = v2.norm;
         norm3 = v3.norm;

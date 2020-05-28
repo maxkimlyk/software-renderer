@@ -287,10 +287,10 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4
 
         auto [start_x, end_x] = MinMax(x1, x2);
 
-        if (x2 < 0 || x1 > width - 1)
+        if (end_x < 0 || start_x > width - 1)
             continue;
 
-        if (x1 == x2)
+        if (start_x == end_x)
         {
             bar_view = Vec3f{1.0f - t, 0.0f, t};
             const Vec3f corrected_bar = DoBarPerspectiveCorrection(bar, bar_corr);

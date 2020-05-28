@@ -71,7 +71,9 @@ void Draw(Renderer& renderer)
 int main()
 {
     ObjReader reader;
-    int status = reader.ReadModel(MODEL_NAME, model);
+    int status;
+
+    status = reader.ReadModel(MODEL_NAME, model);
     if (status != 0)
         return status;
 

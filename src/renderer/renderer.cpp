@@ -154,9 +154,9 @@ void Renderer::Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
     shader_->vertex(v1, v2, v3);
 
-    const auto s1 = ProjectVertex(v1.coord);
-    const auto s2 = ProjectVertex(v2.coord);
-    const auto s3 = ProjectVertex(v3.coord);
+    const Vec4f s1 = ProjectVertex(v1.coord);
+    const Vec4f s2 = ProjectVertex(v2.coord);
+    const Vec4f s3 = ProjectVertex(v3.coord);
 
     RasterizeTriangle(frame_, zbuffer_, viewport_box_.zmax, s1, s2, s3, v1, v2, v3, *shader_);
 }
