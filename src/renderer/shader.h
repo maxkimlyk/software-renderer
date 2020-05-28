@@ -17,12 +17,13 @@ class Shader
 
 namespace DefaultShaders
 {
-class PhongShader : public Shader
+class SmoothLight : public Shader
 {
     Vec3f norm1, norm2, norm3;
 
   public:
-    Vec3f lightDirection = Vec3f{0.0f, 0.0f, 1.0f};
+    Color color = Color(255, 255, 255);
+    Vec3f light_direction = Vec3f{0.0f, 0.0f, 1.0f};
 
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
     {
@@ -34,18 +35,56 @@ class PhongShader : public Shader
     virtual bool pixel(Vec3f bar, Color& resultColor) override
     {
         const Vec3f norm = bar[0] * norm1 + bar[1] * norm2 + bar[2] * norm3;
-        const float dot = lightDirection * norm;
+        const float dot = light_direction * norm;
         const float intensity = dot > 0 ? dot : 0;
-        resultColor = Color(255 * intensity, 255 * intensity, 255 * intensity);
+        resultColor = Color(color.r * intensity, color.g * intensity, color.b * intensity);
         return true;
     }
 };
 
-class FlatShader : public Shader
+class SmoothTexture : public Shader
 {
-    Color color = Color(255, 255, 255);
+    const Image& texture;
+
+    Vec3f us;
+    Vec3f vs;
+    Vec3f norm1, norm2, norm3;
 
   public:
+    Vec3f light_direction;
+
+    SmoothTexture(const Image& texture) : texture(texture), light_direction({0.0f, 0.0f, 1.0f})
+    {}
+
+    virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
+    {
+        us = Vec3f{v1.tex.x, v2.tex.x, v3.tex.x};
+        vs = Vec3f{v1.tex.y, v2.tex.y, v3.tex.y};
+        norm1 = v1.norm;
+        norm2 = v2.norm;
+        norm3 = v3.norm;
+    }
+
+    virtual bool pixel(Vec3f bar, Color& resultColor) override
+    {
+        const Vec3f norm = bar[0] * norm1 + bar[1] * norm2 + bar[2] * norm3;
+        const float dot = light_direction * norm;
+        const float intensity = dot > 0 ? dot : 0;
+
+        const float u = bar * us;
+        const float v = bar * vs;
+        Color color = texture.AtSafe(std::round(u * (texture.width - 1)),
+                                     std::round(v * (texture.height - 1)));
+
+        resultColor = Color(color.r * intensity, color.g * intensity, color.b * intensity);
+        return true;
+    }
+};
+
+class FlatLight : public Shader
+{
+  public:
+    Color color = Color(255, 255, 255);
     float ambient_light_intensity = 0.1f;
     Vec3f light_direction = Vec3f{0.0f, 0.0f, -1.0f};
     Mat4f corr_matrix = Mat4f::Identity();

@@ -51,7 +51,7 @@ class Renderer
     Canvas<float> zbuffer_;
     Image& frame_;
 
-    DefaultShaders::FlatShader default_shader_;
+    DefaultShaders::FlatLight default_shader_;
     Shader* shader_;
 
     Vec4f ProjectVertex(Vec3f vertex);

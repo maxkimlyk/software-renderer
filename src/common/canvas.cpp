@@ -11,6 +11,8 @@ int LoadTGA(const char* path, Image& result)
     if (!status)
         return -1;
 
+    tga.flip_vertically();
+
     const size_t width = (size_t)(tga.get_width());
     const size_t height = (size_t)(tga.get_height());
 
