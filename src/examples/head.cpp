@@ -20,8 +20,7 @@ void PrintUsage()
               << "'E','Q' to move up and down.\n"
               << "ARROWS to look around.\n"
               << "'Z','X' to change light direction.\n"
-              << "'T' to toggle texture,\n"
-
+              << "'T' to toggle texture,\n";
 }
 } // namespace
 
