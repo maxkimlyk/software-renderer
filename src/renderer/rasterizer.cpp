@@ -260,7 +260,7 @@ void RasterizeTriangle(Image& canvas, Canvas<float>& z_buffer, float far_z, Vec4
         return;
 
     const auto [min_z, max_z] = MinMax(screen1.z, screen2.z, screen3.z);
-    if (min_z < 0 || max_z >= far_z)
+    if (max_z < 0 || min_z >= far_z)
         return;
 
     if (i1.y == i3.y)

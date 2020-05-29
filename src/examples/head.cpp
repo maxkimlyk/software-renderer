@@ -16,11 +16,11 @@ Vec3f ApplyTransform(const Vec3f& vec, const Mat4f& transform)
 void PrintUsage()
 {
     std::cout << "Controls:\n"
-              << "'W','A','S','D' to walk.\n"
-              << "'E','Q' to move up and down.\n"
-              << "ARROWS to look around.\n"
-              << "'Z','X' to change light direction.\n"
-              << "'T' to toggle texture,\n";
+              << "'W','A','S','D' to walk\n"
+              << "'E','Q' to move up and down\n"
+              << "ARROWS to look around\n"
+              << "'Z','X' to change light direction\n"
+              << "'T' to toggle texture\n";
 }
 } // namespace
 

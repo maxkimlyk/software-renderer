@@ -5,18 +5,19 @@ namespace sr
 
 Vec4f Renderer::ProjectVertex(Vec3f vertex)
 {
-    Vec4f cs = model_view_matrix_ * Embed<4, float>(vertex);
-    Vec4f tmp = projection_matrix_ * cs;
+    Vec4f cs = view_proj_matrix_ * Embed<4, float>(vertex);
 
-    if (tmp.w == 0.0f)
-        tmp.w = 0.0001f;
+    if (cs.w == 0.0f)
+        cs.w = 0.0001f;
 
-    float invW = 1.0f / tmp.w;
-    float invAbsW = cs.z < 0.0f ? invW : -invW;
-    Vec4f ndc = Vec4f{tmp.x * invAbsW, tmp.y * invAbsW, tmp.z * invAbsW, 1.0f};
+    const float invW = 1.0f / cs.w;
+    // just for a beauty, use abs w in order to force points behind the camera to
+    // preserve negative z in clip coordinates instead of having z > 1 (or > z_far):
+    const float invAbsW = std::fabs(invW);
+    const Vec4f ndc = Vec4f{cs.x * invAbsW, cs.y * invAbsW, cs.z * invAbsW, 1.0f};
 
     Vec4f screen4 = viewport_matrix_ * ndc;
-    screen4.w = tmp.w;
+    screen4.w = cs.w; // save z value from clip space for perspective correction
     return screen4;
 }
 
@@ -36,7 +37,7 @@ Renderer::Renderer(Image& frame)
 {
     SetViewport(0.0, (float)(frame.width), 0.0, (float)(frame.height), 0.0, 255.0);
     projection_matrix_ =
-        Projection::Perspective(45.0f, (float)(frame.width) / (float)(frame.height), 0.01f, 10.0f);
+        Projection::Perspective(45.0f, (float)(frame.width) / (float)(frame.height), 0.05f, 100.0f);
     view_matrix_ = Mat4f::Identity();
     model_matrix_ = Mat4f::Identity();
     UpdateMatrices();

@@ -102,7 +102,7 @@ Mat4f Frustum(float left, float right, float bottom, float top, float znear, flo
     proj[0][2] = (right + left) / (right - left);
     proj[1][1] = 2.0f * znear / (top - bottom);
     proj[1][2] = (top + bottom) / (top - bottom);
-    proj[2][2] = -(zfar + znear) / (zfar - znear);
+    proj[2][2] = (-zfar - znear) / (zfar - znear);
     proj[2][3] = -2.0f * zfar * znear / (zfar - znear);
     proj[3][2] = -1.0f;
     proj[3][3] = 0.0f;
@@ -111,7 +111,7 @@ Mat4f Frustum(float left, float right, float bottom, float top, float znear, flo
 
 Mat4f Perspective(float fovyInDegrees, float aspectRatio, float znear, float zfar)
 {
-    float ymax = znear * std::tan(fovyInDegrees * M_PI / 360.0f);
+    float ymax = znear * std::tan(fovyInDegrees * M_PI / 180.0f);
     float xmax = ymax * aspectRatio;
     return Frustum(-xmax, xmax, -ymax, ymax, znear, zfar);
 }
