@@ -163,12 +163,12 @@ int ObjReader::ParseFLine(std::string& line, std::vector<std::string>& tokens, M
         return -1;
 
     if ((v1 - 1) >= verts_.size() || (v2 - 1) >= verts_.size() || (v3 - 1) >= verts_.size() ||
-        t1 != undefined && (t1 - 1) >= texs_.size() ||
-        t2 != undefined && (t2 - 1) >= texs_.size() ||
-        t3 != undefined && (t3 - 1) >= texs_.size() ||
-        n1 != undefined && (n1 - 1) >= norms_.size() ||
-        n2 != undefined && (n2 - 1) >= norms_.size() ||
-        n3 != undefined && (n3 - 1) >= norms_.size())
+        (t1 != undefined && (t1 - 1) >= texs_.size()) ||
+        (t2 != undefined && (t2 - 1) >= texs_.size()) ||
+        (t3 != undefined && (t3 - 1) >= texs_.size()) ||
+        (n1 != undefined && (n1 - 1) >= norms_.size()) ||
+        (n2 != undefined && (n2 - 1) >= norms_.size()) ||
+        (n3 != undefined && (n3 - 1) >= norms_.size()))
         return -2;
 
     Face face;
