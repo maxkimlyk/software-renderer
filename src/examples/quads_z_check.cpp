@@ -21,7 +21,7 @@ void AddQuad(std::vector<Face>& result, const Vec3f& bl, const Vec3f& tr, const 
 std::vector<Face> InitModel()
 {
     const float offset = 2.0f;
-    const float z_offset = 2.0f;
+    const float z_offset = 0.5f;
     const size_t count = 3;
 
     std::vector<Face> result;
@@ -33,13 +33,20 @@ std::vector<Face> InitModel()
     {
         // clang-format off
         AddQuad(result,
-                Vec3f{-0.5f, min_y + i * offset - 0.5f, 0.0f + z_offset},
-                Vec3f{0.5f, min_y + i * offset + 0.5f, 0.0f + z_offset},
+                Vec3f{-0.5f, min_y + i * offset - 0.5f, 0.0f + i * z_offset},
+                Vec3f{0.5f, min_y + i * offset + 0.5f, 0.0f + i * z_offset},
                 norm);
         // clang-format off
     }
 
     return result;
+}
+
+void PrintHelp() {
+    std::cout << "Use 'S' and 'W' to move backward and forward.\n"
+              << "If projection and clipping work right, "
+              << "quads should disappear when you moving backward.\n"
+              << "The lowest quad should disappear first, then the quad just above.";
 }
 } // namespace
 
@@ -61,6 +68,8 @@ class Demo
 
         const Mat4f proj_mat = Projection::Perspective(45.0f, (float)(Width) / (float)(Height), Z_NEAR, Z_FAR);
         renderer.SetProjMatrix(proj_mat);
+
+        PrintHelp();
     }
 
     void Process(Renderer& renderer, Input& input)

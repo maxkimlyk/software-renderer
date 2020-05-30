@@ -4,9 +4,8 @@
 #include "../common/canvas.h"
 #include "clipping.h"
 #include "rasterizer.h"
-#include "transforms.h"
-// #include "bmp.h"
 #include "shader.h"
+#include "transforms.h"
 
 namespace sr
 {
@@ -27,7 +26,6 @@ class Renderer
     void DrawRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color);
     void DrawSolidRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color);
     void Line(Vec2i p1, Vec2i p2, Color color);
-    // void Triangle(Vec2i p1, Vec2i p2, Vec2i p3, Color color);
     void TriangleFrame(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3);
