@@ -36,8 +36,8 @@ class Demo
 
     int Load()
     {
-        static const std::string model_name = "head.obj";
-        static const std::string texture_name = "head_diffuse.tga";
+        static const std::string model_name = "skull.obj";
+        static const std::string texture_name = "skull_diffuse.tga";
 
         ObjReader reader;
         int status;
