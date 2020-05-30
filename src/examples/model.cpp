@@ -19,7 +19,7 @@ Color color(rand() % 128 + 128, rand() % 128 + 128, rand() % 128 + 128);
 
 float angle = 0.0f;
 float angle_speed = 0.01f;
-const float max_viewport = 1.5f;
+const float cam_distance = 0.8f;
 const float cam_base_height = 0.5f;
 
 void Init(Renderer& renderer)
@@ -37,9 +37,9 @@ void Draw(Renderer& renderer)
     float phi = 2.0f * angle;
     float theta = 0.1f + 0.4f * sin(angle);
 
-    float x = cos(theta) * sin(phi) * max_viewport;
-    float y = cos(theta) * cos(phi) * max_viewport;
-    float z = cam_base_height + sin(theta) * max_viewport;
+    float x = cos(theta) * sin(phi) * cam_distance;
+    float y = cos(theta) * cos(phi) * cam_distance;
+    float z = cam_base_height + sin(theta) * cam_distance;
 
     camera.LookAt(Vec3f{0.0f, cam_base_height, 0.0f}, Vec3f{x, z, y});
     renderer.SetViewMatrix(camera.ViewMatrix());

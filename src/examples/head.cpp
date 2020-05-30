@@ -68,7 +68,7 @@ class Demo
 
     void Init(Renderer&)
     {
-        camera_.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 1.0f, 3.0f});
+        camera_.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 0.5f, 1.5f});
     }
 
     void Process(Renderer& renderer, Input& input)

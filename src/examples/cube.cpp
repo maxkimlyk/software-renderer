@@ -62,7 +62,7 @@ std::vector<Face> Cube = GenCube(1.0f);
 
 void Init(Renderer& renderer)
 {
-    camera.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 1.0f, 3.0f});
+    camera.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 1.0f, 1.5f});
 }
 
 void Process(Renderer& renderer, Input& input)

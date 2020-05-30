@@ -109,6 +109,18 @@ Mat4f Frustum(float left, float right, float bottom, float top, float znear, flo
     return proj;
 }
 
+Mat4f Ortho(float left, float right, float bottom, float top, float znear, float zfar)
+{
+    Mat4f proj = Mat4f::Identity();
+    proj[0][0] = 2.0f / (right - left);
+    proj[0][3] = (-right - left) / (right - left);
+    proj[1][1] = 2.0f / (top - bottom);
+    proj[1][3] = (-top - bottom) / (top - bottom);
+    proj[2][2] = -2.0f / (zfar - znear);
+    proj[2][3] = (-zfar - znear) / (zfar - znear);
+    return proj;
+}
+
 Mat4f Perspective(float fovyInDegrees, float aspectRatio, float znear, float zfar)
 {
     float ymax = znear * std::tan(fovyInDegrees * M_PI / 180.0f);

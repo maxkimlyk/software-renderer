@@ -22,6 +22,7 @@ Mat4f LookAt(const Vec3f& eye, const Vec3f& center, const Vec3f& up);
 namespace Projection
 {
 Mat4f Frustum(float left, float right, float bottom, float top, float znear, float zfar);
+Mat4f Ortho(float left, float right, float bottom, float top, float znear, float zfar);
 Mat4f Perspective(float fovyInDegrees, float aspectRatio, float znear, float zfar);
 Mat4f Viewport(float x0, float width, float y0, float height, float z0 = 0, float depth = 255);
 }; // namespace Projection

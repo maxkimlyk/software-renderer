@@ -45,6 +45,7 @@ void Draw(sr::Renderer& renderer)
     static const Color white(230, 230, 230);
 
     renderer.Clear();
+    renderer.SetProjMatrix(Projection::Ortho(-2.5f, 2.5f, -2.5f, 2.5f, 0.0f, 10.0f));
 
     for (Vec3f v : points)
     {

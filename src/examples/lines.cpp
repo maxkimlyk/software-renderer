@@ -8,7 +8,7 @@ const size_t HEIGHT = 600;
 const std::string CAPTION = "Lines";
 
 float angle = 0;
-const int size = 100;
+const int size = 200;
 
 Color color(0);
 
