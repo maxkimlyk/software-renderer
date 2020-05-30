@@ -6,21 +6,8 @@
 
 using namespace sr;
 
-const size_t WIDTH = 800;
-const size_t HEIGHT = 600;
-const std::string CAPTION = "Scene";
-const std::string TEXTURE_PATH = "box.tga";
-
-const float ROTATE_SPEED = M_PI / 200.0f;
-const float ANGLE_CHANGE_SPEED = 0.05f;
-
-float angle = 0.0f;
-float x_angle = 0.0f;
-float z_angle = 0.0f;
-
-Camera camera;
-Image texture;
-
+namespace
+{
 void AddQuad(std::vector<Face>& result, const Vec3f& bl, const Vec3f& br, const Vec3f& tr,
              const Vec3f& tl, const Vec3f& norm)
 {
@@ -58,52 +45,95 @@ std::vector<Face> GenCube(float sz)
     return cube;
 }
 
-std::vector<Face> Cube = GenCube(1.0f);
-
-void Init(Renderer& renderer)
+void PrintControls()
 {
-    camera.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 1.0f, 1.5f});
+    std::cout << "Use ARROWS to rotate cube.\n";
 }
+} // namespace
 
-void Process(Renderer& renderer, Input& input)
+class Demo
 {
-    if (input.IsHolding(KEY_UP))
-        x_angle += ANGLE_CHANGE_SPEED;
-    if (input.IsHolding(KEY_DOWN))
-        x_angle -= ANGLE_CHANGE_SPEED;
-    if (input.IsHolding(KEY_LEFT))
-        z_angle += ANGLE_CHANGE_SPEED;
-    if (input.IsHolding(KEY_RIGHT))
-        z_angle -= ANGLE_CHANGE_SPEED;
+    inline static const std::string TEXTURE_PATH = "box.tga";
+    inline static const float CUBE_SIZE = 1.0f;
+    inline static const float ROTATE_SPEED = M_PI / 200.0f;
+    inline static const float ANGLE_CHANGE_SPEED = 0.05f;
 
-    angle += ROTATE_SPEED;
-    Mat4f model_mat =
-        Transform::RotateY(angle) * Transform::RotateX(x_angle) * Transform::RotateZ(z_angle);
-    renderer.SetModelMatrix(model_mat);
-    renderer.SetViewMatrix(camera.ViewMatrix());
-}
+  public:
+    inline static const std::string Caption = "Cube";
+    static const size_t Width = 800;
+    static const size_t Height = 600;
 
-void Draw(Renderer& renderer)
-{
-    DefaultShaders::FlatTexture shader(texture);
-    renderer.SetShader(shader);
+    Demo() : cube_(GenCube(CUBE_SIZE))
+    {}
 
-    renderer.Clear();
-    for (const auto& face : Cube)
+    int Load()
     {
-        renderer.Triangle(face.v[0], face.v[1], face.v[2]);
+        int status = LoadTGA(TEXTURE_PATH.c_str(), texture_);
+        if (status != 0)
+            ERROR("Could not load texture: %s\n", TEXTURE_PATH.c_str());
+
+        PrintControls();
+
+        return status;
     }
-}
+
+    void Init(Renderer& renderer)
+    {
+        camera_.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 1.0f, 1.5f});
+    }
+
+    void Process(Renderer& renderer, Input& input)
+    {
+        if (input.IsHolding(KEY_UP))
+            x_angle_ += ANGLE_CHANGE_SPEED;
+        if (input.IsHolding(KEY_DOWN))
+            x_angle_ -= ANGLE_CHANGE_SPEED;
+        if (input.IsHolding(KEY_LEFT))
+            z_angle_ += ANGLE_CHANGE_SPEED;
+        if (input.IsHolding(KEY_RIGHT))
+            z_angle_ -= ANGLE_CHANGE_SPEED;
+
+        angle_ += ROTATE_SPEED;
+        Mat4f model_mat = Transform::RotateY(angle_) * Transform::RotateX(x_angle_) *
+                          Transform::RotateZ(z_angle_);
+        renderer.SetModelMatrix(model_mat);
+        renderer.SetViewMatrix(camera_.ViewMatrix());
+    }
+
+    void Draw(Renderer& renderer)
+    {
+        DefaultShaders::FlatTexture shader(texture_);
+        renderer.SetShader(shader);
+
+        renderer.Clear();
+        for (const auto& face : cube_)
+        {
+            renderer.Triangle(face.v[0], face.v[1], face.v[2]);
+        }
+    }
+
+  private:
+    const std::vector<Face> cube_;
+    Camera camera_;
+    Image texture_;
+
+    float angle_ = 0.0f;
+    float x_angle_ = 0.0f;
+    float z_angle_ = 0.0f;
+};
 
 int main()
 {
-    int status = LoadTGA(TEXTURE_PATH.c_str(), texture);
-    if (status != 0)
+    Demo demo;
+
+    if (int status = demo.Load(); status != 0)
     {
-        ERROR("Could not load texture");
-        return -1;
+        return status;
     }
 
-    Program program(Init, Process, Draw);
-    return program.Run(WIDTH, HEIGHT, CAPTION);
+    auto Init = [&demo](Renderer& renderer) { demo.Init(renderer); };
+    auto Process = [&demo](Renderer& renderer, Input& input) { demo.Process(renderer, input); };
+    auto Draw = [&demo](Renderer& renderer) { demo.Draw(renderer); };
+
+    return Program(Init, Process, Draw).Run(demo.Width, demo.Height, demo.Caption);
 }

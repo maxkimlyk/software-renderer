@@ -21,7 +21,7 @@ void AddQuad(std::vector<Face>& result, const Vec3f& bl, const Vec3f& tr, const 
 std::vector<Face> InitModel()
 {
     const float offset = 2.0f;
-    const float z_offset = 1.0f;
+    const float z_offset = 2.0f;
     const size_t count = 3;
 
     std::vector<Face> result;
@@ -45,43 +45,33 @@ std::vector<Face> InitModel()
 
 class Demo
 {
+    inline static float Z_NEAR = 0.05f;
+    inline static float Z_FAR = 10.0f;
+    inline static float CAM_START_Z = Z_FAR - 0.01f;
+
   public:
     inline static const std::string Caption = "Scene";
     static const size_t Width = 800;
     static const size_t Height = 600;
 
-    void Init(Renderer&)
+    void Init(Renderer& renderer)
     {
         faces_ = InitModel();
-        camera_.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 0.0f, 100.0f});
+        camera_.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 0.0f, CAM_START_Z});
+
+        const Mat4f proj_mat = Projection::Perspective(45.0f, (float)(Width) / (float)(Height), Z_NEAR, Z_FAR);
+        renderer.SetProjMatrix(proj_mat);
     }
 
     void Process(Renderer& renderer, Input& input)
     {
-        const float walk_distance = 0.5f;
+        const float walk_distance = 0.01f;
         const float rotate_angle = 0.05f;
 
         if (input.IsHolding(KEY_W))
             camera_.Walk(walk_distance);
         if (input.IsHolding(KEY_S))
             camera_.Walk(-walk_distance);
-        if (input.IsHolding(KEY_A))
-            camera_.WalkRight(-walk_distance);
-        if (input.IsHolding(KEY_D))
-            camera_.WalkRight(walk_distance);
-        if (input.IsHolding(KEY_E))
-            camera_.RiseUp(walk_distance);
-        if (input.IsHolding(KEY_Q))
-            camera_.RiseUp(-walk_distance);
-
-        if (input.IsHolding(KEY_LEFT))
-            camera_.Yaw(rotate_angle);
-        if (input.IsHolding(KEY_RIGHT))
-            camera_.Yaw(-rotate_angle);
-        if (input.IsHolding(KEY_UP))
-            camera_.Pitch(rotate_angle);
-        if (input.IsHolding(KEY_DOWN))
-            camera_.Pitch(-rotate_angle);
 
         renderer.SetViewMatrix(camera_.ViewMatrix());
     }

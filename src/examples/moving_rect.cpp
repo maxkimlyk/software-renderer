@@ -3,46 +3,56 @@
 
 using namespace sr;
 
-const size_t WIDTH = 800;
-const size_t HEIGHT = 600;
-const std::string CAPTION = "Moving Rect";
-
-const size_t rectWidth = 50;
-const size_t rectHeight = 50;
-
-float angle = 0;
-int x = WIDTH / 2;
-int y = HEIGHT / 2;
-
 Color color(0);
 
-void Init(Renderer& renderer)
-{}
-
-void Process(Renderer& renderer, Input& input)
+class Demo
 {
-    const float PI = 3.141592f;
-    angle += PI / 100;
+    static const size_t RECT_WIDTH = 50;
+    static const size_t RECT_HEIGHT = 50;
 
-    if (angle > 2 * PI)
-        angle -= 2 * PI;
+  public:
+    static const size_t Width = 800;
+    static const size_t Height = 600;
+    inline static const std::string Caption = "Moving Rect";
 
-    x = int(WIDTH / 2 + (WIDTH / 4) * cos(angle)) - rectWidth / 2;
-    y = int(HEIGHT / 2 + (HEIGHT / 4) * sin(angle)) - rectHeight / 2;
+    void Init(Renderer& renderer)
+    {}
 
-    color = Color(uint8_t(255 * (0.5 + 0.5 * cos(2 * angle + 0.1 * PI))),
-                  uint8_t(255 * (0.5 + 0.5 * cos(4 * angle + 0.3 * PI))),
-                  uint8_t(255 * (0.5 + 0.5 * cos(6 * angle + 0.7 * PI))));
-}
+    void Process(Renderer& renderer, Input& input)
+    {
+        const float PI = 3.141592f;
+        angle += PI / 100;
 
-void Draw(Renderer& renderer)
-{
-    renderer.Clear();
-    renderer.DrawSolidRect(x, y, x + rectWidth, y + rectHeight, color);
-}
+        if (angle > 2 * PI)
+            angle -= 2 * PI;
+
+        x = int(Width / 2 + (Width / 4) * cos(angle)) - RECT_WIDTH / 2;
+        y = int(Height / 2 + (Height / 4) * sin(angle)) - RECT_HEIGHT / 2;
+
+        color = Color(uint8_t(255 * (0.5 + 0.5 * cos(2 * angle + 0.1 * PI))),
+                      uint8_t(255 * (0.5 + 0.5 * cos(4 * angle + 0.3 * PI))),
+                      uint8_t(255 * (0.5 + 0.5 * cos(6 * angle + 0.7 * PI))));
+    }
+
+    void Draw(Renderer& renderer)
+    {
+        renderer.Clear();
+        renderer.DrawSolidRect(x, y, x + RECT_WIDTH, y + RECT_HEIGHT, color);
+    }
+
+  private:
+    float angle = 0;
+    int x = Width / 2;
+    int y = Height / 2;
+};
 
 int main()
 {
-    Program program(Init, Process, Draw);
-    return program.Run(WIDTH, HEIGHT, CAPTION);
+    Demo demo;
+
+    auto Init = [&demo](Renderer& renderer) { demo.Init(renderer); };
+    auto Process = [&demo](Renderer& renderer, Input& input) { demo.Process(renderer, input); };
+    auto Draw = [&demo](Renderer& renderer) { demo.Draw(renderer); };
+
+    return Program(Init, Process, Draw).Run(demo.Width, demo.Height, demo.Caption);
 }
