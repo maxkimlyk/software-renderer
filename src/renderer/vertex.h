@@ -14,7 +14,9 @@ struct Vertex
 
     Vertex() = default;
     Vertex(const Vertex&) = default;
-    Vertex(const Vec3f& vec) : coord(vec), norm({0.0f, 0.0f, 0.0f}), tex({0.0f, 0.0f, 0.0f})
+    Vertex(const Vec3f& vec) : coord(vec), norm({0.0f, 0.0f, 0.0f}), tex({0.0f, 0.0f})
+    {}
+    Vertex(const Vec3f& coord, const Vec3f norm) : coord(coord), norm(norm), tex({0.0f, 0.0f})
     {}
     Vertex(const Vec3f& coord, const Vec3f& norm, const Vec2f tex)
         : coord(coord), norm(norm), tex(tex)

@@ -23,16 +23,21 @@ class Camera
         right_direction_ = Cross(direction_, up_direction_);
     }
 
+    void SetUpDirection(const Vec3f& up)
+    {
+        up_direction_ = up;
+    }
+
     void LookAt(const Vec3f& at, const Vec3f& position)
     {
-        this->direction_ = Normalize(at - position);
-        this->right_direction_ = Normalize(Cross(direction_, up_direction_));
-        this->position_ = position;
+        direction_ = Normalize(at - position);
+        right_direction_ = Normalize(Cross(direction_, up_direction_));
+        position_ = position;
     }
 
     void Yaw(float angle)
     {
-        Mat3f transform = Reduce<3, float>(Transform::RotateY(angle));
+        Mat3f transform = Reduce<3, float>(Transform::Rotate(angle, up_direction_));
         direction_ = transform * direction_;
         right_direction_ = transform * right_direction_;
     }
