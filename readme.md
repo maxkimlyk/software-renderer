@@ -5,6 +5,8 @@ Developing of such project was inspired by reading [this acticles](https://githu
 
 ## Building
 In Linux:
+
+You need _CMake_, _make_ and _libx11-dev_ installed.
 ```bash
 software-renderer$ mkdir build && cd build
 software-renderer/build$ cmake -DCMAKE_BUILD_TYPE=Release ..
@@ -12,6 +14,8 @@ software-renderer/build$ make
 ```
 
 In Windows:
+
+You need _CMake_ and _Visual Studio_.
 ```bash
 software-renderer$ mkdir build && cd build
 software-renderer/build$ cmake ..
