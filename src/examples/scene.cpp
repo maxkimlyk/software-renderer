@@ -74,6 +74,41 @@ void DrawBoard(Renderer& renderer)
     }
 }
 
+class GameCamera
+{
+  public:
+    GameCamera(float distance = 5.0f, float phi = 0.0f, float theta = M_PI / 4.0f)
+        : center_({0.0f, 0.0f, 0.0f}), up_direction_({0.0f, 0.0f, 1.0f}), distance_(distance),
+          phi_(phi), theta_(theta)
+    {}
+
+    void Yaw(float delta)
+    {
+        phi_ += delta;
+    }
+
+    void Pitch(float delta)
+    {
+        theta_ += delta;
+    }
+
+    Mat4f GetViewMatrix() const
+    {
+        const Vec3f direction = {cosf(phi_) * cosf(theta_), sinf(phi_) * cosf(theta_),
+                                 sinf(theta_)};
+        const Vec3f position = distance_ * direction;
+        return Transform::LookAt(center_, position, up_direction_);
+    }
+
+  private:
+    const Vec3f center_;
+    const Vec3f up_direction_;
+
+    float distance_;
+    float phi_;
+    float theta_;
+};
+
 } // namespace
 
 class Demo
@@ -84,39 +119,22 @@ class Demo
     static const size_t Height = 600;
 
     void Init(Renderer& renderer)
-    {
-        camera_.SetUpDirection({0.0f, 0.0f, 1.0f});
-        camera_.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 1.0f, 1.5f});
-    }
+    {}
 
     void Process(Renderer& renderer, Input& input)
     {
-        const float walk_distance = 0.01f;
         const float rotate_angle = 0.01f;
 
-        if (input.IsHolding(KEY_W))
-            camera_.Walk(walk_distance);
-        if (input.IsHolding(KEY_S))
-            camera_.Walk(-walk_distance);
-        if (input.IsHolding(KEY_A))
-            camera_.WalkRight(-walk_distance);
-        if (input.IsHolding(KEY_D))
-            camera_.WalkRight(walk_distance);
-        if (input.IsHolding(KEY_E))
-            camera_.RiseUp(walk_distance);
-        if (input.IsHolding(KEY_Q))
-            camera_.RiseUp(-walk_distance);
-
         if (input.IsHolding(KEY_LEFT))
-            camera_.Yaw(rotate_angle);
-        if (input.IsHolding(KEY_RIGHT))
             camera_.Yaw(-rotate_angle);
+        if (input.IsHolding(KEY_RIGHT))
+            camera_.Yaw(rotate_angle);
         if (input.IsHolding(KEY_UP))
             camera_.Pitch(rotate_angle);
         if (input.IsHolding(KEY_DOWN))
             camera_.Pitch(-rotate_angle);
 
-        renderer.SetViewMatrix(camera_.ViewMatrix());
+        renderer.SetViewMatrix(camera_.GetViewMatrix());
     }
 
     void Draw(Renderer& renderer)
@@ -131,7 +149,7 @@ class Demo
     }
 
   private:
-    Camera camera_;
+    GameCamera camera_;
 };
 
 int main()

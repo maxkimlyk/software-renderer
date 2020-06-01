@@ -84,12 +84,12 @@ Mat4f Translate(float x, float y, float z)
     return Mat4f{{1, 0, 0, x}, {0, 1, 0, y}, {0, 0, 1, z}, {0, 0, 0, 1}};
 }
 
-Mat4f LookAt(const Vec3f& eye, const Vec3f& center, const Vec3f& up)
+Mat4f LookAt(const Vec3f& at, const Vec3f& from, const Vec3f& up)
 {
-    const Vec3f e3 = Normalize(center - eye);
+    const Vec3f e3 = Normalize(from - at); // camera looks in negative z direction
     const Vec3f e1 = Normalize(Cross(up, e3));
     const Vec3f e2 = Normalize(Cross(e3, e1));
-    return NewBasis(e1, e2, e3, center);
+    return NewBasis(e1, e2, e3, from);
 }
 }; // namespace Transform
 
