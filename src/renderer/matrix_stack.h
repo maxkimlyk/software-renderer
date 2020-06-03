@@ -109,7 +109,8 @@ class MatrixStack
         Saved(MatrixType type, const Mat4f& current_matrix, const Mat4f& full_transform_matrix,
               bool full_transform_calculated)
             : type(type), current_matrix(current_matrix),
-              full_transform_matrix(full_transform_matrix), full_transform_calculated(true)
+              full_transform_matrix(full_transform_matrix),
+              full_transform_calculated(full_transform_calculated)
         {}
     };
 

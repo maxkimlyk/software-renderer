@@ -16,6 +16,7 @@ Vec4f Renderer::ProjectVertex(Vec3f vertex)
     const float invAbsW = std::fabs(invW);
     const Vec4f ndc = Vec4f{cs.x * invAbsW, cs.y * invAbsW, cs.z * invAbsW, 1.0f};
 
+    // TODO: get rid of unnecessary matrix multiplication here
     Vec4f screen4 = viewport_matrix_ * ndc;
     screen4.w = cs.w; // save z value from clip space for perspective correction
     return screen4;
