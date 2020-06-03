@@ -5,7 +5,7 @@ namespace sr
 
 Vec4f Renderer::ProjectVertex(Vec3f vertex)
 {
-    Vec4f cs = view_proj_matrix_ * Embed<4, float>(vertex);
+    Vec4f cs = Matrices.GetFullTransformMatrix() * Embed<4, float>(vertex);
 
     if (cs.w == 0.0f)
         cs.w = 0.0001f;
@@ -36,40 +36,9 @@ Renderer::Renderer(Image& frame)
     : frame_(frame), zbuffer_(frame.width, frame.height), shader_(&default_shader_)
 {
     SetViewport(0.0, (float)(frame.width), 0.0, (float)(frame.height), 0.0, 255.0);
-    projection_matrix_ =
-        Projection::Perspective(45.0f, (float)(frame.width) / (float)(frame.height), 0.05f, 100.0f);
-    view_matrix_ = Mat4f::Identity();
-    model_matrix_ = Mat4f::Identity();
-    UpdateMatrices();
-}
-
-void Renderer::SetModelMatrix(const Mat4f& mat)
-{
-    model_matrix_ = mat;
-    UpdateMatrices();
-}
-
-void Renderer::SetViewMatrix(const Mat4f& mat)
-{
-    view_matrix_ = mat;
-    UpdateMatrices();
-}
-
-void Renderer::SetProjMatrix(const Mat4f& mat)
-{
-    projection_matrix_ = mat;
-    UpdateMatrices();
-}
-
-const Mat4f& Renderer::GetModelViewMatrix() const
-{
-    return model_view_matrix_;
-}
-
-void Renderer::UpdateMatrices()
-{
-    model_view_matrix_ = view_matrix_ * model_matrix_;
-    view_proj_matrix_ = projection_matrix_ * model_view_matrix_;
+    Matrices.SetProjection(Projection::Perspective(45.0f, (float)(frame.width) / (float)(frame.height), 0.05f, 100.0f));
+    Matrices.SetView(Mat4f::Identity());
+    Matrices.SetModel(Mat4f::Identity());
 }
 
 size_t Renderer::Width()

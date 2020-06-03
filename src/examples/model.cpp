@@ -59,7 +59,7 @@ class Demo
         float z = CAM_BASE_HEIGHT + sin(theta) * CAM_DISTANCE;
 
         camera_.LookAt(Vec3f{0.0f, CAM_BASE_HEIGHT, 0.0f}, Vec3f{x, z, y});
-        renderer.SetViewMatrix(camera_.ViewMatrix());
+        renderer.Matrices.SetView(camera_.ViewMatrix());
 
         renderer.Clear();
         for (auto face = model_.faces.begin(); face != model_.faces.end(); ++face)

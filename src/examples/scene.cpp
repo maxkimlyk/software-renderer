@@ -68,7 +68,7 @@ void DrawBoard(Renderer& renderer)
             else
                 shader.color = white_color;
 
-            renderer.SetModelMatrix(mat_scale * Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
+            renderer.Matrices.SetModel(mat_scale * Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
             DrawObject(renderer, box);
         }
     }
@@ -134,7 +134,7 @@ class Demo
         if (input.IsHolding(KEY_DOWN))
             camera_.Pitch(-rotate_angle);
 
-        renderer.SetViewMatrix(camera_.GetViewMatrix());
+        renderer.Matrices.SetView(camera_.GetViewMatrix());
     }
 
     void Draw(Renderer& renderer)

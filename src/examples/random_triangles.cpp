@@ -39,7 +39,7 @@ class Demo
 
     void Init(Renderer& renderer)
     {
-        renderer.SetProjMatrix(Mat4f::Identity());
+        renderer.Matrices.SetProjection(Mat4f::Identity());
     }
 
     void Process(Renderer& renderer, Input& input)

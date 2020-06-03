@@ -106,7 +106,7 @@ class Demo
         if (input.IsPressed(KEY_T))
             ToggleShaders();
 
-        renderer.SetViewMatrix(camera_.ViewMatrix());
+        renderer.Matrices.SetView(camera_.ViewMatrix());
     }
 
     void Draw(Renderer& renderer)

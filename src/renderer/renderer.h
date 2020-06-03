@@ -6,6 +6,7 @@
 #include "rasterizer.h"
 #include "shader.h"
 #include "transforms.h"
+#include "matrix_stack.h"
 
 namespace sr
 {
@@ -30,19 +31,11 @@ class Renderer
     void Triangle(Vec3f p1, Vec3f p2, Vec3f p3, Color color);
     void Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3);
 
-    void SetModelMatrix(const Mat4f& mat);
-    void SetViewMatrix(const Mat4f& mat);
-    void SetProjMatrix(const Mat4f& mat);
-    const Mat4f& GetModelViewMatrix() const;
-
     void SetShader(Shader& shader);
 
+    MatrixStack Matrices;
+
   private:
-    Mat4f model_matrix_;
-    Mat4f view_matrix_;
-    Mat4f model_view_matrix_;
-    Mat4f projection_matrix_;
-    Mat4f view_proj_matrix_;
     Mat4f viewport_matrix_;
     Boxf viewport_box_;
 

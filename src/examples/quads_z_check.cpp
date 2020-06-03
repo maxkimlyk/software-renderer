@@ -46,7 +46,7 @@ void PrintHelp() {
     std::cout << "Use 'S' and 'W' to move backward and forward.\n"
               << "If projection and clipping work right, "
               << "quads should disappear when you moving backward.\n"
-              << "The lowest quad should disappear first, then the quad just above.";
+              << "The lowest quad should disappear first, then the quad just above.\n";
 }
 } // namespace
 
@@ -67,7 +67,7 @@ class Demo
         camera_.LookAt(Vec3f{0.0f, 0.0f, 0.0f}, Vec3f{0.0f, 0.0f, CAM_START_Z});
 
         const Mat4f proj_mat = Projection::Perspective(45.0f, (float)(Width) / (float)(Height), Z_NEAR, Z_FAR);
-        renderer.SetProjMatrix(proj_mat);
+        renderer.Matrices.SetProjection(proj_mat);
 
         PrintHelp();
     }
@@ -82,7 +82,7 @@ class Demo
         if (input.IsHolding(KEY_S))
             camera_.Walk(-walk_distance);
 
-        renderer.SetViewMatrix(camera_.ViewMatrix());
+        renderer.Matrices.SetView(camera_.ViewMatrix());
     }
 
     void Draw(Renderer& renderer)

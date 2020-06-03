@@ -24,10 +24,10 @@ class MatrixStack
         : model_matrix_(Mat4f::Identity()), view_matrix_(Mat4f::Identity()),
           projection_matrix_(Mat4f::Identity()), is_full_transform_calculated_(false)
     {
-        SetMatrixMode(default_type_);
+        SetMode(default_type_);
     }
 
-    void SetMatrixMode(MatrixType type)
+    void SetMode(MatrixType type)
     {
         current_type_ = type;
         current_ = &GetMatrixByType(type);
@@ -50,7 +50,7 @@ class MatrixStack
         if (is_full_transform_calculated_)
         {
             saved_.push_back(Saved{current_type_, *current_, full_transform_matrix_,
-                                         is_full_transform_calculated_});
+                                   is_full_transform_calculated_});
         }
         else
         {
@@ -69,11 +69,29 @@ class MatrixStack
         saved_.pop_back();
     }
 
-    const Mat4f& GetModelViewProjMatrix()
+    const Mat4f& GetFullTransformMatrix()
     {
         if (!is_full_transform_calculated_)
             CalculateTransform();
         return full_transform_matrix_;
+    }
+
+    void SetProjection(const Mat4f& mat)
+    {
+        projection_matrix_ = mat;
+        is_full_transform_calculated_ = false;
+    }
+
+    void SetView(const Mat4f& mat)
+    {
+        view_matrix_ = mat;
+        is_full_transform_calculated_ = false;
+    }
+
+    void SetModel(const Mat4f& mat)
+    {
+        model_matrix_ = mat;
+        is_full_transform_calculated_ = false;
     }
 
   private:

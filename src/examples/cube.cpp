@@ -96,8 +96,8 @@ class Demo
         angle_ += ROTATE_SPEED;
         Mat4f model_mat = Transform::RotateY(angle_) * Transform::RotateX(x_angle_) *
                           Transform::RotateZ(z_angle_);
-        renderer.SetModelMatrix(model_mat);
-        renderer.SetViewMatrix(camera_.ViewMatrix());
+        renderer.Matrices.SetModel(model_mat);
+        renderer.Matrices.SetView(camera_.ViewMatrix());
     }
 
     void Draw(Renderer& renderer)
