@@ -59,6 +59,8 @@ void DrawBoard(Renderer& renderer)
     shader.ambient_light_intensity = ambient_light_intensity;
     renderer.SetShader(shader);
 
+    renderer.Matrices.SetMode(MatrixType::MODEL);
+
     for (size_t i = 0; i < 8; ++i)
     {
         for (size_t j = 0; j < 8; ++j)
@@ -68,8 +70,11 @@ void DrawBoard(Renderer& renderer)
             else
                 shader.color = white_color;
 
-            renderer.Matrices.SetModel(mat_scale * Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
+            renderer.Matrices.Push();
+            renderer.Matrices.ApplyTransform(mat_scale *
+                                             Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
             DrawObject(renderer, box);
+            renderer.Matrices.Pop();
         }
     }
 }
@@ -77,7 +82,7 @@ void DrawBoard(Renderer& renderer)
 class GameCamera
 {
   public:
-    GameCamera(float distance = 5.0f, float phi = 0.0f, float theta = M_PI / 4.0f)
+    GameCamera(float distance = 7.0f, float phi = 0.0f, float theta = M_PI / 4.0f)
         : center_({0.0f, 0.0f, 0.0f}), up_direction_({0.0f, 0.0f, 1.0f}), distance_(distance),
           phi_(phi), theta_(theta)
     {}
@@ -144,6 +149,8 @@ class Demo
         renderer.SetShader(shader);
 
         renderer.Clear();
+
+        renderer.Matrices.SetModel(Transform::Translate(-4.0f, -4.0f, 0.0f));
 
         DrawBoard(renderer);
     }
