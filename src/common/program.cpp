@@ -50,19 +50,21 @@ int Program::MainLoop()
         }
 
         window_->Redraw();
-        fps_counter += 1;
 
         bool updated = false;
         uint32_t now_time = GetTimeMs();
-        while (now_time - last_process_time >= process_interval_)
+        while (now_time - last_process_time >= process_interval_ms)
         {
             process_callback_(*renderer_, *input_);
             updated = true;
-            last_process_time += process_interval_;
+            last_process_time += process_interval_ms;
         }
 
-        if (updated)
+        if (updated || !is_fps_sync_enabled)
+        {
             draw_callback_(*renderer_);
+            fps_counter += 1;
+        }
 
         if (GetTimeMs() - sec_begin_time >= 1000)
         {

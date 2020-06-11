@@ -23,6 +23,9 @@ class Program
 
     int Run(size_t window_width, size_t window_height, const std::string& window_caption);
 
+    bool is_fps_sync_enabled = false;
+    uint32_t process_interval_ms = 20;
+
   private:
     int MainLoop();
 
@@ -36,8 +39,6 @@ class Program
     std::unique_ptr<Input> input_;
 
     std::string window_caption_;
-
-    uint32_t process_interval_ = 20;
 
     bool is_running_;
 };
