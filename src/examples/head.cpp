@@ -27,7 +27,7 @@ void PrintUsage()
 class Demo
 {
   public:
-    inline static const std::string Caption = "Scene";
+    inline static const std::string Caption = "Head";
     static const size_t Width = 800;
     static const size_t Height = 600;
 

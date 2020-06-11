@@ -20,7 +20,7 @@ namespace impl
 class SupportsNormalCorrection
 {
   public:
-    SupportsNormalCorrection() : is_norm_corr_identity_(false)
+    SupportsNormalCorrection() : is_norm_corr_identity_(true)
     {}
 
     void SetNormCorrection(const Mat4f& mat)
