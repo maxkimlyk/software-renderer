@@ -38,7 +38,42 @@ std::vector<Face> GenBox()
     return box;
 }
 
-void DrawObject(Renderer& renderer, const std::vector<Face>& faces)
+std::vector<Face> GenChecker()
+{
+    const int segments = 16;
+    const float radius = 0.45f;
+    const float height = 0.15f;
+
+    const float delta_angle = 2 * M_PI / segments;
+
+    auto x = [radius, delta_angle](float i) { return radius * sinf(delta_angle * i); };
+    auto y = [radius, delta_angle](float i) { return radius * cosf(delta_angle * i); };
+
+    std::vector<Face> model;
+
+    for (int i = 0; i < segments; ++i)
+    {
+        Face f;
+        f.v[0] = {Vec3f{0.0f, 0.0f, height}, Vec3f{0.0f, 0.0f, 1.0f}};
+        f.v[1] = {Vec3f{x(i), y(i), height}, Vec3f{0.0f, 0.0f, 1.0f}};
+        f.v[2] = {Vec3f{x(i + 1), y(i + 1), height}, Vec3f{0.0f, 0.0f, 1.0f}};
+        model.push_back(f);
+    }
+
+    for (int i = 0; i < segments; ++i)
+    {
+        Vec3f bl = {x(i), y(i), 0.0f};
+        Vec3f br = {x(i + 1), y(i + 1), 0.0f};
+        Vec3f tr = {x(i + 1), y(i + 1), height};
+        Vec3f tl = {x(i), y(i), height};
+        Vec3f norm = {x(i + 0.5f), y(i + 0.5f), 0.0f};
+        AddQuad(model, bl, br, tr, tl, norm);
+    }
+
+    return model;
+}
+
+void DrawModel(Renderer& renderer, const std::vector<Face>& faces)
 {
     for (const auto& face : faces)
     {
@@ -48,11 +83,11 @@ void DrawObject(Renderer& renderer, const std::vector<Face>& faces)
 
 void DrawBoard(Renderer& renderer)
 {
-    const std::vector<Face> box = GenBox();
-    const Mat4f mat_scale = Transform::Scale(1.0f, 1.0f, 0.2f);
+    static const std::vector<Face> box = GenBox();
+    const Mat4f mat_scale = Transform::Scale(1.0f, 1.0f, -0.2f);
 
     static const Color white_color = Color(210, 210, 210);
-    static const Color black_color = Color(80, 80, 80);
+    static const Color black_color = Color(100, 100, 100);
     static const float ambient_light_intensity = 0.3f;
 
     DefaultShaders::FlatLight shader;
@@ -73,18 +108,43 @@ void DrawBoard(Renderer& renderer)
             renderer.Matrices.Push();
             renderer.Matrices.ApplyTransform(mat_scale *
                                              Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
-            DrawObject(renderer, box);
+            shader.SetNormCorrection(Inverse(renderer.Matrices.GetModelViewMatrix()));
+            DrawModel(renderer, box);
             renderer.Matrices.Pop();
         }
     }
 }
 
+void DrawChecker(Renderer& renderer, int i, int j, bool is_white)
+{
+    static const std::vector<Face> model = GenChecker();
+
+    static const Color checker_white_color = Color(230, 230, 230);
+    static const Color checker_black_color = Color(60, 60, 60);
+    static const float ambient_light_intensity = 0.3f;
+
+    DefaultShaders::FlatLight shader;
+    shader.ambient_light_intensity = ambient_light_intensity;
+    shader.color = is_white ? checker_white_color : checker_black_color;
+    renderer.SetShader(shader);
+
+    renderer.Matrices.SetMode(MatrixType::MODEL);
+
+    renderer.Matrices.Push();
+    renderer.Matrices.ApplyTransform(
+        Transform::Translate((i + 0.5f) * 1.0f, (j + 0.5f) * 1.0f, 0.0f));
+    DrawModel(renderer, model);
+    renderer.Matrices.Pop();
+}
+
 class GameCamera
 {
+    inline static Vec3f center_ = {0.0f, 0.0f, 0.0f};
+    inline static Vec3f up_direction_ = {0.0f, 0.0f, 1.0f};
+
   public:
-    GameCamera(float distance = 7.0f, float phi = 0.0f, float theta = M_PI / 4.0f)
-        : center_({0.0f, 0.0f, 0.0f}), up_direction_({0.0f, 0.0f, 1.0f}), distance_(distance),
-          phi_(phi), theta_(theta)
+    GameCamera(float distance = 7.0f, float phi = 0.0f, float theta = 2.0f * M_PI / 3.0f)
+        : distance_(distance), phi_(phi), theta_(theta)
     {}
 
     void Yaw(float delta)
@@ -106,9 +166,6 @@ class GameCamera
     }
 
   private:
-    const Vec3f center_;
-    const Vec3f up_direction_;
-
     float distance_;
     float phi_;
     float theta_;
@@ -144,15 +201,37 @@ class Demo
 
     void Draw(Renderer& renderer)
     {
-        DefaultShaders::FlatLight shader;
-        shader.color = Color(200, 200, 200);
-        renderer.SetShader(shader);
-
         renderer.Clear();
 
-        renderer.Matrices.SetModel(Transform::Translate(-4.0f, -4.0f, 0.0f));
+        renderer.Matrices.SetMode(MatrixType::MODEL);
+        renderer.Matrices.Set(Mat4f::Identity());
+        renderer.Matrices.ApplyTransform(Transform::Scale(1.0f, -1.0f, 1.0f));
+        renderer.Matrices.ApplyTransform(Transform::Translate(-4.0f, -4.0f, 0.0f));
 
         DrawBoard(renderer);
+
+        // clang-format off
+        const char tmp_board[8][8] = {
+            {'w', ' ', 'w', ' ', 'w', ' ', 'w', ' '},
+            {' ', 'w', ' ', 'w', ' ', 'w', ' ', 'w'},
+            {'w', ' ', 'w', ' ', 'w', ' ', 'w', ' '},
+            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            {' ', 'b', ' ', 'b', ' ', 'b', ' ', 'b'},
+            {'b', ' ', 'b', ' ', 'b', ' ', 'b', ' '},
+            {' ', 'b', ' ', 'b', ' ', 'b', ' ', 'b'}
+        };
+        // clang-format on
+        for (size_t i = 0; i < 8; ++i)
+        {
+            for (size_t j = 0; j < 8; ++j)
+            {
+                if (tmp_board[i][j] != ' ') {
+                    const bool is_white = tmp_board[i][j] == 'w';
+                    DrawChecker(renderer, i, j, is_white);
+                }
+            }
+        }
     }
 
   private:

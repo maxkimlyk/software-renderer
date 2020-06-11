@@ -15,11 +15,47 @@ class Shader
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) = 0;
 };
 
+namespace impl
+{
+class SupportsNormalCorrection
+{
+  public:
+    SupportsNormalCorrection() : is_norm_corr_identity_(false)
+    {}
+
+    void SetNormCorrection(const Mat4f& mat)
+    {
+        if (mat == Mat4f::Identity())
+        {
+            is_norm_corr_identity_ = true;
+        }
+        else
+        {
+            norm_corr_matrix_ = mat;
+            is_norm_corr_identity_ = false;
+        }
+    }
+
+  protected:
+    Vec3f CorrectNormal(const Vec3f& norm) const
+    {
+        if (is_norm_corr_identity_)
+            return norm;
+        Vec4f transformed = norm_corr_matrix_ * Embed<4>(norm, 0.0f);
+        return Project<3>(transformed);
+    };
+
+  private:
+    Mat4f norm_corr_matrix_;
+    bool is_norm_corr_identity_;
+};
+}; // namespace impl
+
 namespace DefaultShaders
 {
-class SmoothLight : public Shader
+class SmoothLight : public Shader, public impl::SupportsNormalCorrection
 {
-    Vec3f norm1, norm2, norm3;
+    Vec3f norm1_, norm2_, norm3_;
 
   public:
     Color color = Color(255, 255, 255);
@@ -27,14 +63,14 @@ class SmoothLight : public Shader
 
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
     {
-        norm1 = v1.norm;
-        norm2 = v2.norm;
-        norm3 = v3.norm;
+        norm1_ = CorrectNormal(v1.norm);
+        norm2_ = CorrectNormal(v2.norm);
+        norm3_ = CorrectNormal(v3.norm);
     }
 
     virtual bool pixel(Vec3f bar, Color& result_color) override
     {
-        const Vec3f norm = bar[0] * norm1 + bar[1] * norm2 + bar[2] * norm3;
+        const Vec3f norm = bar[0] * norm1_ + bar[1] * norm2_ + bar[2] * norm3_;
         const float dot = light_direction * norm;
         const float intensity = dot > 0 ? dot : 0;
         result_color = Color(color.r * intensity, color.g * intensity, color.b * intensity);
@@ -81,7 +117,7 @@ class SmoothTexture : public Shader
     }
 };
 
-class FlatLight : public Shader
+class FlatLight : public Shader, public impl::SupportsNormalCorrection
 {
   public:
     Color color = Color(255, 255, 255);
@@ -96,7 +132,8 @@ class FlatLight : public Shader
 
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
     {
-        const Vec3f norm = Normalize(Cross(v3.coord - v1.coord, v2.coord - v1.coord));
+        const Vec3f model_norm = Cross(v3.coord - v1.coord, v2.coord - v1.coord);
+        const Vec3f norm = Normalize(CorrectNormal(model_norm));
         const float cross = light_direction * norm;
         const float light_intensity = cross > 0 ? cross : 0;
         const float coef =

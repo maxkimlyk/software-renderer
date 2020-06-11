@@ -41,7 +41,7 @@ class MatrixStack
 
     void ApplyTransform(const Mat4f& matrix)
     {
-        *current_ = matrix * (*current_);
+        *current_ = *current_ * matrix;
         is_full_transform_calculated_ = false;
     }
 
@@ -74,6 +74,11 @@ class MatrixStack
         if (!is_full_transform_calculated_)
             CalculateTransform();
         return full_transform_matrix_;
+    }
+
+    Mat4f GetModelViewMatrix() const
+    {
+        return view_matrix_ * model_matrix_;
     }
 
     void SetProjection(const Mat4f& mat)
