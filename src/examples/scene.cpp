@@ -11,8 +11,8 @@ namespace
 void AddQuad(std::vector<Face>& result, const Vec3f& bl, const Vec3f& br, const Vec3f& tr,
              const Vec3f& tl, const Vec3f& norm)
 {
-    result.push_back({Vertex(bl, norm), Vertex(br, norm), Vertex(tr, norm)});
-    result.push_back({Vertex(bl, norm), Vertex(tr, norm), Vertex(tl, norm)});
+    result.push_back({Vertex(bl, norm), Vertex(tr, norm), Vertex(br, norm)});
+    result.push_back({Vertex(bl, norm), Vertex(tl, norm), Vertex(tr, norm)});
 }
 
 std::vector<Face> GenBox()
@@ -81,62 +81,6 @@ void DrawModel(Renderer& renderer, const std::vector<Face>& faces)
     }
 }
 
-void DrawBoard(Renderer& renderer)
-{
-    static const std::vector<Face> box = GenBox();
-    const Mat4f mat_scale = Transform::Scale(1.0f, 1.0f, -0.2f);
-
-    static const Color white_color = Color(210, 210, 210);
-    static const Color black_color = Color(100, 100, 100);
-    static const float ambient_light_intensity = 0.3f;
-
-    DefaultShaders::FlatLight shader;
-    shader.ambient_light_intensity = ambient_light_intensity;
-    renderer.SetShader(shader);
-
-    renderer.Matrices.SetMode(MatrixType::MODEL);
-
-    for (size_t i = 0; i < 8; ++i)
-    {
-        for (size_t j = 0; j < 8; ++j)
-        {
-            if ((i + j) % 2 == 0)
-                shader.color = black_color;
-            else
-                shader.color = white_color;
-
-            renderer.Matrices.Push();
-            renderer.Matrices.ApplyTransform(mat_scale *
-                                             Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
-            shader.SetNormCorrection(Inverse(renderer.Matrices.GetModelViewMatrix()));
-            DrawModel(renderer, box);
-            renderer.Matrices.Pop();
-        }
-    }
-}
-
-void DrawChecker(Renderer& renderer, int i, int j, bool is_white)
-{
-    static const std::vector<Face> model = GenChecker();
-
-    static const Color checker_white_color = Color(230, 230, 230);
-    static const Color checker_black_color = Color(60, 60, 60);
-    static const float ambient_light_intensity = 0.3f;
-
-    DefaultShaders::FlatLight shader;
-    shader.ambient_light_intensity = ambient_light_intensity;
-    shader.color = is_white ? checker_white_color : checker_black_color;
-    renderer.SetShader(shader);
-
-    renderer.Matrices.SetMode(MatrixType::MODEL);
-
-    renderer.Matrices.Push();
-    renderer.Matrices.ApplyTransform(
-        Transform::Translate((i + 0.5f) * 1.0f, (j + 0.5f) * 1.0f, 0.0f));
-    DrawModel(renderer, model);
-    renderer.Matrices.Pop();
-}
-
 class GameCamera
 {
     inline static Vec3f center_ = {0.0f, 0.0f, 0.0f};
@@ -196,7 +140,89 @@ class Demo
         if (input.IsHolding(KEY_DOWN))
             camera_.Pitch(-rotate_angle);
 
+        if (input.IsHolding(KEY_J))
+            RotateLight(rotate_angle);
+        if (input.IsHolding(KEY_K))
+            RotateLight(-rotate_angle);
+
         renderer.Matrices.SetView(camera_.GetViewMatrix());
+    }
+
+    void RotateLight(float angle)
+    {
+        light_direction_ = TransformVector(light_direction_, Transform::RotateZ(angle));
+        std::cout << light_direction_ << std::endl;
+    }
+
+    void DrawBoard(Renderer& renderer)
+    {
+        static const std::vector<Face> box = GenBox();
+        const Mat4f mat_scale = Transform::Scale(1.0f, 1.0f, -0.2f);
+
+        static const Color white_color = Color(210, 210, 210);
+        static const Color black_color = Color(100, 100, 100);
+        static const float ambient_light_intensity = 0.3f;
+
+        DefaultShaders::FlatLight shader;
+        shader.ambient_light_intensity = ambient_light_intensity;
+        shader.light_direction = light_direction_;
+        renderer.SetShader(shader);
+
+        renderer.Matrices.SetMode(MatrixType::MODEL);
+
+        for (size_t i = 0; i < 8; ++i)
+        {
+            for (size_t j = 0; j < 8; ++j)
+            {
+                if ((i + j) % 2 == 0)
+                    shader.color = black_color;
+                else
+                    shader.color = white_color;
+
+                renderer.Matrices.Push();
+                renderer.Matrices.Transform(mat_scale *
+                                            Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
+
+                const Mat4f model_mat = renderer.Matrices.GetModel();
+                std::cout << "M: " << model_mat << std::endl;
+                const Mat4f norm_corr_mat = Inverse(Transpose(model_mat));
+                std::cout << "(M^T)^-1: " << norm_corr_mat << std::endl;
+                shader.SetNormCorrection(norm_corr_mat);
+
+                DrawModel(renderer, box);
+                renderer.Matrices.Pop();
+            }
+        }
+    }
+
+    void DrawChecker(Renderer& renderer, int i, int j, bool is_white)
+    {
+        static const std::vector<Face> model = GenChecker();
+
+        static const Color checker_white_color = Color(230, 230, 230);
+        static const Color checker_black_color = Color(60, 60, 60);
+        static const float ambient_light_intensity = 0.3f;
+
+        DefaultShaders::FlatLight shader;
+        shader.ambient_light_intensity = ambient_light_intensity;
+        shader.color = is_white ? checker_white_color : checker_black_color;
+        shader.light_direction = light_direction_;
+        renderer.SetShader(shader);
+
+        renderer.Matrices.SetMode(MatrixType::MODEL);
+
+        renderer.Matrices.Push();
+        renderer.Matrices.Transform(
+            Transform::Translate((i + 0.5f) * 1.0f, (j + 0.5f) * 1.0f, 0.0f));
+
+        const Mat4f model_mat = renderer.Matrices.GetModel();
+        // std::cout << "M: " << model_mat << std::endl;
+        const Mat4f norm_corr_mat = Inverse(Transpose(model_mat));
+        // std::cout << "(M^T)^-1: " << norm_corr_mat << std::endl;
+        shader.SetNormCorrection(norm_corr_mat);
+
+        DrawModel(renderer, model);
+        renderer.Matrices.Pop();
     }
 
     void Draw(Renderer& renderer)
@@ -205,8 +231,8 @@ class Demo
 
         renderer.Matrices.SetMode(MatrixType::MODEL);
         renderer.Matrices.Set(Mat4f::Identity());
-        renderer.Matrices.ApplyTransform(Transform::Scale(1.0f, -1.0f, 1.0f));
-        renderer.Matrices.ApplyTransform(Transform::Translate(-4.0f, -4.0f, 0.0f));
+        renderer.Matrices.Transform(Transform::Scale(1.0f, -1.0f, 1.0f));
+        renderer.Matrices.Transform(Transform::Translate(-4.0f, -4.0f, 0.0f));
 
         DrawBoard(renderer);
 
@@ -226,7 +252,8 @@ class Demo
         {
             for (size_t j = 0; j < 8; ++j)
             {
-                if (tmp_board[i][j] != ' ') {
+                if (tmp_board[i][j] != ' ')
+                {
                     const bool is_white = tmp_board[i][j] == 'w';
                     DrawChecker(renderer, i, j, is_white);
                 }
@@ -236,6 +263,7 @@ class Demo
 
   private:
     GameCamera camera_;
+    Vec3f light_direction_ = Normalize(Vec3f{0.2f, 0.2f, -1.0f});
 };
 
 int main()

@@ -188,6 +188,15 @@ Vec<n, T> operator-(Vec<n, T> lhs, const Vec<n, T>& rhs)
 }
 
 template <size_t n, class T>
+Vec<n, T> operator-(const Vec<n, T>& v)
+{
+    Vec<n, T> result;
+    for (size_t i = 0; i < n; ++i)
+        result[i] = -v[i];
+    return result;
+}
+
+template <size_t n, class T>
 bool operator==(const Vec<n, T>& lhs, const Vec<n, T>& rhs)
 {
     for (size_t i = 0; i < n; ++i)
@@ -518,11 +527,21 @@ bool operator==(const Mat<n, T>& lhs, const Mat<n, T>& rhs)
 }
 
 template <size_t n, class T>
-std::ostream& operator<<(std::ostream& os, Mat<n, T>& rhs)
+std::ostream& operator<<(std::ostream& os, const Mat<n, T>& rhs)
 {
-    for (size_t i = 0; i < n; ++i)
-        os << rhs[i] << std::endl;
+    static const char* separator = ",";
+    os << rhs[0];
+    for (size_t i = 1; i < n; ++i)
+        os << separator << rhs[i];
     return os;
+}
+
+template <size_t n, class T>
+Vec<n, T> TransformVector(const Vec<n, T>& vec, const Mat<n + 1, T>& mat)
+{
+    const Vec<n + 1, T> generalized_coord = Embed<n + 1, T>(vec, T(0));
+    const Vec<n + 1, T> transformed = mat * generalized_coord;
+    return Project<n, T>(transformed);
 }
 
 } // namespace sr

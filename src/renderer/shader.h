@@ -134,7 +134,7 @@ class FlatLight : public Shader, public impl::SupportsNormalCorrection
     {
         const Vec3f model_norm = Cross(v3.coord - v1.coord, v2.coord - v1.coord);
         const Vec3f norm = Normalize(CorrectNormal(model_norm));
-        const float cross = light_direction * norm;
+        const float cross = (-light_direction) * norm;
         const float light_intensity = cross > 0 ? cross : 0;
         const float coef =
             ambient_light_intensity + (1.0f - ambient_light_intensity) * light_intensity;
