@@ -165,7 +165,7 @@ class Demo
 
         DefaultShaders::FlatLight shader;
         shader.ambient_light_intensity = ambient_light_intensity;
-        shader.light_direction = light_direction_;
+        shader.SetLightDirection(light_direction_);
         renderer.SetShader(shader);
 
         renderer.Matrices.SetMode(MatrixType::MODEL);
@@ -184,10 +184,7 @@ class Demo
                                             Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
 
                 const Mat4f model_mat = renderer.Matrices.GetModel();
-                std::cout << "M: " << model_mat << std::endl;
-                const Mat4f norm_corr_mat = Inverse(Transpose(model_mat));
-                std::cout << "(M^T)^-1: " << norm_corr_mat << std::endl;
-                shader.SetNormCorrection(norm_corr_mat);
+                shader.SetNormCorrection(Inverse(Transpose(model_mat)));
 
                 DrawModel(renderer, box);
                 renderer.Matrices.Pop();
@@ -206,20 +203,18 @@ class Demo
         DefaultShaders::FlatLight shader;
         shader.ambient_light_intensity = ambient_light_intensity;
         shader.color = is_white ? checker_white_color : checker_black_color;
-        shader.light_direction = light_direction_;
+        shader.SetLightDirection(light_direction_);
         renderer.SetShader(shader);
 
         renderer.Matrices.SetMode(MatrixType::MODEL);
 
+        const Mat4f model_mat = renderer.Matrices.GetModel();
+        const Mat4f norm_corr_mat = Inverse(Transpose(model_mat));
+        shader.SetNormCorrection(norm_corr_mat);
+
         renderer.Matrices.Push();
         renderer.Matrices.Transform(
             Transform::Translate((i + 0.5f) * 1.0f, (j + 0.5f) * 1.0f, 0.0f));
-
-        const Mat4f model_mat = renderer.Matrices.GetModel();
-        // std::cout << "M: " << model_mat << std::endl;
-        const Mat4f norm_corr_mat = Inverse(Transpose(model_mat));
-        // std::cout << "(M^T)^-1: " << norm_corr_mat << std::endl;
-        shader.SetNormCorrection(norm_corr_mat);
 
         DrawModel(renderer, model);
         renderer.Matrices.Pop();

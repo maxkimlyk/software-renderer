@@ -10,11 +10,11 @@ void AddQuad(std::vector<Face>& result, const Vec3f& bl, const Vec3f& tr, const 
 {
     // clang-format off
     result.push_back({Vertex(bl, norm, Vec2f{0.0f, 0.0f}),
-                      Vertex(Vec3f{tr.x, bl.y, bl.z}, norm, Vec2f{1.0f, 0.0f}),
-                      Vertex(tr, norm, Vec2f{1.0f, 1.0f})});
-    result.push_back({Vertex(bl, norm, Vec2f{0.0f, 0.0f}),
                       Vertex(tr, norm, Vec2f{1.0f, 1.0f}),
-                      Vertex(Vec3f{bl.x, tr.y, tr.z}, norm, Vec2f{0.0f, 1.0f})});
+                      Vertex(Vec3f{tr.x, bl.y, bl.z}, norm, Vec2f{1.0f, 0.0f})});
+    result.push_back({Vertex(bl, norm, Vec2f{0.0f, 0.0f}),
+                      Vertex(Vec3f{bl.x, tr.y, tr.z}, norm, Vec2f{0.0f, 1.0f}),
+                      Vertex(tr, norm, Vec2f{1.0f, 1.0f})});
     // clang-format on
 }
 

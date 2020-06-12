@@ -49,17 +49,35 @@ class SupportsNormalCorrection
     Mat4f norm_corr_matrix_;
     bool is_norm_corr_identity_;
 };
+
+class SupportsGlobalLight
+{
+  public:
+    void SetLightDirection(const Vec3f& dir)
+    {
+        minus_light_direction_ = -dir;
+    }
+
+    Vec3f GetLightDirection() const
+    {
+        return -minus_light_direction_;
+    }
+
+  protected:
+    Vec3f minus_light_direction_ = Vec3f{0.0f, 0.0f, 1.0f};
+};
 }; // namespace impl
 
 namespace DefaultShaders
 {
-class SmoothLight : public Shader, public impl::SupportsNormalCorrection
+class SmoothLight : public Shader,
+                    public impl::SupportsNormalCorrection,
+                    public impl::SupportsGlobalLight
 {
     Vec3f norm1_, norm2_, norm3_;
 
   public:
     Color color = Color(255, 255, 255);
-    Vec3f light_direction = Vec3f{0.0f, 0.0f, 1.0f};
 
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
     {
@@ -71,14 +89,16 @@ class SmoothLight : public Shader, public impl::SupportsNormalCorrection
     virtual bool pixel(Vec3f bar, Color& result_color) override
     {
         const Vec3f norm = bar[0] * norm1_ + bar[1] * norm2_ + bar[2] * norm3_;
-        const float dot = light_direction * norm;
+        const float dot = minus_light_direction_ * norm;
         const float intensity = dot > 0 ? dot : 0;
         result_color = Color(color.r * intensity, color.g * intensity, color.b * intensity);
         return true;
     }
 };
 
-class SmoothTexture : public Shader
+class SmoothTexture : public Shader,
+                      public impl::SupportsNormalCorrection,
+                      public impl::SupportsGlobalLight
 {
     const Image& texture;
 
@@ -87,9 +107,7 @@ class SmoothTexture : public Shader
     Vec3f norm1, norm2, norm3;
 
   public:
-    Vec3f light_direction;
-
-    SmoothTexture(const Image& texture) : texture(texture), light_direction({0.0f, 0.0f, 1.0f})
+    SmoothTexture(const Image& texture) : texture(texture)
     {}
 
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
@@ -104,25 +122,26 @@ class SmoothTexture : public Shader
     virtual bool pixel(Vec3f bar, Color& result_color) override
     {
         const Vec3f norm = bar[0] * norm1 + bar[1] * norm2 + bar[2] * norm3;
-        const float dot = light_direction * norm;
+        const float dot = minus_light_direction_ * norm;
         const float intensity = dot > 0 ? dot : 0;
 
         const float u = bar * us;
         const float v = bar * vs;
-        Color color = texture.AtSafe(std::round(u * (texture.width - 1)),
-                                     std::round(v * (texture.height - 1)));
+        const Color color = texture.AtSafe(std::round(u * (texture.width - 1)),
+                                           std::round(v * (texture.height - 1)));
 
         result_color = Color(color.r * intensity, color.g * intensity, color.b * intensity);
         return true;
     }
 };
 
-class FlatLight : public Shader, public impl::SupportsNormalCorrection
+class FlatLight : public Shader,
+                  public impl::SupportsNormalCorrection,
+                  public impl::SupportsGlobalLight
 {
   public:
     Color color = Color(255, 255, 255);
     float ambient_light_intensity = 0.1f;
-    Vec3f light_direction = Vec3f{0.0f, 0.0f, -1.0f};
 
     virtual bool pixel(Vec3f bar, Color& result_color) override
     {
@@ -134,7 +153,7 @@ class FlatLight : public Shader, public impl::SupportsNormalCorrection
     {
         const Vec3f model_norm = Cross(v3.coord - v1.coord, v2.coord - v1.coord);
         const Vec3f norm = Normalize(CorrectNormal(model_norm));
-        const float cross = (-light_direction) * norm;
+        const float cross = minus_light_direction_ * norm;
         const float light_intensity = cross > 0 ? cross : 0;
         const float coef =
             ambient_light_intensity + (1.0f - ambient_light_intensity) * light_intensity;

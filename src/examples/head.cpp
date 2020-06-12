@@ -128,8 +128,8 @@ class Demo
     {
         const Mat4f transform = Transform::RotateY(angle);
         light_direction_ = ApplyTransform(light_direction_, transform);
-        colored_shader_.light_direction = light_direction_;
-        textured_shader_.light_direction = light_direction_;
+        colored_shader_.SetLightDirection(light_direction_);
+        textured_shader_.SetLightDirection(light_direction_);
     }
 
     void ToggleShaders()
@@ -143,7 +143,7 @@ class Demo
     Model model_;
     Image texture_;
     Camera camera_;
-    Vec3f light_direction_ = Vec3f{0.0f, 0.0f, 1.0f};
+    Vec3f light_direction_ = Vec3f{0.0f, 0.0f, -1.0f};
 
     DefaultShaders::SmoothLight colored_shader_;
     DefaultShaders::SmoothTexture textured_shader_;
