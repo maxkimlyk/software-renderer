@@ -1,6 +1,7 @@
 #include "rasterizer.h"
 #include "shader.h"
 
+#include <algorithm>
 #include <tuple>
 
 namespace sr

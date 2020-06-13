@@ -20,7 +20,7 @@ You need _CMake_ and _Visual Studio_.
 ```bash
 software-renderer$ mkdir build && cd build
 software-renderer/build$ cmake ..
-software-renderer/build$ cmake --build --config Release
+software-renderer/build$ cmake --build . --config Release
 ```
 
 **Note**: building in "release" mode makes code working much faster (about 10 times more FPS).
