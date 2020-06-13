@@ -78,6 +78,7 @@ class SmoothLight : public Shader,
 
   public:
     Color color = Color(255, 255, 255);
+    float ambient_light_intensity = 0.0f;
 
     virtual void vertex(const Vertex& v1, const Vertex& v2, const Vertex& v3) override
     {
@@ -91,7 +92,9 @@ class SmoothLight : public Shader,
         const Vec3f norm = bar[0] * norm1_ + bar[1] * norm2_ + bar[2] * norm3_;
         const float dot = minus_light_direction_ * norm;
         const float intensity = dot > 0 ? dot : 0;
-        result_color = Color(color.r * intensity, color.g * intensity, color.b * intensity);
+        const float coef =
+            ambient_light_intensity + (1.0f - ambient_light_intensity) * intensity;
+        result_color = Color(color.r * coef, color.g * coef, color.b * coef);
         return true;
     }
 };

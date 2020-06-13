@@ -15,6 +15,13 @@ void AddQuad(std::vector<Face>& result, const Vec3f& bl, const Vec3f& br, const 
     result.push_back({Vertex(bl, norm), Vertex(tl, norm), Vertex(tr, norm)});
 }
 
+void AddQuad(std::vector<Face>& result, const Vertex& bl, const Vertex& br, const Vertex& tr,
+             const Vertex& tl)
+{
+    result.push_back({bl, tr, br});
+    result.push_back({bl, tl, tr});
+}
+
 std::vector<Face> GenBox()
 {
     const Vec3f a = {1, 0, 1};
@@ -41,13 +48,29 @@ std::vector<Face> GenBox()
 std::vector<Face> GenChecker()
 {
     const int segments = 16;
-    const float radius = 0.45f;
+    const float radius = 0.4f;
     const float height = 0.15f;
 
-    const float delta_angle = 2 * M_PI / segments;
+    const float alpha = 0.1f;
+    const float k = 3;
+    const float l = (1.0f - alpha) * radius;
+    const float omega = k * 2 * M_PI / l;
+    const float t0 = alpha * radius;
+    const float t_inc = l / (4 * k);
 
-    auto x = [radius, delta_angle](float i) { return radius * sinf(delta_angle * i); };
-    auto y = [radius, delta_angle](float i) { return radius * cosf(delta_angle * i); };
+    const float delta_angle = 2 * M_PI / segments;
+    auto x = [delta_angle](float radius, float i) { return radius * sinf(delta_angle * i); };
+    auto y = [delta_angle](float radius, float i) { return radius * cosf(delta_angle * i); };
+
+    auto f = [omega, t0](float t) { return sinf(omega * (t - t0)); };
+    auto der_f = [omega, t0](float t) { return omega * cosf(omega * (t - t0)); };
+
+    auto calc_norm_for_curve = [&der_f](float t, const Vec3f& x_dir) {
+        const Vec3f z_dir = {0.0f, 0.0f, 1.0f};
+        const Vec2f norm_2d = Normalize(Vec2f{-der_f(t), 1.0f});
+        const Vec3f norm_3d = x_dir * norm_2d.x + z_dir * norm_2d.y;
+        return norm_3d;
+    };
 
     std::vector<Face> model;
 
@@ -55,18 +78,35 @@ std::vector<Face> GenChecker()
     {
         Face f;
         f.v[0] = {Vec3f{0.0f, 0.0f, height}, Vec3f{0.0f, 0.0f, 1.0f}};
-        f.v[1] = {Vec3f{x(i), y(i), height}, Vec3f{0.0f, 0.0f, 1.0f}};
-        f.v[2] = {Vec3f{x(i + 1), y(i + 1), height}, Vec3f{0.0f, 0.0f, 1.0f}};
+        f.v[1] = {Vec3f{x(t0, i), y(t0, i), height}, Vec3f{0.0f, 0.0f, 1.0f}};
+        f.v[2] = {Vec3f{x(t0, i + 1), y(t0, i + 1), height}, Vec3f{0.0f, 0.0f, 1.0f}};
         model.push_back(f);
+
+        const Vec3f x_dir_left = Normalize(Vec3f{x(t0, i), y(t0, i), 0.0f});
+        const Vec3f x_dir_right = Normalize(Vec3f{x(t0, i + 1), y(t0, i + 1), 0.0f});
+
+        for (float t = t0; t < radius; t += t_inc)
+        {
+            const float t1 = t + t_inc;
+            const Vertex tl = {Vec3f{x(t, i), y(t, i), height}, //
+                               calc_norm_for_curve(t, x_dir_left)};
+            const Vertex tr = {Vec3f{x(t, i + 1), y(t, i + 1), height},
+                               calc_norm_for_curve(t, x_dir_right)};
+            const Vertex bl = {Vec3f{x(t1, i), y(t1, i), height},
+                               calc_norm_for_curve(t1, x_dir_left)};
+            const Vertex br = {Vec3f{x(t1, i + 1), y(t1, i + 1), height},
+                               calc_norm_for_curve(t1, x_dir_right)};
+            AddQuad(model, bl, br, tr, tl);
+        }
     }
 
     for (int i = 0; i < segments; ++i)
     {
-        Vec3f bl = {x(i), y(i), 0.0f};
-        Vec3f br = {x(i + 1), y(i + 1), 0.0f};
-        Vec3f tr = {x(i + 1), y(i + 1), height};
-        Vec3f tl = {x(i), y(i), height};
-        Vec3f norm = {x(i + 0.5f), y(i + 0.5f), 0.0f};
+        Vec3f bl = {x(radius, i), y(radius, i), 0.0f};
+        Vec3f br = {x(radius, i + 1), y(radius, i + 1), 0.0f};
+        Vec3f tr = {x(radius, i + 1), y(radius, i + 1), height};
+        Vec3f tl = {x(radius, i), y(radius, i), height};
+        Vec3f norm = {x(radius, i + 0.5f), y(radius, i + 0.5f), 0.0f};
         AddQuad(model, bl, br, tr, tl, norm);
     }
 
@@ -197,10 +237,10 @@ class Demo
         static const std::vector<Face> model = GenChecker();
 
         static const Color checker_white_color = Color(230, 230, 230);
-        static const Color checker_black_color = Color(60, 60, 60);
+        static const Color checker_black_color = Color(80, 80, 80);
         static const float ambient_light_intensity = 0.3f;
 
-        DefaultShaders::FlatLight shader;
+        DefaultShaders::SmoothLight shader;
         shader.ambient_light_intensity = ambient_light_intensity;
         shader.color = is_white ? checker_white_color : checker_black_color;
         shader.SetLightDirection(light_direction_);
@@ -235,8 +275,8 @@ class Demo
         const char tmp_board[8][8] = {
             {'w', ' ', 'w', ' ', 'w', ' ', 'w', ' '},
             {' ', 'w', ' ', 'w', ' ', 'w', ' ', 'w'},
-            {'w', ' ', 'w', ' ', 'w', ' ', 'w', ' '},
-            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            {'w', ' ', 'w', ' ', ' ', ' ', 'w', ' '},
+            {' ', ' ', ' ', 'w', ' ', ' ', ' ', ' '},
             {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
             {' ', 'b', ' ', 'b', ' ', 'b', ' ', 'b'},
             {'b', ' ', 'b', ' ', 'b', ' ', 'b', ' '},
@@ -258,7 +298,7 @@ class Demo
 
   private:
     GameCamera camera_;
-    Vec3f light_direction_ = Normalize(Vec3f{0.2f, 0.2f, -1.0f});
+    Vec3f light_direction_ = Normalize(Vec3f{0.8f, 0.8f, -1.0f});
 };
 
 int main()
