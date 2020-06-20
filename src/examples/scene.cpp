@@ -270,7 +270,9 @@ class Demo
 
     void Draw(Renderer& renderer)
     {
-        renderer.Clear();
+        static const Color clear_color(50, 50, 35);
+
+        renderer.Clear(clear_color);
 
         renderer.Matrices.SetMode(MatrixType::MODEL);
         renderer.Matrices.Set(Mat4f::Identity());
