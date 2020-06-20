@@ -155,8 +155,6 @@ class GameCamera
     float theta_;
 };
 
-} // namespace
-
 class Demo
 {
   public:
@@ -164,124 +162,75 @@ class Demo
     static const size_t Width = 800;
     static const size_t Height = 600;
 
-    void Init(Renderer& renderer)
-    {}
+    void Init(Renderer& renderer);
+    void Process(Renderer& renderer, Input& input);
+    void Draw(Renderer& renderer);
 
-    void Process(Renderer& renderer, Input& input)
+  private:
+    void RotateLight(float angle);
+    void DrawBoard(Renderer& renderer);
+    void DrawBoardStencil(Renderer& renderer, const Mat4f& mat_scale, const std::vector<Face>& box);
+    void DrawChecker(Renderer& renderer, int i, int j, bool is_white, bool is_under_cursor);
+    std::optional<Vec2i> GetCellUnderPointer(int x, int y) const;
+    bool IsCellUnderCursor(int i, int j) const;
+
+    GameCamera camera_;
+    Vec3f light_direction_ = Normalize(Vec3f{0.8f, 0.8f, -1.0f});
+    Image board_stencil_;
+    std::optional<Vec2i> cell_under_cursor_;
+};
+
+void Demo::Init(Renderer& renderer)
+{
+    board_stencil_.Resize(Width, Height);
+}
+
+void Demo::Process(Renderer& renderer, Input& input)
+{
+    const float rotate_angle = 0.01f;
+
+    if (input.IsHolding(KEY_LEFT))
+        camera_.Yaw(-rotate_angle);
+    if (input.IsHolding(KEY_RIGHT))
+        camera_.Yaw(rotate_angle);
+    if (input.IsHolding(KEY_UP))
+        camera_.Pitch(rotate_angle);
+    if (input.IsHolding(KEY_DOWN))
+        camera_.Pitch(-rotate_angle);
+
+    if (input.IsHolding(KEY_RBUTTON))
     {
-        const float rotate_angle = 0.01f;
-
-        if (input.IsHolding(KEY_LEFT))
-            camera_.Yaw(-rotate_angle);
-        if (input.IsHolding(KEY_RIGHT))
-            camera_.Yaw(rotate_angle);
-        if (input.IsHolding(KEY_UP))
-            camera_.Pitch(rotate_angle);
-        if (input.IsHolding(KEY_DOWN))
-            camera_.Pitch(-rotate_angle);
-
-        if (input.IsHolding(KEY_RBUTTON))
-        {
-            const float sensitivity = 0.15f;
-            const auto [deltax, deltay] = input.GetMouseMovement();
-            camera_.Yaw(-deltax * sensitivity * rotate_angle);
-            camera_.Pitch(-deltay * sensitivity * rotate_angle);
-        }
-
-        if (input.IsHolding(KEY_J))
-            RotateLight(rotate_angle);
-        if (input.IsHolding(KEY_K))
-            RotateLight(-rotate_angle);
-
-        renderer.Matrices.SetView(camera_.GetViewMatrix());
+        const float sensitivity = 0.25f;
+        const auto [deltax, deltay] = input.GetMouseMovement();
+        camera_.Yaw(-deltax * sensitivity * rotate_angle);
+        camera_.Pitch(-deltay * sensitivity * rotate_angle);
     }
 
-    void RotateLight(float angle)
-    {
-        light_direction_ = TransformVector(light_direction_, Transform::RotateZ(angle));
-        std::cout << light_direction_ << std::endl;
-    }
+    if (input.IsHolding(KEY_J))
+        RotateLight(rotate_angle);
+    if (input.IsHolding(KEY_K))
+        RotateLight(-rotate_angle);
 
-    void DrawBoard(Renderer& renderer)
-    {
-        static const std::vector<Face> box = GenBox();
-        const Mat4f mat_scale = Transform::Scale(1.0f, 1.0f, -0.2f);
+    const auto [x, y] = input.GetMousePosition();
+    cell_under_cursor_ = GetCellUnderPointer(x, y);
 
-        static const Color white_color = Color(210, 210, 210);
-        static const Color black_color = Color(100, 100, 100);
-        static const float ambient_light_intensity = 0.3f;
+    renderer.Matrices.SetView(camera_.GetViewMatrix());
+}
 
-        DefaultShaders::FlatLight shader;
-        shader.ambient_light_intensity = ambient_light_intensity;
-        shader.SetLightDirection(light_direction_);
-        renderer.SetShader(shader);
+void Demo::Draw(Renderer& renderer)
+{
+    static const Color clear_color(50, 50, 35);
 
-        renderer.Matrices.SetMode(MatrixType::MODEL);
+    renderer.Clear(clear_color);
 
-        for (size_t i = 0; i < 8; ++i)
-        {
-            for (size_t j = 0; j < 8; ++j)
-            {
-                if ((i + j) % 2 == 0)
-                    shader.color = black_color;
-                else
-                    shader.color = white_color;
+    renderer.Matrices.SetMode(MatrixType::MODEL);
+    renderer.Matrices.Set(Mat4f::Identity());
+    renderer.Matrices.Transform(Transform::Scale(1.0f, -1.0f, 1.0f));
+    renderer.Matrices.Transform(Transform::Translate(-4.0f, -4.0f, 0.0f));
 
-                renderer.Matrices.Push();
-                renderer.Matrices.Transform(mat_scale *
-                                            Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
+    DrawBoard(renderer);
 
-                const Mat4f model_mat = renderer.Matrices.GetModel();
-                shader.SetNormCorrection(Inverse(Transpose(model_mat)));
-
-                DrawModel(renderer, box);
-                renderer.Matrices.Pop();
-            }
-        }
-    }
-
-    void DrawChecker(Renderer& renderer, int i, int j, bool is_white)
-    {
-        static const std::vector<Face> model = GenChecker();
-
-        static const Color checker_white_color = Color(230, 230, 230);
-        static const Color checker_black_color = Color(80, 80, 80);
-        static const float ambient_light_intensity = 0.3f;
-
-        DefaultShaders::SmoothLight shader;
-        shader.ambient_light_intensity = ambient_light_intensity;
-        shader.color = is_white ? checker_white_color : checker_black_color;
-        shader.SetLightDirection(light_direction_);
-        renderer.SetShader(shader);
-
-        renderer.Matrices.SetMode(MatrixType::MODEL);
-
-        const Mat4f model_mat = renderer.Matrices.GetModel();
-        const Mat4f norm_corr_mat = Inverse(Transpose(model_mat));
-        shader.SetNormCorrection(norm_corr_mat);
-
-        renderer.Matrices.Push();
-        renderer.Matrices.Transform(
-            Transform::Translate((i + 0.5f) * 1.0f, (j + 0.5f) * 1.0f, 0.0f));
-
-        DrawModel(renderer, model);
-        renderer.Matrices.Pop();
-    }
-
-    void Draw(Renderer& renderer)
-    {
-        static const Color clear_color(50, 50, 35);
-
-        renderer.Clear(clear_color);
-
-        renderer.Matrices.SetMode(MatrixType::MODEL);
-        renderer.Matrices.Set(Mat4f::Identity());
-        renderer.Matrices.Transform(Transform::Scale(1.0f, -1.0f, 1.0f));
-        renderer.Matrices.Transform(Transform::Translate(-4.0f, -4.0f, 0.0f));
-
-        DrawBoard(renderer);
-
-        // clang-format off
+    // clang-format off
         const char tmp_board[8][8] = {
             {'w', ' ', 'w', ' ', 'w', ' ', 'w', ' '},
             {' ', 'w', ' ', 'w', ' ', 'w', ' ', 'w'},
@@ -292,24 +241,164 @@ class Demo
             {'b', ' ', 'b', ' ', 'b', ' ', 'b', ' '},
             {' ', 'b', ' ', 'b', ' ', 'b', ' ', 'b'}
         };
-        // clang-format on
-        for (size_t i = 0; i < 8; ++i)
+    // clang-format on
+    for (size_t i = 0; i < 8; ++i)
+    {
+        for (size_t j = 0; j < 8; ++j)
         {
-            for (size_t j = 0; j < 8; ++j)
+            if (tmp_board[i][j] != ' ')
             {
-                if (tmp_board[i][j] != ' ')
-                {
-                    const bool is_white = tmp_board[i][j] == 'w';
-                    DrawChecker(renderer, i, j, is_white);
-                }
+                const bool is_white = tmp_board[i][j] == 'w';
+                const bool is_under_cursor = IsCellUnderCursor(i, j);
+                DrawChecker(renderer, i, j, is_white, is_under_cursor);
+            }
+        }
+    }
+}
+
+void Demo::RotateLight(float angle)
+{
+    light_direction_ = TransformVector(light_direction_, Transform::RotateZ(angle));
+    std::cout << light_direction_ << std::endl;
+}
+
+void Demo::DrawBoard(Renderer& renderer)
+{
+    static const std::vector<Face> box = GenBox();
+
+    static const Color color_table[2][2] = {
+        // not under cursor
+        {Color(100, 100, 100), Color(210, 210, 210)},
+        // under cursor
+        {Color(120, 120, 120), Color(230, 230, 230)},
+    };
+
+    static const float ambient_light_intensity = 0.3f;
+
+    const Mat4f mat_scale = Transform::Scale(1.0f, 1.0f, -0.2f);
+
+    DefaultShaders::FlatLight shader;
+    shader.ambient_light_intensity = ambient_light_intensity;
+    shader.SetLightDirection(light_direction_);
+    renderer.SetShader(shader);
+
+    renderer.Matrices.SetMode(MatrixType::MODEL);
+
+    for (size_t i = 0; i < 8; ++i)
+    {
+        for (size_t j = 0; j < 8; ++j)
+        {
+            const bool is_white = (i + j) % 2 == 1;
+            const bool is_under_cursor = IsCellUnderCursor(i, j);
+            shader.color = color_table[int(is_under_cursor)][int(is_white)];
+
+            renderer.Matrices.Push();
+            renderer.Matrices.Transform(mat_scale * Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
+
+            const Mat4f model_mat = renderer.Matrices.GetModel();
+            shader.SetNormCorrection(Inverse(Transpose(model_mat)));
+
+            DrawModel(renderer, box);
+            renderer.Matrices.Pop();
+        }
+    }
+
+    DrawBoardStencil(renderer, mat_scale, box);
+}
+
+void Demo::DrawBoardStencil(Renderer& renderer, const Mat4f& mat_scale,
+                            const std::vector<Face>& box)
+{
+    renderer.SetDrawTarget(board_stencil_);
+    renderer.Clear(Color(255, 0, 0));
+
+    DefaultShaders::SolidColor shader;
+    renderer.SetShader(shader);
+
+    for (size_t i = 0; i < 8; ++i)
+    {
+        for (size_t j = 0; j < 8; ++j)
+        {
+            if ((i + j) % 2 == 0)
+            {
+                const uint8_t code = i * 8 + j;
+                shader.color = Color(code, 0, 0);
+
+                renderer.Matrices.Push();
+                renderer.Matrices.Transform(mat_scale *
+                                            Transform::Translate(i * 1.0f, j * 1.0f, 0.0f));
+
+                DrawModel(renderer, box); // TODO: draw only upper side
+                renderer.Matrices.Pop();
             }
         }
     }
 
-  private:
-    GameCamera camera_;
-    Vec3f light_direction_ = Normalize(Vec3f{0.8f, 0.8f, -1.0f});
-};
+    renderer.ResetDrawTarget();
+}
+
+void Demo::DrawChecker(Renderer& renderer, int i, int j, bool is_white, bool is_under_cursor)
+{
+    static const std::vector<Face> model = GenChecker();
+
+    static const Color color_table[2][2] = {
+        // not under cursor
+        {Color(80, 80, 80), Color(230, 230, 230)},
+        // under cursor
+        {Color(100, 100, 100), Color(250, 250, 250)},
+    };
+
+    static const float ambient_light_intensity = 0.3f;
+
+    DefaultShaders::SmoothLight shader;
+    shader.ambient_light_intensity = ambient_light_intensity;
+    shader.color = color_table[int(is_under_cursor)][int(is_white)];
+    shader.SetLightDirection(light_direction_);
+    renderer.SetShader(shader);
+
+    renderer.Matrices.SetMode(MatrixType::MODEL);
+
+    const Mat4f model_mat = renderer.Matrices.GetModel();
+    const Mat4f norm_corr_mat = Inverse(Transpose(model_mat));
+    shader.SetNormCorrection(norm_corr_mat);
+
+    renderer.Matrices.Push();
+    renderer.Matrices.Transform(Transform::Translate((i + 0.5f) * 1.0f, (j + 0.5f) * 1.0f, 0.0f));
+
+    DrawModel(renderer, model);
+    renderer.Matrices.Pop();
+}
+
+std::optional<Vec2i> Demo::GetCellUnderPointer(int x, int y) const
+{
+    if (x < 0 || x >= board_stencil_.width)
+        return std::nullopt;
+
+    if (y < 0 || y >= board_stencil_.height)
+        return std::nullopt;
+
+    y = board_stencil_.height - 1 - y;
+
+    const Color color = board_stencil_.At(x, y);
+    const uint8_t value = color.r;
+
+    if (value == 255)
+        return std::nullopt;
+
+    const int i = value / 8;
+    const int j = value % 8;
+
+    return Vec2i{j, i};
+}
+
+bool Demo::IsCellUnderCursor(int i, int j) const
+{
+    if (cell_under_cursor_ != std::nullopt)
+        return (i == cell_under_cursor_->y && j == cell_under_cursor_->x);
+    return false;
+}
+
+} // namespace
 
 int main()
 {

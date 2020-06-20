@@ -129,10 +129,13 @@ class Canvas
         }
     }
 
-    void Reserve(size_t width, size_t height)
+    void Resize(size_t width, size_t height)
     {
         if (ptr != nullptr)
             delete[] ptr;
+
+        this->width = width;
+        this->height = height;
 
         ptr = new T[width * height];
     }
@@ -141,6 +144,7 @@ class Canvas
 typedef Canvas<uint32_t> Image;
 
 int LoadTGA(const char* path, Image& result);
+void DumpTga(const char* path, const Image& image);
 
 } // namespace sr
 

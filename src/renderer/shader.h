@@ -195,9 +195,10 @@ class FlatTexture : public Shader
 
 class SolidColor : public Shader
 {
-    Color color;
-
   public:
+    Color color = Color(0, 0, 0);
+
+    SolidColor() = default;
     SolidColor(const Color& color) : color(color)
     {}
 

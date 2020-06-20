@@ -23,7 +23,7 @@ class Renderer
 
     void Clear(Color color = Color(0));
 
-    void SetPixel(uint32_t x, uint32_t y, Color color);
+    void SetPixel(int32_t x, int32_t y, Color color);
     void DrawRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color);
     void DrawSolidRect(int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color color);
     void Line(Vec2i p1, Vec2i p2, Color color);
@@ -33,6 +33,11 @@ class Renderer
 
     void SetShader(Shader& shader);
 
+    void SetDrawTarget(Image& target);
+    void ResetDrawTarget();
+
+    void DumpTargetScreen(const char* path) const;
+
     MatrixStack Matrices;
 
   private:
@@ -41,6 +46,7 @@ class Renderer
 
     Canvas<float> zbuffer_;
     Image& frame_;
+    Image* target_;
 
     DefaultShaders::FlatLight default_shader_;
     Shader* shader_;

@@ -45,6 +45,11 @@ class Input
         return click_points_[button];
     }
 
+    Point GetMousePosition() const
+    {
+        return mouse_coord_;
+    }
+
     Point GetMouseMovement() const
     {
         return Point{mouse_coord_.x - prev_mouse_coord_.x, mouse_coord_.y - prev_mouse_coord_.y};
