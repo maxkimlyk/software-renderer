@@ -56,6 +56,7 @@ int Program::MainLoop()
         while (now_time - last_process_time >= process_interval_ms)
         {
             process_callback_(*renderer_, *input_);
+            input_->OnProcessingIterationEnd();
             updated = true;
             last_process_time += process_interval_ms;
         }

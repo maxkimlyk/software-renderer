@@ -1,6 +1,5 @@
 #include "window.h"
 
-#include <iostream>
 #include <memory>
 
 #include <X11/Xlib.h>
@@ -25,6 +24,18 @@ ParseButtonEventResult ParseButtonEvent(const XEvent& event)
 {
     const auto& b_event = *reinterpret_cast<const XButtonEvent*>(&event);
     return {b_event.button, b_event.x, b_event.y};
+}
+
+struct ParseMotionEventResult
+{
+    int x;
+    int y;
+};
+
+ParseMotionEventResult ParseMotionEvent(const XEvent& event)
+{
+    const auto& m_event = *reinterpret_cast<const XMotionEvent*>(&event);
+    return {m_event.x, m_event.y};
 }
 } // namespace
 
@@ -58,7 +69,8 @@ int Window::Create(size_t width, size_t height, const std::string& caption)
     SetCaption(caption);
 
     XSelectInput(display_, window_,
-                 ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask);
+                 ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask |
+                     ButtonReleaseMask | PointerMotionMask | FocusChangeMask);
 
     const int screen_num = DefaultScreen(display_);
     gc_ = DefaultGC(display_, screen_num);
@@ -167,6 +179,12 @@ void Window::MainLoopRoutine()
             const auto [keycode, x, y] = ParseButtonEvent(event);
             input_.OnMouseButtonUp(ConvertMouseButton(keycode), x, y);
             break;
+        }
+
+        case MotionNotify:
+        {
+            const auto [x, y] = ParseMotionEvent(event);
+            input_.OnMouseMotion(x, y);
         }
 
         case FocusIn:

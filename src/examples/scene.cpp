@@ -180,6 +180,14 @@ class Demo
         if (input.IsHolding(KEY_DOWN))
             camera_.Pitch(-rotate_angle);
 
+        if (input.IsHolding(KEY_RBUTTON))
+        {
+            const float sensitivity = 0.15f;
+            const auto [deltax, deltay] = input.GetMouseMovement();
+            camera_.Yaw(-deltax * sensitivity * rotate_angle);
+            camera_.Pitch(-deltay * sensitivity * rotate_angle);
+        }
+
         if (input.IsHolding(KEY_J))
             RotateLight(rotate_angle);
         if (input.IsHolding(KEY_K))
