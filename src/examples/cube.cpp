@@ -84,9 +84,9 @@ class Demo
 
     void Process(Renderer& renderer, Input& input)
     {
-        if (input.IsHolding(KEY_UP))
+        if (input.IsHolding(KEY_UP) || input.IsHolding(KEY_LBUTTON))
             x_angle_ += ANGLE_CHANGE_SPEED;
-        if (input.IsHolding(KEY_DOWN))
+        if (input.IsHolding(KEY_DOWN) || input.IsHolding(KEY_RBUTTON))
             x_angle_ -= ANGLE_CHANGE_SPEED;
         if (input.IsHolding(KEY_LEFT))
             z_angle_ += ANGLE_CHANGE_SPEED;

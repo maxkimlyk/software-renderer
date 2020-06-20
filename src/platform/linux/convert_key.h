@@ -7,6 +7,7 @@ namespace sr
 {
 
 KeyCodes ConvertKey(int key);
+KeyCodes ConvertMouseButton(int key);
 
 }
 

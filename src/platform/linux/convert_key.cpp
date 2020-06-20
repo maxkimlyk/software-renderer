@@ -1,13 +1,13 @@
 #include "convert_key.h"
 
-#include <map>
+#include <unordered_map>
 
 #include <X11/keysym.h>
 
 namespace sr
 {
 
-const std::map<int, KeyCodes> Table = {
+const std::unordered_map<int, KeyCodes> KbTable = {
     {XK_BackSpace, KEY_BACKSPACE},
     {XK_Tab, KEY_TAB},
 
@@ -129,8 +129,29 @@ const std::map<int, KeyCodes> Table = {
 
 KeyCodes ConvertKey(int key)
 {
-    const auto it = Table.find(key);
-    if (it != Table.end())
+    const auto it = KbTable.find(key);
+    if (it != KbTable.end())
+    {
+        return it->second;
+    }
+
+    return KEY_UNKNOWN;
+}
+
+std::unordered_map<unsigned int, KeyCodes> MouseTable = {
+    // clang-format off
+    {1, KEY_LBUTTON},
+    {2, KEY_MBUTTON},
+    {3, KEY_RBUTTON},
+    {4, KEY_XBUTTON1},
+    {5, KEY_XBUTTON2},
+    // clang-format on
+};
+
+KeyCodes ConvertMouseButton(int key)
+{
+    const auto it = MouseTable.find(key);
+    if (it != MouseTable.end())
     {
         return it->second;
     }

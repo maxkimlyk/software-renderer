@@ -1,5 +1,6 @@
 #include "window.h"
 
+#include <iostream>
 #include <memory>
 
 #include <X11/Xlib.h>
@@ -12,6 +13,19 @@ namespace
 const size_t BYTES_PER_PIXEL = 3;
 const size_t PITCH = 8;
 const size_t WINDOW_BORDER_WIDTH = 5;
+
+struct ParseButtonEventResult
+{
+    unsigned long keycode;
+    int x;
+    int y;
+};
+
+ParseButtonEventResult ParseButtonEvent(const XEvent& event)
+{
+    const auto& b_event = *reinterpret_cast<const XButtonEvent*>(&event);
+    return {b_event.button, b_event.x, b_event.y};
+}
 } // namespace
 
 namespace sr
@@ -43,7 +57,8 @@ int Window::Create(size_t width, size_t height, const std::string& caption)
 
     SetCaption(caption);
 
-    XSelectInput(display_, window_, ExposureMask | KeyPressMask | KeyReleaseMask | FocusChangeMask);
+    XSelectInput(display_, window_,
+                 ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask);
 
     const int screen_num = DefaultScreen(display_);
     gc_ = DefaultGC(display_, screen_num);
@@ -128,17 +143,31 @@ void Window::MainLoopRoutine()
 
         case KeyPress:
         {
-            unsigned long key = XLookupKeysym(&event.xkey, 0);
+            const unsigned long key = XLookupKeysym(&event.xkey, 0);
             input_.OnKeyDown(ConvertKey(key));
+            break;
         }
-        break;
 
         case KeyRelease:
         {
-            unsigned long key = XLookupKeysym(&event.xkey, 0);
+            const unsigned long key = XLookupKeysym(&event.xkey, 0);
             input_.OnKeyUp(ConvertKey(key));
+            break;
         }
-        break;
+
+        case ButtonPress:
+        {
+            const auto [keycode, x, y] = ParseButtonEvent(event);
+            input_.OnMouseButtonDown(ConvertMouseButton(keycode), x, y);
+            break;
+        }
+
+        case ButtonRelease:
+        {
+            const auto [keycode, x, y] = ParseButtonEvent(event);
+            input_.OnMouseButtonUp(ConvertMouseButton(keycode), x, y);
+            break;
+        }
 
         case FocusIn:
             input_.OnFocus();

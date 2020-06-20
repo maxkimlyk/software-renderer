@@ -52,6 +52,16 @@ class Input
         memset(keys, 0, sizeof(keys));
         active = false;
     }
+
+    void OnMouseButtonDown(uint32_t button, int /* x */, int /* y */) {
+        keys[button] = true;
+
+    }
+
+    void OnMouseButtonUp(uint32_t button, int /* x */, int /* y */) {
+        keys[button] = false;
+
+    }
 };
 
 } // namespace sr
