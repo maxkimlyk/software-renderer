@@ -1,7 +1,7 @@
 # software-renderer
 
 This project is a challenge of writing minimal possible real time 3D-renderer using only
-the graphical functionality like "paint pixel with a sertain color" provided by WinAPI or X11.
+the graphical functionality like "paint pixel with a certain color" provided by WinAPI or X11.
 Developing of such project was inspired by reading [this acticles](https://github.com/ssloy/tinyrenderer/wiki).
 
 ## Building
